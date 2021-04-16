@@ -1,0 +1,7 @@
+.env
+/.idea
+/env
+/__pycache__
+/.instapi_cache
+/utils/__pycache__
+/service_scripts
