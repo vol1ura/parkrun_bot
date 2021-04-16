@@ -8,58 +8,60 @@
     <meta name="author" content="Yuriy Volodin">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Favicons -->
-    <link rel="apple-touch-icon" href="/docs/5.0/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="apple-touch-icon" href="/static/pics/bot/logo.jpg" sizes="180x180">
     <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
     <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
-    <link rel="manifest" href="/docs/5.0/assets/img/favicons/manifest.json">
+    <link rel="manifest" href="static/icons/manifest.json">
     <link rel="mask-icon" href="/docs/5.0/assets/img/favicons/safari-pinned-tab.svg" color="#7952b3">
     <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon.ico">
+    <!-- Custom settings -->
     <meta name="theme-color" content="#7952b3">
-    <style>
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-        }
-
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-            }
-        }
-
-        .b-example-divider {
-            height: 3rem;
-            background-color: rgba(0, 0, 0, .1);
-            border: solid rgba(0, 0, 0, .15);
-            border-width: 1px 0;
-            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
-        }
-
-        @media (min-width: 992px) {
-            .rounded-lg-3 {
-                border-radius: .3rem;
-            }
-        }
-    </style>
-
+    <link rel="stylesheet" href="static/custom.css">
     <title>Телеграм бот: @parkrunnerbot</title>
 </head>
 <body>
-
 <div class="px-4 py-5 my-5 text-center">
-    <img class="d-block mx-auto mb-4" src="/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
+    <img class="d-block mx-auto mb-4" src="/static/pics/bot/logo.jpg" alt="" width="60" height="60">
     <h1 class="display-5 fw-bold">Parkrunner bot</h1>
     <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4"><a href="https://t.me/s/parkrunnerbot">@parkrunnerbot</a> размещён на бесплатном сервисе
-            HEROKU.
+        <p class="lead mb-4"><a style="text-decoration: none" href="https://t.me/s/parkrunnerbot">@parkrunnerbot</a>
+            размещён на бесплатном сервисе HEROKU.
             В силу действующих ограничений, приложение "засыпает" после 30 минут
             неактивности. Просьба отнестись с пониманием и не удивляться, что иногда бот отвечает с заметной
-            задержкой - требуется некоторое время, чтобы приложение снова стартовало.</p>
+            задержкой&nbsp;&mdash; требуется некоторое время, чтобы приложение снова стартовало.</p>
+        <p class="lead mb-4">Бот может работать как в режиме персонального диалога, так и в режиме группового чата,
+            для чего его необходимо добавить в соответствующий чат.</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a type="button" class="btn btn-outline-secondary btn-lg px-4" href="https://t.me/s/parkrunnerbot">Начать диалог</a>
+            <a type="button" class="btn btn-outline-secondary btn-lg px-4" href="https://t.me/s/parkrunnerbot">Начать
+                диалог</a>
+        </div>
+    </div>
+</div>
+
+<div class="b-example-divider"></div>
+
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+        <div class="col-10 col-sm-8 col-lg-6">
+            <img src="bootstrap-themes.png" class="d-block mx-lg-auto img-fluid" alt="Bootstrap Themes" width="700"
+                 height="500" loading="lazy">
+        </div>
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold lh-1 mb-3">Команды бота</h1>
+            <p class="lead">Командный режим не является основным, обычно коммуникация с ботом происходит через
+                запросы и диалоги, однако есть несколько базовых команд:</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><kbd>/start</kbd> выводит начальное приветствие с основной информацией о
+                    боте
+                </li>
+                <li class="list-group-item"><kbd>/help</kbd> либо <kbd>/помощь</kbd> выведет ссылку на данный сайт и
+                    версию бота
+                </li>
+                <li class="list-group-item"><kbd>/admin</kbd> либо <kbd>/админ</kbd> покажет одного из администраторов
+                    группового чата
+                </li>
+            </ul>
+            <p class="lead">Через пару секунд появится меню, из которого можно выбрать нужный вариант информации.</p>
         </div>
     </div>
 </div>
@@ -74,13 +76,13 @@
         </div>
         <div class="col-lg-6">
             <h1 class="display-5 fw-bold lh-1 mb-3">Inline запросы</h1>
-            <p class="lead">Есть <b>inline</b> режим запросов - наберите в поле ввода сообщения @parkrunnerbot
-                <i>запрос</i> (примеры):</p>
-            <ul>
-                <li>@parkrunnerbot погода</li>
-                <li>@parkrunnerbot паркран</li>
-                <li>@parkrunnerbot воздух</li>
-                <li>@parkrunnerbot старты</li>
+            <p class="lead">Есть <b>inline</b> режим запросов&nbsp;&mdash; наберите в поле ввода сообщения <kbd>@parkrunnerbot
+                запрос</kbd>, например</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">@parkrunnerbot погода</li>
+                <li class="list-group-item">@parkrunnerbot паркран</li>
+                <li class="list-group-item">@parkrunnerbot воздух</li>
+                <li class="list-group-item">@parkrunnerbot старты</li>
             </ul>
             <p class="lead">Через пару секунд появится меню, из которого можно выбрать нужный вариант информации.</p>
         </div>
@@ -97,8 +99,13 @@
         </div>
         <div class="col-lg-6">
             <h1 class="display-5 fw-bold lh-1 mb-3">Информация о погоде и загрязнении воздуха</h1>
-            <p class="lead">Про погоду и воздух можно также спросить напрямую, например, _Бот, погода Москва Кузьминки_,
-                либо _Бот, воздух Кисловодск_.</p>
+            <p class="lead">Про погоду и степень загрязнения воздуха в данный момент можно также спросить напрямую,
+                отправив сообщение с указанием места, например</p>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Бот, погода Москва Кузьминки</li>
+                <li class="list-group-item">Бот, воздух Кисловодск</li>
+            </ul>
+
         </div>
     </div>
 </div>
@@ -116,7 +123,8 @@
             <p class="lead">При запросе _Бот, паркран Фамилия_, бот попытается найти результат участника с указанной
                 фамилией на последнем
                 загруженном в систему паркране. Если маркеры наползают друг на друга, можно повернуть надпись,
-                указав целое количество градусов поворота, например, _Бот, паркран Фамилия 45_ - надписи повернутся на
+                указав целое количество градусов поворота, например, _Бот, паркран Фамилия 45_&nbsp;&mdash; надписи
+                повернутся на
                 45°.</p>
         </div>
     </div>
@@ -141,26 +149,53 @@
 
 <div class="b-example-divider"></div>
 
-<div class="bg-dark text-secondary px-4 py-5 text-center">
-    <div class="py-5">
-        <h1 class="display-5 fw-bold text-white">От разработчика</h1>
-        <div class="col-lg-6 mx-auto">
-            <p class="fs-5 mb-4">Если у вас есть замечания, интересные идеи и предложения, пишите мне в телеграм
-                <a class="text-white" style="text-decoration: none" href="https://t.me/s/vol1ura">@vol1ura</a>.</p>
-            <p class="fs-5 mb-4">Если вам понравилось приложение и вы хотите чтобы оно и дальше развивалось, можете
-                поддержать
-                разработчика любой суммой на карточку сбера 5469&nbsp;3800&nbsp;8020&nbsp;7367.
-                <br />У меня много идей!</p>
+<div class="container my-5">
+    <div class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg">
+        <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
+            <h1 class="display-4 fw-bold lh-1">Strava Weather App</h1>
             <p class="fs-5 mb-4">Ещё один мой проект - погодное приложение для Strava
-                <a class="text-white" style="text-decoration: none" href="http://strava.pythonanywhere.com/">strava.pythonanywhere.com</a>
-                - автоматическое добавление в описание тренировок информации о погоде и воздухе (можно настроить).</p>
-            <p class="fs-5 mb-4"></p>
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a type="button" class="btn btn-outline-light btn-lg px-4" href="https://t.me/s/vol1ura">Telegram</a>
-                <a type="button" class="btn btn-outline-light btn-lg px-4"
+                <a style="text-decoration: none" href="http://strava.pythonanywhere.com/">strava.pythonanywhere.com</a>
+                &mdash; автоматическое добавление в описание тренировок информации о погоде и воздухе.</p>
+            <p class="fs-5 mb-4">При подключении можно выбрать какие показатели будут добавляться.</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
+                <a type="button" class="btn btn-outline-secondary btn-lg px-4"
+                   href="http://strava.pythonanywhere.com/">Strava Weather App</a>
+            </div>
+        </div>
+        <div class="col-lg-4 offset-lg-1 p-0 position-relative overflow-hidden shadow-lg">
+            <div class="position-lg-absolute top-0 left-0 overflow-hidden">
+                <img class="d-block rounded-lg-3" src="static/pics/bot/stravawa.png" alt="Strava с данными о погоде"
+                     width="1000">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="b-example-divider mb-0"></div>
+
+<div class="container my-5">
+    <div class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg">
+        <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
+            <h1 class="display-4 fw-bold lh-1">От разработчика</h1>
+            <p class="fs-5 mb-4">Если у вас есть замечания, интересные идеи и предложения,
+                которыми вы хотите поделиться, пишите мне в телеграм
+                <a style="text-decoration: none" href="https://t.me/s/vol1ura">@vol1ura</a>.</p>
+            <p class="fs-5 mb-4">Если вам понравился бот и вы хотите, чтобы его функционал развивался, можете
+                поддержать разработку переводом любой суммы на карточку сбера 5469&nbsp;3800&nbsp;8020&nbsp;7367.</p>
+            <p class="fs-5 mb-4">Мои контакты</p>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
+                <a type="button" class="btn btn-outline-secondary btn-lg px-4"
                    href="https://www.strava.com/athletes/2843469">Strava</a>
-                <a type="button" class="btn btn-outline-light btn-lg px-4"
+                <a type="button" class="btn btn-outline-secondary btn-lg px-4"
                    href="https://www.instagram.com/urka_runner/">Instagram</a>
+                <a type="button" class="btn btn-outline-secondary btn-lg px-4"
+                   href="https://t.me/s/vol1ura">Telegram</a>
+            </div>
+        </div>
+        <div class="col-lg-4 offset-lg-1 p-0 position-relative overflow-hidden shadow-lg">
+            <div class="position-lg-absolute top-0 left-0 overflow-hidden">
+                <img class="d-block rounded-lg-3" src="static/pics/bot/urka.png" alt="" width="520">
             </div>
         </div>
     </div>
@@ -169,6 +204,5 @@
 <div class="b-example-divider mb-0"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
