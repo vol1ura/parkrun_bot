@@ -38,34 +38,17 @@ def about(message):
 @bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_admin))
 def admin(message):
     if message.chat.type == "private":  # private chat message
-        bot.send_message(message.chat.id, 'Здесь нет админов, мы все равны.')
+        bot.send_message(message.chat.id, 'Здесь нет админов, это персональный чат.')
     else:
         admin = random.choice(bot.get_chat_administrators(message.chat.id)).user.to_dict()
         about_admin = f"\nАдмин @{admin['username']} - {admin['first_name']}  {admin['last_name']}"
         bot.send_message(message.chat.id, random.choice(content.phrases_about_admin) + about_admin)
 
 
-@bot.message_handler(commands=['social', 'соцсети'])
-@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_social))
-def social(message):
-    bot.send_message(message.chat.id, content.about_social,
-                     parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
-
-
-@bot.message_handler(commands=['schedule', 'расписание'])
-@bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_schedule))
-def schedule(message):
-    bot.send_message(message.chat.id, content.about_training,
-                     parse_mode='MarkdownV2', disable_web_page_preview=True, disable_notification=True)
-
-
 @bot.message_handler(commands=['help', 'помощь', 'команды', 'справка'])
 def commands(message):
     bot_nick = bot.get_me().to_dict()["username"]
     bot.send_message(message.chat.id, f"""Я понимаю следующие команды:
-    📆 /schedule, /расписание - расписание тренировок
-    📱 /social, /соцсети - Wake&Run в соцсетях
-    👤 /admin, /админ - администраторы чата
     🤖 /about, /оботе - информация о боте
     ❓ /help, /помощь, /справка, /команды - _данное сообщение_
     Есть *inline* режим запросов - наберите в поле ввода сообщения @{bot_nick} <запрос> (примеры):
@@ -233,9 +216,7 @@ def query_competitions(inline_query):
             else:
                 month += 1
             competitions += news.get_competitions(month, year)
-        queries = [types.InlineQueryResultArticle(
-            '111', 'Google-таблица стартов и одноклубников', description='Показать ссылку',
-            input_message_content=types.InputTextMessageContent(news.club_calendar(), parse_mode='html'))]
+        queries = []
         for i, comp in enumerate(competitions, 1):
             queries.append(types.InlineQueryResultArticle(
                 str(i), comp[0], description=comp[1],
@@ -294,21 +275,20 @@ def simple_answers(message):
         return
     elif 'погода' in message.text:
         bot_nick = bot.get_me().to_dict()["username"]
-        ans = [f'Информацию о погоде можно получить через inline запрос: в строке сообщений наберите "@{bot_nick} погода".'
-               'Либо, набрав сообщение, "Бот, погода Населённый пункт", например, "Бот, погода Кузьминки Москва".']
+        ans = ['Информацию о погоде можно получить через inline запрос: '
+               f'в строке сообщений наберите "@{bot_nick} погода".'
+               'Либо, набрав сообщение, "Бот, погода Населённый пункт", '
+               'например, "Бот, погода Кузьминки Москва".']
     elif re.search(r'GRUT|ГРУТ', message.text, re.I):
         ans = content.phrases_grut
     elif re.search(r'\bгречк|\bгречневая', message.text, re.I):
         ans = content.phrases_grechka
     else:
         bot.send_chat_action(message.chat.id, 'typing')
-        ans_variant = random.randrange(3)
-        if ans_variant == 0:
+        if random.randrange(11) % 2:
             ans = [search.google(message.text)]
             if not ans[0]:
                 ans = [random.choice(content.phrases_about_running)]
-        elif ans_variant == 1:
-            ans = [fucomp.best_answer(message.text, fucomp.message_base_wr)]
         else:
             ans = [fucomp.best_answer(message.text, fucomp.message_base_m)]
     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
