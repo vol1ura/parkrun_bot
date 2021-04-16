@@ -316,5 +316,5 @@ def simple_answers(message):
 
 if __name__ == '__main__':
     # print(os.environ.get('API_BOT_TOKEN'))
-    # bot.remove_webhook()
+    bot.remove_webhook()
     bot.polling(none_stop=True)

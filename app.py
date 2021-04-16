@@ -17,13 +17,14 @@ def getMessage():
 @app.route(f"/{os.environ.get('WEBHOOK')}")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='https://parkruner.herokuapp.com/' + TOKEN_BOT)
-    return "!", 200
+    webhook_url = os.environ.get('HOST_BOT') + TOKEN_BOT
+    bot.set_webhook(url=webhook_url)
+    return f"Webhook set to [{webhook_url[:40]}]", 200
 
 
-@app.route("/bot")
-def bot_page():
-    return "<h1>Привет, вы на странице для администрирования бота</h1>", 200
+# @app.route("/bot")
+# def bot_page():
+#     return "<h1>Привет, вы на странице для администрирования бота</h1>", 200
 
 
 @app.route("/")
