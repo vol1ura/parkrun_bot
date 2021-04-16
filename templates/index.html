@@ -1,57 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Телеграм бот, предоставляющий информацию и статистику по результатам паркрана. Обрабатывается информация только по российским паркранам.">
+    <meta name="author" content="Yuriy Volodin">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="/docs/5.0/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="/docs/5.0/assets/img/favicons/manifest.json">
+    <link rel="mask-icon" href="/docs/5.0/assets/img/favicons/safari-pinned-tab.svg" color="#7952b3">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon.ico">
+    <meta name="theme-color" content="#7952b3">
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .b-example-divider {
+            height: 3rem;
+            background-color: rgba(0, 0, 0, .1);
+            border: solid rgba(0, 0, 0, .15);
+            border-width: 1px 0;
+            box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+        }
+
+        @media (min-width: 992px) {
+            .rounded-lg-3 {
+                border-radius: .3rem;
+            }
+        }
+    </style>
+
     <title>Телеграм бот: @parkrunnerbot</title>
 </head>
 <body>
-<h1>Parkrunner bot</h1>
 
-<p><a href="https://t.me/s/parkrunnerbot">@parkrunnerbot</a> размещён на бесплатном сервисе HEROKU.
-    В силу действующих ограничений, приложение "засыпает" после 30 минут
-    неактивности. Просьба отнестись с пониманием и не удивляться, что иногда бот отвечает с заметной
-    задержкой - требуется некоторое время, чтобы приложение снова стартовало.</p>
+<div class="px-4 py-5 my-5 text-center">
+    <img class="d-block mx-auto mb-4" src="/docs/5.0/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
+    <h1 class="display-5 fw-bold">Parkrunner bot</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4"><a href="https://t.me/s/parkrunnerbot">@parkrunnerbot</a> размещён на бесплатном сервисе
+            HEROKU.
+            В силу действующих ограничений, приложение "засыпает" после 30 минут
+            неактивности. Просьба отнестись с пониманием и не удивляться, что иногда бот отвечает с заметной
+            задержкой - требуется некоторое время, чтобы приложение снова стартовало.</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a type="button" class="btn btn-outline-secondary btn-lg px-4" href="https://t.me/s/parkrunnerbot">Начать диалог</a>
+        </div>
+    </div>
+</div>
 
-<h2>Inline запросы</h2>
-<p>Есть <b>inline</b> режим запросов - наберите в поле ввода сообщения @parkrunnerbot <i>запрос</i> (примеры):</p>
-<ul>
-    <li>@parkrunnerbot погода</li>
-    <li>@parkrunnerbot паркран</li>
-    <li>@parkrunnerbot воздух</li>
-    <li>@parkrunnerbot старты</li>
-</ul>
-<p>Через пару секунд появится меню, из которого можно выбрать нужный вариант информации.</p>
+<div class="b-example-divider"></div>
 
-<h2>Информация о погоде и загрязнении воздуха</h2>
-<p>Про погоду и воздух можно также спросить напрямую, например, _Бот, погода Москва Кузьминки_, либо
-    _Бот, воздух Кисловодск_.</p>
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+        <div class="col-10 col-sm-8 col-lg-6">
+            <img src="bootstrap-themes.png" class="d-block mx-lg-auto img-fluid" alt="Bootstrap Themes" width="700"
+                 height="500" loading="lazy">
+        </div>
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold lh-1 mb-3">Inline запросы</h1>
+            <p class="lead">Есть <b>inline</b> режим запросов - наберите в поле ввода сообщения @parkrunnerbot
+                <i>запрос</i> (примеры):</p>
+            <ul>
+                <li>@parkrunnerbot погода</li>
+                <li>@parkrunnerbot паркран</li>
+                <li>@parkrunnerbot воздух</li>
+                <li>@parkrunnerbot старты</li>
+            </ul>
+            <p class="lead">Через пару секунд появится меню, из которого можно выбрать нужный вариант информации.</p>
+        </div>
+    </div>
+</div>
 
-<h2>Информация о персональном результате</h2>
-<p>При запросе _Бот, паркран Фамилия_, бот попытается найти результат участника с указанной фамилией на последнем
-    загруженном в систему паркране. Если маркеры наползают друг на друга, можно повернуть надпись,
-    указав целое количество градусов поворота, например, _Бот, паркран Фамилия 45_ - надписи повернутся на 45°.</p>
+<div class="b-example-divider"></div>
 
-<h2>Общение с ботом</h2>
-<p>Если отправлять сообщения _Бот паркран_, _Бот, инстаграм_, бот будет находить картинки или новости.
-    Бот _не чувствителен_ к знакам пунктуации, регистру букв, и, в большинстве случаев, к порядку фраз.
-    Кроме того, с ботом можно просто поболтать - отправьте сообщение, начинающееся словом *бот*.
-</p>
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+        <div class="col-10 col-sm-8 col-lg-6">
+            <img src="bootstrap-themes.png" class="d-block mx-lg-auto img-fluid" alt="Bootstrap Themes" width="700"
+                 height="500" loading="lazy">
+        </div>
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold lh-1 mb-3">Информация о погоде и загрязнении воздуха</h1>
+            <p class="lead">Про погоду и воздух можно также спросить напрямую, например, _Бот, погода Москва Кузьминки_,
+                либо _Бот, воздух Кисловодск_.</p>
+        </div>
+    </div>
+</div>
 
-<h3>От разработчика</h3>
-<p>Если у вас есть замечания, интересные идеи и предложения, пишите мне в телеграм
-    <a href="https://t.me/s/vol1ura">@vol1ura</a>.</p>
-<p>Если вам понравилось приложение и вы хотите чтобы оно и дальше развивалось, можете поддержать
-    разработчика любой суммой на карточку сбера 0000&nbsp;0000&nbsp;0000&nbsp;0000. У меня ещё много идей!</p>
+<div class="b-example-divider"></div>
 
-<p>Ещё один мой проект - погодное приложение для Strava
-    <a href="http://strava.pythonanywhere.com/">strava.pythonanywhere.com</a> - автоматическое добавление
-    в описание тренировок информации о погоде и воздухе (можно настроить).</p>
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+        <div class="col-10 col-sm-8 col-lg-6">
+            <img src="bootstrap-themes.png" class="d-block mx-lg-auto img-fluid" alt="Bootstrap Themes" width="700"
+                 height="500" loading="lazy">
+        </div>
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold lh-1 mb-3">Информация о персональном результате</h1>
+            <p class="lead">При запросе _Бот, паркран Фамилия_, бот попытается найти результат участника с указанной
+                фамилией на последнем
+                загруженном в систему паркране. Если маркеры наползают друг на друга, можно повернуть надпись,
+                указав целое количество градусов поворота, например, _Бот, паркран Фамилия 45_ - надписи повернутся на
+                45°.</p>
+        </div>
+    </div>
+</div>
 
-<h4>Мои контакты</h4>
-<ul>
-    <li>Telegram: <a href="https://t.me/s/vol1ura">@vol1ura</a></li>
-    <li>Strava: <a href="https://www.strava.com/athletes/2843469">urka_runner</a></li>
-    <li>Instagram: <a href="https://www.instagram.com/urka_runner/">@urka_runner</a></li>
-</ul>
+<div class="b-example-divider"></div>
+
+<div class="container col-xxl-8 px-4 py-5">
+    <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+        <div class="col-10 col-sm-8 col-lg-6">
+            <img src="bootstrap-themes.png" class="d-block mx-lg-auto img-fluid" alt="Bootstrap Themes" width="700"
+                 height="500" loading="lazy">
+        </div>
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold lh-1 mb-3">Общение с ботом</h1>
+            <p class="lead">Если отправлять сообщения _Бот паркран_, _Бот, инстаграм_, бот будет находить картинки или
+                новости. Бот _не чувствителен_ к знакам пунктуации, регистру букв, и, в большинстве случаев, к порядку
+                фраз. Кроме того, с ботом можно просто поболтать - отправьте сообщение, начинающееся словом *бот*.</p>
+        </div>
+    </div>
+</div>
+
+<div class="b-example-divider"></div>
+
+<div class="bg-dark text-secondary px-4 py-5 text-center">
+    <div class="py-5">
+        <h1 class="display-5 fw-bold text-white">От разработчика</h1>
+        <div class="col-lg-6 mx-auto">
+            <p class="fs-5 mb-4">Если у вас есть замечания, интересные идеи и предложения, пишите мне в телеграм
+                <a class="text-white" style="text-decoration: none" href="https://t.me/s/vol1ura">@vol1ura</a>.</p>
+            <p class="fs-5 mb-4">Если вам понравилось приложение и вы хотите чтобы оно и дальше развивалось, можете
+                поддержать
+                разработчика любой суммой на карточку сбера 5469&nbsp;3800&nbsp;8020&nbsp;7367.
+                <br />У меня много идей!</p>
+            <p class="fs-5 mb-4">Ещё один мой проект - погодное приложение для Strava
+                <a class="text-white" style="text-decoration: none" href="http://strava.pythonanywhere.com/">strava.pythonanywhere.com</a>
+                - автоматическое добавление в описание тренировок информации о погоде и воздухе (можно настроить).</p>
+            <p class="fs-5 mb-4"></p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a type="button" class="btn btn-outline-light btn-lg px-4" href="https://t.me/s/vol1ura">Telegram</a>
+                <a type="button" class="btn btn-outline-light btn-lg px-4"
+                   href="https://www.strava.com/athletes/2843469">Strava</a>
+                <a type="button" class="btn btn-outline-light btn-lg px-4"
+                   href="https://www.instagram.com/urka_runner/">Instagram</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="b-example-divider mb-0"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
