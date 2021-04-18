@@ -1,34 +1,55 @@
-# Bot is deployed on Heroku, so it might sleep
-# after 30 mins of being inactive but could wake up (big delay around 30 secs)
-from flask import Flask, request, render_template
+import os
+import logging
 
-from parkrunnerbot import *
+from aiogram import Bot, Dispatcher, types, executor
 
+PROJECT_NAME = os.getenv("PROJECT", 'parkrunbot')
+TOKEN = os.getenv("API_BOT_TOKEN")
 
-app = Flask(__name__)
+WEBHOOK_HOST = f"https://{PROJECT_NAME}.herokuapp.com"
+WEBHOOK_PATH = "/webhook/" + TOKEN
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
+WEBAPP_HOST = "0.0.0.0"
+WEBAPP_PORT = int(os.environ.get("PORT", 5000))
 
-@app.route('/' + TOKEN_BOT, methods=['POST'])
-def getMessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
+bot = Bot(TOKEN)
+dp = Dispatcher(bot)
 
-
-@app.route(f"/{os.environ.get('WEBHOOK')}")
-def webhook():
-    bot.remove_webhook()
-    webhook_url = os.environ.get('HOST_BOT') + TOKEN_BOT
-    bot.set_webhook(url=webhook_url)
-    return f"Webhook set to [{webhook_url[:40]}... ]", 200
+logging.basicConfig(level=logging.DEBUG)
 
 
-@app.route("/")
-def index():
-    return render_template("index.html"), 200
+# Example handler
+@dp.message_handler(commands="start")
+async def start_handler(message: types.Message):
+    await bot.send_message(message.chat.id, text="hi")
 
 
-if __name__ == '__main__':
-    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-    app.run()
+# Run after startup
+async def on_startup(dp):
+    await bot.delete_webhook()
+    await bot.set_webhook(WEBHOOK_URL)
+
+
+# Run before shutdown
+async def on_shutdown(dp):
+    logging.warning("Shutting down..")
+    await bot.delete_webhook()
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+    logging.warning("Bot down")
+
+
+if __name__ == "__main__":
+    if "HEROKU" in list(os.environ.keys()):
+        executor.start_webhook(
+            dispatcher=dp,
+            webhook_path=WEBHOOK_PATH,
+            on_startup=on_startup,
+            on_shutdown=on_shutdown,
+            skip_updates=True,
+            host=WEBAPP_HOST,
+            port=WEBAPP_PORT
+        )
+    else:
+        executor.start_polling(dp)
