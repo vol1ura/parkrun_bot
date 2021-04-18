@@ -1,28 +1,36 @@
-import os
 import logging
+import random
 
 from aiogram import Bot, Dispatcher, types, executor
 
-PROJECT_NAME = os.getenv("PROJECT", 'parkrunbot')
-TOKEN = os.getenv("API_BOT_TOKEN")
+from config import *
+from utils import content, fucomp
 
-WEBHOOK_HOST = f"https://{PROJECT_NAME}.herokuapp.com"
-WEBHOOK_PATH = "/webhook/" + TOKEN
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
-
-WEBAPP_HOST = "0.0.0.0"
-WEBAPP_PORT = int(os.environ.get("PORT", 5000))
-
-bot = Bot(TOKEN)
+bot = Bot(TOKEN_BOT)
 dp = Dispatcher(bot)
 
 logging.basicConfig(level=logging.DEBUG)
 
 
-# Example handler
-@dp.message_handler(commands="start")
-async def start_handler(message: types.Message):
-    await bot.send_message(message.chat.id, text="hi")
+@dp.message_handler(commands='start')
+async def send_welcome(message: types.Message):
+    await bot.send_message(message.chat.id, text=content.start_message, disable_notification=True)
+
+
+@dp.message_handler(commands=['help', 'помощь'])
+async def commands(message):
+    await bot.send_message(message.chat.id, text=content.help_message, disable_notification=True, parse_mode='html')
+
+
+@dp.message_handler(commands=['admin', 'админ'])
+@dp.message_handler(lambda message: fucomp.bot_compare(message.text, fucomp.phrases_admin))
+async def admin(message):
+    if message.chat.type == 'private':  # private chat message
+        await message.reply('Здесь нет админов, это персональный чат.')
+    else:
+        admin = random.choice(await bot.get_chat_administrators(message.chat.id)).user
+        about_admin = f"\nАдмин @{admin.username} - {admin.first_name}  {admin.last_name}"
+        await bot.send_message(message.chat.id, random.choice(content.phrases_about_admin) + about_admin)
 
 
 # Run after startup

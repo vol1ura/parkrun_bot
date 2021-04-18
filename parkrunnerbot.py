@@ -1,4 +1,3 @@
-import logging
 import os
 import random
 import re
@@ -7,7 +6,7 @@ import time
 from aiogram import Bot, Dispatcher, executor, types
 
 from dotenv import load_dotenv
-from geopy.geocoders import Nominatim
+# from geopy.geocoders import Nominatim
 # https://api.telegram.org/{TOKEN_BOT}/getMe
 
 from utils import content, vk, instagram, weather, parkrun, news, fucomp, search
@@ -19,28 +18,8 @@ if os.path.exists(dotenv_path):
 TOKEN_BOT = os.environ.get('API_BOT_TOKEN')
 bot = Bot(token=TOKEN_BOT)
 dp = Dispatcher(bot)
-logging.basicConfig(level=logging.INFO)  # Outputs INFO messages to log and console.
 
 
-@dp.message_handler(commands=['start'])
-async def send_welcome(message: types.Message):
-    await message.reply(content.start_message, disable_notification=True)
-
-
-@dp.message_handler(commands=['help', 'помощь', 'команды', 'справка'])
-async def commands(message):
-    await message.reply(content.help_message, disable_notification=True, parse_mode='html')
-
-
-@dp.message_handler(commands=['admin', 'админ'])
-@dp.message_handler(lambda message: fucomp.bot_compare(message.text, fucomp.phrases_admin))
-async def admin(message):
-    if message.chat.type == "private":  # private chat message
-        await message.reply('Здесь нет админов, это персональный чат.')
-    else:
-        admin = random.choice(await bot.get_chat_administrators(message.chat.id)).user
-        about_admin = f"\nАдмин @{admin.username} - {admin.first_name}  {admin.last_name}"
-        await message.reply(random.choice(content.phrases_about_admin) + about_admin)
 
 
 # @bot.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
