@@ -6,7 +6,6 @@ import time
 from aiogram import Bot, Dispatcher, executor, types
 
 from dotenv import load_dotenv
-# from geopy.geocoders import Nominatim
 # https://api.telegram.org/{TOKEN_BOT}/getMe
 
 from utils import content, vk, instagram, weather, parkrun, news, fucomp, search
@@ -22,25 +21,6 @@ dp = Dispatcher(bot)
 
 
 
-# @bot.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
-# def ask_weather(message):
-#     match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
-#     if match:
-#         place = re.sub(r' в\b', '', match.group(2).strip())
-#         app = Nominatim(user_agent="wr-tg-bot")
-#         try:
-#             location = app.geocode(place).raw
-#         except AttributeError:
-#             return bot.reply_to(message, 'Есть такой населённый пункт? ...не знаю. Введите запрос в в формате '
-#                                          '"Бот, погода Город" или "Бот, воздух Название Область".')
-#         if match.group(1).startswith('погод'):
-#             bot.send_chat_action(message.chat.id, 'typing')
-#             bot.send_message(message.chat.id, weather.get_weather(place, location['lat'], location['lon']))
-#         else:
-#             bot.send_chat_action(message.chat.id, 'typing')
-#             bot.send_message(message.chat.id, weather.get_air_quality(place, location['lat'], location['lon'])[1])
-#
-#
 # @bot.inline_handler(lambda query: 'погода' in query.query)
 # def query_weather(inline_query):
 #     try:
@@ -180,28 +160,6 @@ dp = Dispatcher(bot)
 #         logger.error(e)
 #
 #
-# @bot.message_handler(regexp=r'(?i)бот[, \w]+?(паркран\w?|parkrun)( \w+){1,3}( \d+)?$')
-# def parkrun_personal_result(message):
-#     bot.send_chat_action(message.chat.id, 'typing')
-#     try:
-#         turn = re.search(r'\d+$', message.text)
-#         turn = int(turn[0]) % 360 if turn else 0
-#         person = re.sub(r'.*(паркран\w?|parkrun) ', '', message.text)
-#         person = re.sub(r'\d', '', person).strip()
-#         pic = parkrun.make_latest_results_diagram('results.png', person, turn)
-#         bot.send_photo(message.chat.id, pic)
-#         pic.close()
-#     except:
-#         logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}')
-#         bot.reply_to(message, 'Что-то пошло не так. Возможно, вы неправильно ввели имя.')
-#
-#
-# @bot.message_handler(regexp=r'(?i)бот,? (паркран|parkrun)', content_types=['text'])
-# def get_parkrun_picture(message):
-#     token = os.environ.get('VK_SERVICE_TOKEN')
-#     bot.send_photo(message.chat.id, vk.get_random_photo(token), disable_notification=True)
-#
-#
 # @bot.message_handler(func=lambda message: fucomp.bot_compare(message.text, fucomp.phrases_instagram))
 # def get_instagram_post(message):
 #     login = os.environ.get('IG_USERNAME')
@@ -211,41 +169,6 @@ dp = Dispatcher(bot)
 #     ig_post = instagram.get_last_post(login, password, user)
 #     bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
 #     bot.delete_message(wait_message.chat.id, wait_message.id)
-#
-#
-# @bot.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
-# def simple_answers(message):
-#     ans = []
-#     if 'как' in message.text and re.search(r'\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
-#         ans = content.phrases_about_myself
-#     elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
-#         user = message.from_user.first_name
-#         ans = [s.format(user) for s in content.greeting]
-#     elif fucomp.bot_compare(message.text, fucomp.phrases_parkrun):
-#         ans = content.phrases_about_parkrun
-#
-#     if ans:
-#         bot.reply_to(message, random.choice(ans), disable_web_page_preview=True)
-#         return
-#     elif 'погода' in message.text:
-#         bot_nick = bot.get_me().to_dict()["username"]
-#         ans = ['Информацию о погоде можно получить через inline запрос: '
-#                f'в строке сообщений наберите "@{bot_nick} погода".'
-#                'Либо, набрав сообщение, "Бот, погода Населённый пункт", '
-#                'например, "Бот, погода Кузьминки Москва".']
-#     elif re.search(r'GRUT|ГРУТ', message.text, re.I):
-#         ans = content.phrases_grut
-#     elif re.search(r'\bгречк|\bгречневая', message.text, re.I):
-#         ans = content.phrases_grechka
-#     else:
-#         bot.send_chat_action(message.chat.id, 'typing')
-#         if random.randrange(11) % 2:
-#             ans = [search.google(message.text)]
-#             if not ans[0]:
-#                 ans = [random.choice(content.phrases_about_running)]
-#         else:
-#             ans = [fucomp.best_answer(message.text, fucomp.message_base_m)]
-#     bot.send_message(message.chat.id, random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
 if __name__ == '__main__':

@@ -3,13 +3,12 @@ import os
 import random
 import re
 import urllib.parse
-from lxml.html import parse
 
-import requests
-from dotenv import load_dotenv
+import aiohttp
+from lxml.html import fromstring
 
 
-def google(phrase):
+async def google(phrase):
     search_phrase = re.sub(r'(?i)бот|\.|,|!', '', phrase).strip()
     params = {
         "q": f"{search_phrase}",
@@ -17,9 +16,11 @@ def google(phrase):
         "cx": f"{os.environ.get('GOOGLE_CX')}"
     }
     values_url = urllib.parse.urlencode(params)
-    result = requests.get(f'https://www.googleapis.com/customsearch/v1?' + values_url)
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://www.googleapis.com/customsearch/v1?' + values_url) as resp:
+            result = await resp.json()
     try:
-        res1 = random.choice(result.json()['items'])['htmlSnippet']
+        res1 = random.choice(result['items'])['htmlSnippet']
     except KeyError:
         return ''
     res2 = re.sub(r'(?im)<b>|</b>|\.\.\.|<br>|&nbsp;|&quot;|\n', '', res1)
@@ -29,18 +30,15 @@ def google(phrase):
     res6 = re.sub(r'Сообщение Добавлено: \w{,2} \d{,2} \w+ \d{2,4}, \d\d:\d\d', '', res5)
     res7 = re.sub(r'Марафорум|» Соревнования|» Кроссы, трейлы\.|Часовой пояс:|UTC\.|Кто сейчас на форуме\.*', '', res6)
     res8 = re.sub(r'Последний раз редактировалось .*, \d\d:\d\d, всего', '', res7)
-    return re.sub(r'[,.!?][\w ]+$', '.', res8.strip(), re.MULTILINE)
+    return [].append(re.sub(r'[,.!?][\w ]+$', '.', res8.strip(), re.MULTILINE))
 
 
-def bashim(phrase):
+async def bashim(phrase):
     search_phrase = re.sub(r'(?i)\bбот\b|\.|,|!|\?', '', phrase).strip()
-    params = {
-        "text": f"{search_phrase}"
-    }
-    values_url = urllib.parse.urlencode(params)
-    result = requests.get(f'https://bash.im/search?' + values_url, stream=True)
-    result.raw.decode_content = True
-    tree = parse(result.raw)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'https://bash.im/search?text={search_phrase}') as resp:
+            html = await resp.text()
+    tree = fromstring(html)
     cites = tree.xpath('//article/div/div')
     if cites:
         for cite in cites:
@@ -51,9 +49,16 @@ def bashim(phrase):
 
 
 if __name__ == '__main__':
+    import asyncio
+    from dotenv import load_dotenv
+
     dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
 
-    s = google('бот, гречка')
-    print(s)
+    loop = asyncio.get_event_loop()
+    srch1 = loop.run_until_complete(google('бот, гречка'))
+    srch2 = loop.run_until_complete(bashim('бот, гречка'))
+
+    print(srch1)
+    print(srch2)

@@ -1,3 +1,4 @@
+import os
 import re
 from fuzzywuzzy import process, fuzz
 import pickle
@@ -50,16 +51,13 @@ phrases_schedule = [
     "когда тренировка"
 ]
 
-with open('utils/message_base_wr.pkl', 'rb') as f:
-    message_base_wr = pickle.load(f)
-
-with open('utils/message_base_meschch.pkl', 'rb') as f:
+with open(os.path.join(os.path.dirname(__file__), 'message_base_meschch.pkl'), 'rb') as f:
     message_base_m = pickle.load(f)
 
 
 # ===================== TESTING =============================
 if __name__ == '__main__':
-    with open('message_base_wr.pkl', 'rb') as f:
+    with open('message_base_meschch.pkl', 'rb') as f:
         message_base_wr = pickle.load(f)
     print(best_answer('бот, знаешь девиз?', message_base_wr))
 

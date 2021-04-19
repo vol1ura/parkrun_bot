@@ -2,8 +2,6 @@ import time
 from datetime import timedelta
 
 from instapi import bind, User
-from dotenv import load_dotenv
-import os
 
 
 def get_last_post(login, password, profile_name):
@@ -30,6 +28,9 @@ def get_last_post(login, password, profile_name):
 
 
 if __name__ == '__main__':
+    from dotenv import load_dotenv
+    import os
+
     dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)

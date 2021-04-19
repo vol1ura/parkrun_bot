@@ -1,9 +1,8 @@
 import os
 import time
 
-import requests
-from dotenv import load_dotenv
-from lxml.html import parse
+import aiohttp
+from lxml.html import fromstring
 
 
 def compass_direction(degree: int, lan='en') -> str:
@@ -14,37 +13,42 @@ def compass_direction(degree: int, lan='en') -> str:
     return compass_arr[lan][int((degree % 360) / 22.5 + 0.5)]
 
 
-def get_weather(place, lat, lon, lang='ru'):
+async def get_weather(place, lat, lon, lang='ru'):
     weather_api_key = os.environ.get('OWM_TOKEN')
     base_url = f"http://api.openweathermap.org/data/2.5/weather?" \
                f"lat={lat}&lon={lon}&appid={weather_api_key}&units=metric&lang={lang}"
-    w = requests.get(base_url).json()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(base_url) as resp:
+            w = await resp.json()
     wind_dir = compass_direction(w['wind']['deg'], lang)
     sunset = time.strftime("%H:%M", time.localtime(w['sys']['sunset']))
-    weather_desc = f"🏙 {place}: сейчас {w['weather'][0]['description']}\n" \
+    weather_description = f"🏙 {place}: сейчас {w['weather'][0]['description']}\n" \
                    f"🌡 {w['main']['temp']:.1f}°C, ощущ. как {w['main']['feels_like']:.0f}°C\n" \
                    f"💨 {w['wind']['speed']:.1f}м/с с\xa0{wind_dir}, 💦\xa0{w['main']['humidity']}%\n" \
                    f"🌇 {sunset} "
-    return weather_desc
+    return weather_description
 
 
-def get_air_quality(place, lat, lon, lang='ru'):
+async def get_air_quality(place, lat, lon, lang='ru'):
     weather_api_key = os.environ.get('OWM_TOKEN')
     base_url = f"http://api.openweathermap.org/data/2.5/air_pollution?" \
                f"lat={lat}&lon={lon}&appid={weather_api_key}"
-    aq = requests.get(base_url).json()
+    async with aiohttp.ClientSession() as session:
+        async with session.get(base_url) as resp:
+            aq = await resp.json()
     # Air Quality Index: 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor
     aqi = aq['list'][0]['main']['aqi']
     aqi_e = ['👍', '🙂', '😐', '🙁', '🤢'][aqi - 1]
     air = {'ru': 'воздух', 'en': 'air'}
-    air_conditions = f"{place}: {air[lang]} {aqi_e} PM2.5~{aq['list'][0]['components']['pm2_5']:.0f}, " \
+    air_description = f"{place}: {air[lang]} {aqi_e} PM2.5~{aq['list'][0]['components']['pm2_5']:.0f}, " \
                      f"SO₂~{aq['list'][0]['components']['so2']:.0f}, NO₂~{aq['list'][0]['components']['no2']:.0f}, " \
                      f"NH₃~{aq['list'][0]['components']['nh3']:.1f} (в µg/m³)."
-    return aqi, air_conditions
+    return aqi, air_description
 
 
-def get_place_accu_params(lat, lon):
-    url = f'https://www.accuweather.com/en/search-locations?query={lat}%2C{lon}'
+async def get_air_accu_quality(lat, lon):
+    url_host = 'https://www.accuweather.com'
+    url_path = f'/en/search-locations?query={lat}%2C{lon}'
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate, br",
@@ -57,29 +61,24 @@ def get_place_accu_params(lat, lon):
         "Upgrade-Insecure-Requests": "1",
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
     }
-    return requests.get(url, headers=headers).url
+    session = aiohttp.ClientSession(headers=headers)
+    async with session.get(url_host + url_path) as resp:
+        url = url_host + resp.url.path
+        print('URL: ', url)
+        result = await parse_air_accu(url, session)
+    await session.close()
+    return result
 
 
-def get_air_accu(url: str):
+async def parse_air_accu(url: str, session):
     pollutant = {'SO 2': 'SO₂', 'PM 2.5': 'PM2.5', 'O 3': 'O₃', 'PM 10': 'PM10', 'NO 2': 'NO₂', 'CO': 'CO'}
     category = {'Fair': '🙂', 'Excellent': '👍', 'Poor': '😐', 'Unhealthy': '🙁', 'Very Unhealthy': '🤢',
                 'Dangerous': '☠'}
     air_index = {'Fair': 2, 'Excellent': 1, 'Poor': 3, 'Unhealthy': 4, 'Very Unhealthy': 5, 'Dangerous': 6}
     url = url.replace('weather-forecast', 'air-quality-index')
-    print(url)
-    headers = {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Accept-Language": "en-US;q=0.8,en;q=0.3",
-        "Connection": "keep-alive",
-        "Host": "www.accuweather.com",
-        "Sec-GPC": "1",
-        "Upgrade-Insecure-Requests": "1",
-        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
-    }
-    result = requests.get(url, headers=headers, stream=True)
-    result.raw.decode_content = True
-    tree = parse(result.raw)
+    async with session.get(url) as resp:
+        html = await resp.text()
+    tree = fromstring(html)
     aqi_category = tree.xpath('//*/p[@class="category-text"]')[0].text_content().strip()
     air_description = f'воздух {category[aqi_category]}'
     rows = tree.xpath('//div[contains(@class, "air-quality-pollutant")]')
@@ -94,7 +93,11 @@ def get_air_accu(url: str):
     return air_index[aqi_category], air_description
 
 
+# TESTING
 if __name__ == '__main__':
+    import asyncio
+    from dotenv import load_dotenv
+
     dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
@@ -103,9 +106,13 @@ if __name__ == '__main__':
     lon = 37.507175
     my_name = 'tyelyatinki'
     my_key = 2442389
-    get_place_accu_params(lat, lon)
-    print(get_air_accu(get_place_accu_params(lat, lon)))
-    # w = get_weather('Test', 43.585472, 39.723089)
-    # print(w)
-    # a = get_air_quality('Some place', 43.585472, 39.723089)
-    # print(a[1])
+    loop = asyncio.get_event_loop()
+    # t = loop.run_until_complete(get_air_accu_quality(lat, lon))
+#     t = loop.run_until_complete(get_air_quality('Some place', 43.585472, 39.723089))
+#     # get_place_accu_params(lat, lon)
+#     # aqu = get_air_accu_quality(lat, lon)
+#     # print(aqu)
+#     # w = get_weather('Test', 43.585472, 39.723089)
+#     print(t)
+#     # a = get_air_quality('Some place', 43.585472, 39.723089)
+#     # print(a[1])
