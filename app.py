@@ -242,6 +242,14 @@ async def process_most_records(callback_query: types.CallbackQuery):
     pic.close()
 
 
+@dp.callback_query_handler(lambda c: c.data == 'top_active_clubs')
+async def process_active_clubs(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
+    pic = parkrun.top_active_clubs_diagram('top_clubs.png')
+    await bot.send_photo(callback_query.from_user.id, pic)
+    pic.close()
+
+
 @dp.inline_handler(lambda query: 'records' in query.query)
 async def display_records_menu(inline_query):
     try:
@@ -288,7 +296,6 @@ async def get_instagram_post(message):
     login = os.environ.get('IG_USERNAME')
     password = os.environ.get('IG_PASSWORD')
     user = re.search(r'из @([\w.]+)\. Подождите\.', message.text)[1]
-    print(user)
     ig_post = instagram.get_last_post(login, password, user)
     await bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
 

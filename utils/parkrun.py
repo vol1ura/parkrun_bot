@@ -168,12 +168,33 @@ async def update_parkruns_clubs():
         writer.writerows(all_clubs)
 
 
-async def top_active_clubs():
+def top_active_clubs():
     CLUBS.sort(key=lambda club: -int(club['runs']))
     message = f"*10 активных клубов (по числу пробежек):*\n"
     for i, club in enumerate(CLUBS[:10], 1):
         message += f"{i:>2}.\xa0[{club['name']:<29}]({club['link']})\xa0*{club['runs']:<3}*\n"
     return message.rstrip()
+
+
+def top_active_clubs_diagram(pic: str):
+    df = pd.read_csv(__CLUBS_FILE)
+    df = df.sort_values(by=[df.columns[3]], ascending=False).head(10)
+    clubs = df[df.columns[1]]
+    vals = df[df.columns[3]].values
+    fig = plt.figure(figsize=(6, 6), dpi=200)
+    ax = fig.add_subplot()
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#8c564b',
+              '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#17ceaf']
+    plt.xticks(rotation=70)
+    plt.bar(clubs, height=vals, color=colors)
+    for p, label, mark in zip(ax.patches, vals, clubs.values):
+        if mark == 'Wake&Run':
+            p.set_facecolor('#9467bd')
+        ax.annotate(label, (p.get_x() + 0.05, p.get_height() + 0.2))
+    plt.title('10 активных клубов (по числу пробежек)', fontweight='bold')
+    plt.tight_layout()
+    plt.savefig(pic)
+    return open(pic, 'rb')
 
 
 async def top_parkruns():
@@ -338,7 +359,8 @@ if __name__ == '__main__':
     # print(t)
     # get_latest_results_diagram()
     # f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
-    f = loop.run_until_complete(top_records_count('../utils/results.png'))
+    # f = loop.run_until_complete(top_records_count('../utils/results.png'))
+    f = top_active_clubs_diagram('../utils/clubs.png')
     f.close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()

@@ -12,11 +12,11 @@ main.row(btn3).row(btn4).add(btn1, btn2)
 inline_stat = InlineKeyboardMarkup(row_width=2)
 stat_btn1 = InlineKeyboardButton('Рекорды', switch_inline_query_current_chat='records')
 stat_btn2 = InlineKeyboardButton('Рекордсмены', callback_data='most_records_parkruns')
-# stat_btn3 = InlineKeyboardButton('Top10 медленных паркранов (м)', callback_data='slow_men_parkruns')
+stat_btn3 = InlineKeyboardButton('Top10 клубов', callback_data='top_active_clubs')
 # stat_btn4 = InlineKeyboardButton('Top10 медленных паркранов (ж)', callback_data='slow_women_parkruns')
 # stat_btn5 = InlineKeyboardButton('Top рекрдсменов мужчин', callback_data='most_records_men')
 # stat_btn6 = InlineKeyboardButton('Top рекордсменов женщин', callback_data='most_records_women')
-inline_stat.add(stat_btn1, stat_btn2)
+inline_stat.add(stat_btn1, stat_btn2, stat_btn3)
 
 # INFORMATION keyboard layout with additional information
 inline_info = InlineKeyboardMarkup(row_width=2)
