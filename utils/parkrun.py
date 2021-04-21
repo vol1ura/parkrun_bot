@@ -1,3 +1,4 @@
+import os
 import re
 
 import aiohttp
@@ -10,6 +11,10 @@ from matplotlib.ticker import MaxNLocator
 PARKRUN_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
 
 club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
+
+
+with open(os.path.join(os.path.dirname(__file__), 'all_parkruns.txt'), 'r') as f:
+    PARKRUNS = f.readlines()
 
 
 # TODO: добавить вывод предстоящих юбилейных паркранов
@@ -151,9 +156,10 @@ async def top_records_count(men=True):
     return message.rstrip()
 
 
-async def get_parkruns_list():
+async def update_parkruns_list():
     data = await all_parkruns_records()
-    return data[data.columns[0]].values
+    with open(os.path.join(os.path.dirname(__file__), 'all_parkruns.txt'), 'w') as f:
+        f.write('\n'.join(data[data.columns[0]].values))
 
 
 async def parse_latest_results(parkrun: str):
@@ -262,11 +268,11 @@ if __name__ == '__main__':
     import asyncio
 
     loop = asyncio.get_event_loop()
-    # t = loop.run_until_complete(get_parkruns_list())
+    t = loop.run_until_complete(get_parkruns_list())
     # mes = most_slow_parkruns()
-    # print(t)
+    print(t, type(t), t[1])
     # get_latest_results_diagram()
-    f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
-    f.close()
+    # f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
+    # f.close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()

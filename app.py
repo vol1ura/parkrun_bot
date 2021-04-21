@@ -1,10 +1,11 @@
 import logging
 import random
 import re
-from geopy.geocoders import Nominatim
 
 from aiogram import Bot, Dispatcher, types, executor
+from geopy.geocoders import Nominatim
 
+import keyboards as kb
 from config import *
 from utils import content, fucomp, weather, vk, search, parkrun
 
@@ -32,15 +33,20 @@ async def admin(message: types.Message):
         await message.reply('Здесь нет админов, это персональный чат.')
     else:
         admin = random.choice(await bot.get_chat_administrators(message.chat.id)).user
-        about_admin = f"\nАдмин @{admin.username} - {admin.first_name}  {admin.last_name}"
+        about_admin = f'\nАдмин @{admin.username} - {admin.first_name}  {admin.last_name}'
         await message.answer(random.choice(content.phrases_about_admin) + about_admin)
+
+
+@dp.message_handler(commands=['parkrun'])
+async def process_command_parkrun(message: types.Message):
+    await message.reply('Установка параметров', reply_markup=kb.inline_kb_parkrun)
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
 async def ask_weather(message: types.Message):
     match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
     if match:
-        place = re.sub(r' в\b', '', match.group(2).strip())
+        place = re.sub(r' в ', '', match.group(2)).strip()
         app = Nominatim(user_agent="parkrun-bot")
         try:
             location = app.geocode(place).raw
@@ -59,7 +65,7 @@ async def ask_weather(message: types.Message):
 
 @dp.message_handler(regexp=r'(?i)бот[, \w]+?(паркран\w?|parkrun)( \w+)( \d+)?$')
 async def parkrun_personal_result(message: types.Message):
-    await bot.send_chat_action(message.chat.id, 'typing')
+    await types.ChatActions.upload_photo()
     try:
         turn = re.search(r'\d+$', message.text)
         turn = int(turn[0]) % 360 if turn else 0
@@ -116,10 +122,28 @@ async def simple_answers(message: types.Message):
     await message.answer(random.choice(ans), disable_web_page_preview=True, disable_notification=True)
 
 
+@dp.inline_handler(lambda query: 'parkrun' in query.query or 'паркран' in query.query)
+async def query_all_parkruns(query):
+    offset = int(query.offset) if query.offset else 0
+    try:
+        parkruns_list = parkrun.PARKRUNS
+        quotes = parkruns_list[offset:]
+        m_next_offset = str(offset + 5) if len(quotes) >= 5 else None
+        parkruns_menu = [types.InlineQueryResultArticle(
+            id=f'{k}', title=p, input_message_content=types.InputTextMessageContent(f'/setparkrun {p}')
+        )
+            for k, p in enumerate(quotes[:5])]
+        await bot.answer_inline_query(query.id, parkruns_menu,
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=3)
+    except Exception as e:
+        logger.error(e)
+
+
 # Run after startup
 async def on_startup(dp):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
+    await parkrun.update_parkruns_list()
 
 
 # Run before shutdown
