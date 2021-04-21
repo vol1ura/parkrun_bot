@@ -10,6 +10,7 @@ certifi==2020.12.5
 cffi==1.14.5
 chardet==4.0.0
 cycler==0.10.0
+Cython==0.29.23
 fuzzywuzzy==0.18.0
 geographiclib==1.50
 geopy==2.1.0
@@ -35,4 +36,5 @@ six==1.15.0
 typing-extensions==3.7.4.3
 ujson==4.0.2
 urllib3==1.26.4
+vedis==0.7.1
 yarl==1.6.3

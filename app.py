@@ -5,6 +5,7 @@ import time
 
 from aiogram import Bot, Dispatcher, types, executor
 from geopy.geocoders import Nominatim
+from vedis import Vedis
 
 import keyboards as kb
 from config import *
@@ -45,16 +46,72 @@ async def process_command_settings(message: types.Message):
     await message.answer('Установка параметров', reply_markup=kb.inline_parkrun)
 
 
-@dp.message_handler(regexp='📑 общая статистика')
+@dp.message_handler(regexp='🌳 паркран')
 @dp.message_handler(commands=['statistics'])
 async def process_command_statistics(message: types.Message):
     await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_stat)
 
 
-@dp.message_handler(regexp='📋 полезная информация')
+@dp.message_handler(regexp='📋 разное')
 @dp.message_handler(commands=['info'])
 async def process_command_statistics(message: types.Message):
     await message.answer('Кое-что ещё помимо паркранов:', reply_markup=kb.inline_info)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'check_settings')
+async def check_settings(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Получение данных..')
+    user_id = callback_query.from_user.id
+    print(user_id)
+    try:
+        with Vedis(DB_FILE) as db:
+            h = db.Hash(user_id)
+    except:
+        return await bot.send_message(callback_query.from_user.id, 'Не удалось получить настройки.')
+    print(h)
+    print(h['pr'], h['cl'])
+    mes1 = h['pr'] if h['pr'] else 'Паркран не выбран.\n'
+    mes2 = h['cl'] if h['cl'] else 'Клуб не выбран.'
+    await bot.send_message(callback_query.from_user.id, mes1 + mes2)
+
+
+@dp.message_handler(commands=['setparkrun'])
+async def process_command_setparkrun(message: types.Message):
+    parkrun_name = message.get_args()
+    if not parkrun_name:
+        return await message.answer(content.no_parkrun_message, reply_markup=kb.main)
+    if parkrun_name not in parkrun.PARKRUNS:
+        return await message.answer('В моей базе нет такого паркрана. Проверьте ввод.')
+    user_id = message.from_user.id
+    with Vedis(DB_FILE) as db:
+        try:
+            h = db.Hash(user_id)
+            h['pr'] = parkrun_name
+            print(h, parkrun_name, user_id)
+            return await message.answer(content.success_parkrun_set.format(parkrun_name))
+        except:
+            logger.error(f'Writing to DB failed. User ID={user_id}, argument {parkrun_name}')
+            return await message.answer(content.settings_save_failed)
+
+
+@dp.message_handler(commands=['setclub'])
+async def process_command_setclub(message: types.Message):
+    club = message.get_args()
+    if not club:
+        return await message.answer(content.no_club_message, reply_markup=kb.main)
+    club_r = [c['id'] for c in parkrun.CLUBS if c['name'] == club]
+    if not club_r:
+        return await message.answer('В моей базе нет такого клуба. Проверьте ввод.')
+    user_id = message.from_user.id
+    with Vedis(DB_FILE) as db:
+        try:
+            h = db.Hash(user_id)
+            h['cl'] = club
+            print(h, club, user_id)
+            return await message.answer(content.success_club_set.format(club, club_r[0]['id']))
+        except:
+            logger.error(f'Writing to DB failed. User ID={user_id}, argument {club}')
+            return await message.answer(content.settings_save_failed)
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -311,7 +368,7 @@ async def on_startup(dp):
 # Run before shutdown
 async def on_shutdown(dp):
     logging.warning("Shutting down..")
-    await bot.delete_webhook()
+    # await bot.delete_webhook()
     await dp.storage.close()
     await dp.storage.wait_closed()
     logging.warning("Bot down")

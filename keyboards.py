@@ -4,9 +4,9 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 main = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 btn1 = KeyboardButton('🔧 настройки')
 btn2 = KeyboardButton('❓ справка')
-btn3 = KeyboardButton('📑 общая статистика')
-btn4 = KeyboardButton('📋 полезная информация')
-main.row(btn3).row(btn4).add(btn1, btn2)
+btn3 = KeyboardButton('🌳 паркран')
+btn4 = KeyboardButton('📋 разное')
+main.row(btn3, btn4).add(btn1, btn2)
 
 # STATISTICS inline keyboard layout
 inline_stat = InlineKeyboardMarkup(row_width=2)
@@ -32,6 +32,7 @@ inline_info.add(info_btn4, info_btn3)
 
 # SETTINGS inline keyboard layout
 inline_parkrun = InlineKeyboardMarkup(row_width=2)
-inline_parkrun.insert(InlineKeyboardButton("Выбрать parkrun", switch_inline_query_current_chat='parkrun'))
+inline_parkrun.insert(InlineKeyboardButton('Выбрать parkrun', switch_inline_query_current_chat='parkrun'))
 inline_parkrun.insert(InlineKeyboardButton("Выбрать клуб", switch_inline_query_current_chat='clubs'))
-inline_parkrun.add(InlineKeyboardButton('Перейти на сайт parkrun.ru', url='https://parkrun.ru/'))
+inline_parkrun.insert(InlineKeyboardButton('Показать установки', callback_data='check_settings'))
+inline_parkrun.insert(InlineKeyboardButton('Перейти на сайт parkrun.ru', url='https://parkrun.ru/'))

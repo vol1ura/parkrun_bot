@@ -16,8 +16,10 @@ __CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
 
 club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
 
-with open(__PARKRUNS_FILE, 'r') as f:
-    PARKRUNS = f.readlines()
+PARKRUNS = []
+with open(__PARKRUNS_FILE, 'r', newline='\n') as f:
+    for line in f:
+        PARKRUNS.append(line.strip())
 
 CLUBS = []
 with open(__CLUBS_FILE, 'r', encoding='utf-8') as f:
@@ -190,7 +192,7 @@ def top_active_clubs_diagram(pic: str):
     for p, label, mark in zip(ax.patches, vals, clubs.values):
         if mark == 'Wake&Run':
             p.set_facecolor('#9467bd')
-        ax.annotate(label, (p.get_x() + 0.05, p.get_height() + 0.2))
+        ax.annotate(label, (p.get_x() + 0.05, p.get_height() + 10), color='gray')
     plt.title('10 активных клубов (по числу пробежек)', fontweight='bold')
     plt.tight_layout()
     plt.savefig(pic)
@@ -360,7 +362,7 @@ if __name__ == '__main__':
     # get_latest_results_diagram()
     # f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
     # f = loop.run_until_complete(top_records_count('../utils/results.png'))
-    f = top_active_clubs_diagram('../utils/clubs.png')
-    f.close()
+    ff = top_active_clubs_diagram('../utils/clubs.png')
+    ff.close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()
