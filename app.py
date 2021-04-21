@@ -1,13 +1,14 @@
 import logging
 import random
 import re
+import time
 
 from aiogram import Bot, Dispatcher, types, executor
 from geopy.geocoders import Nominatim
 
 import keyboards as kb
 from config import *
-from utils import content, fucomp, weather, vk, search, parkrun
+from utils import content, fucomp, weather, vk, search, parkrun, news, instagram
 
 bot = Bot(TOKEN_BOT)
 dp = Dispatcher(bot)
@@ -18,9 +19,10 @@ logger = logging.getLogger()
 
 @dp.message_handler(commands='start')
 async def send_welcome(message: types.Message):
-    await message.answer(content.start_message, disable_notification=True)
+    await message.answer(content.start_message, reply_markup=kb.main, disable_notification=True)
 
 
+@dp.message_handler(regexp='❓ справка')
 @dp.message_handler(commands=['help', 'помощь'])
 async def commands(message: types.Message):
     await message.answer(content.help_message, disable_notification=True, parse_mode='html')
@@ -37,9 +39,22 @@ async def admin(message: types.Message):
         await message.answer(random.choice(content.phrases_about_admin) + about_admin)
 
 
-@dp.message_handler(commands=['parkrun'])
-async def process_command_parkrun(message: types.Message):
-    await message.reply('Установка параметров', reply_markup=kb.inline_kb_parkrun)
+@dp.message_handler(regexp='🔧 настройки')
+@dp.message_handler(commands=['settings'])
+async def process_command_settings(message: types.Message):
+    await message.answer('Установка параметров', reply_markup=kb.inline_parkrun)
+
+
+@dp.message_handler(regexp='📑 общая статистика')
+@dp.message_handler(commands=['statistics'])
+async def process_command_statistics(message: types.Message):
+    await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_stat)
+
+
+@dp.message_handler(regexp='📋 полезная информация')
+@dp.message_handler(commands=['info'])
+async def process_command_statistics(message: types.Message):
+    await message.answer('Кое-что ещё помимо паркранов:', reply_markup=kb.inline_info)
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -139,11 +154,151 @@ async def query_all_parkruns(query):
         logger.error(e)
 
 
+@dp.inline_handler(lambda query: 'clubs' in query.query or 'клуб' in query.query)
+async def query_all_clubs(query):
+    offset = int(query.offset) if query.offset else 0
+    try:
+        clubs_list = parkrun.CLUBS
+        quotes = clubs_list[offset:]
+        m_next_offset = str(offset + 5) if len(quotes) >= 5 else None
+        clubs_menu = [types.InlineQueryResultArticle(
+            id=f'{k}', title=p['name'], input_message_content=types.InputTextMessageContent(f"/setclub {p['name']}")
+        )
+            for k, p in enumerate(quotes[:5])]
+        await bot.answer_inline_query(query.id, clubs_menu,
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=30)
+    except Exception as e:
+        logger.error(e)
+
+
+@dp.inline_handler(lambda query: 'погода' in query.query or 'weather' in query.query)
+async def query_weather(inline_query):
+    try:
+        data = []
+        for k, v in content.places.items():
+            w = await weather.get_weather(k, v.lat, v.lon)
+            data.append(w)
+        places_weather = [types.InlineQueryResultArticle(
+            id=f'{k}', title=k, description='погода сейчас',
+            input_message_content=types.InputTextMessageContent(w))
+            for (k, v), w in zip(content.places.items(), data)]
+        await bot.answer_inline_query(inline_query.id, places_weather, cache_time=35)
+    except Exception as e:
+        logger.error(e)
+
+
+@dp.inline_handler(lambda query: 'воздух' in query.query or 'air' in query.query)
+async def query_air(inline_query):
+    try:
+        data = []
+        for k, v in content.places.items():
+            aq = await weather.get_air_quality(k, v.lat, v.lon)
+            data.append(aq)
+        places_air = [types.InlineQueryResultArticle(
+            id=f'{k}', title=k, description='качество воздуха',
+            input_message_content=types.InputTextMessageContent(aq[1]))
+            for (k, v), aq in zip(content.places.items(), data)]
+        await bot.answer_inline_query(inline_query.id, places_air, cache_time=36)
+    except Exception as e:
+        logger.error(e)
+
+
+@dp.inline_handler(lambda query: re.search(r'соревнован|старт|забег|events', query.query))
+async def query_competitions(inline_query):
+    try:
+        date = time.gmtime(time.time())
+        month, year = date.tm_mon, date.tm_year
+        competitions = await news.get_competitions(month, year)
+        logger.info(str(len(competitions)))
+        if len(competitions) < 10:
+            if month == 12:
+                month = 1
+                year += 1
+            else:
+                month += 1
+            competitions += await news.get_competitions(month, year)
+        queries = []
+        for i, comp in enumerate(competitions, 1):
+            queries.append(types.InlineQueryResultArticle(
+                id=str(i), title=comp[0], description=comp[1],
+                input_message_content=types.InputTextMessageContent(comp[2], parse_mode='html')))
+        await bot.answer_inline_query(inline_query.id, queries, cache_time=300000)
+    except Exception as e:
+        logger.error(e)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'telegram')
+async def process_callback_telegram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, content.telegram_channels,
+                           parse_mode='Markdown', disable_web_page_preview=True)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
+async def process_most_records(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
+    pic = await parkrun.top_records_count('records.png')
+    await bot.send_photo(callback_query.from_user.id, pic)
+    pic.close()
+
+
+@dp.inline_handler(lambda query: 'records' in query.query)
+async def display_records_menu(inline_query):
+    try:
+        records_tables = await parkrun.top_parkruns()
+        m1 = types.InlineQueryResultArticle(id='1', title='Top10 быстрых паркранов', description='по мужским рекордам',
+                                            input_message_content=types.InputTextMessageContent(records_tables[0],
+                                                                                                parse_mode='Markdown'))
+        m2 = types.InlineQueryResultArticle(id='2', title='Top10 быстрых паркранов', description='по женским рекордам',
+                                            input_message_content=types.InputTextMessageContent(records_tables[2],
+                                                                                                parse_mode='Markdown'))
+        m3 = types.InlineQueryResultArticle(id='3', title='Top10 медленных паркранов',
+                                            description='по мужским результатам',
+                                            input_message_content=types.InputTextMessageContent(records_tables[1],
+                                                                                                parse_mode='Markdown'))
+        m4 = types.InlineQueryResultArticle(id='4', title='Top10 медленных паркранов',
+                                            description='по женским результатам',
+                                            input_message_content=types.InputTextMessageContent(records_tables[3],
+                                                                                                parse_mode='Markdown'))
+        await bot.answer_inline_query(inline_query.id, [m1, m2, m3, m4], cache_time=600)
+    except Exception as e:
+        logger.error(e)
+
+
+@dp.inline_handler(lambda query: 'instagram' in query.query)
+async def display_instagram_menu(query):
+    offset = int(query.offset) if query.offset else 0
+    try:
+        quotes = content.instagram_profiles[offset:]
+        m_next_offset = str(offset + 5) if len(quotes) >= 5 else None
+        inst_menu = [types.InlineQueryResultArticle(
+            id=f'{k}', title=f'@{p}',
+            input_message_content=types.InputTextMessageContent(f"Достаю последний пост из @{p}. Подождите...")
+        )
+            for k, p in enumerate(quotes[:5])]
+        await bot.answer_inline_query(query.id, inst_menu,
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=30)
+    except Exception as e:
+        logger.error(e)
+
+
+@dp.message_handler(regexp=r'Достаю последний пост из @[\w.]+ Подождите\.{3}')
+async def get_instagram_post(message):
+    await bot.send_chat_action(message.chat.id, 'typing')
+    login = os.environ.get('IG_USERNAME')
+    password = os.environ.get('IG_PASSWORD')
+    user = re.search(r'из @([\w.]+)\. Подождите\.', message.text)[1]
+    print(user)
+    ig_post = instagram.get_last_post(login, password, user)
+    await bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
+
+
 # Run after startup
 async def on_startup(dp):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
     await parkrun.update_parkruns_list()
+    await parkrun.update_parkruns_clubs()
 
 
 # Run before shutdown

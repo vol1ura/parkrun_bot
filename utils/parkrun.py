@@ -1,5 +1,7 @@
+import csv
 import os
 import re
+import time
 
 import aiohttp
 import matplotlib.pyplot as plt
@@ -9,12 +11,20 @@ from matplotlib.colors import Normalize, PowerNorm
 from matplotlib.ticker import MaxNLocator
 
 PARKRUN_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
+__PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
+__CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
 
 club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
 
-
-with open(os.path.join(os.path.dirname(__file__), 'all_parkruns.txt'), 'r') as f:
+with open(__PARKRUNS_FILE, 'r') as f:
     PARKRUNS = f.readlines()
+
+CLUBS = []
+with open(__CLUBS_FILE, 'r', encoding='utf-8') as f:
+    fieldnames = ['id', 'name', 'participants', 'runs', 'link']
+    reader = csv.DictReader(f, fieldnames=fieldnames)
+    for row in reader:
+        CLUBS.append(row)
 
 
 # TODO: добавить вывод предстоящих юбилейных паркранов
@@ -82,28 +92,28 @@ async def get_participants():
     return message
 
 
-async def get_club_table():
+async def get_club_table(parkrun: str, club_id: str):
     async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
-        async with session.get('https://www.parkrun.ru/kuzminki/results/clubhistory/?clubNum=23212') as resp:
+        async with session.get(f'https://www.parkrun.ru/{parkrun}/results/clubhistory/?clubNum={club_id}') as resp:
             html_club_results = await resp.text()
     data = pd.read_html(html_club_results)[0]
     data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
     return data
 
 
-async def get_kuzminki_fans():
-    data = await get_club_table()
+async def get_club_fans(parkrun: str, club_id: str):
+    data = await get_club_table(parkrun, club_id)
     table = data.sort_values(by=[data.columns[7]], ascending=False).reset_index(drop=True).head(10)
     sportsmens = table[table.columns[0]]
     pr_num = table[table.columns[7]]
-    message = 'Наибольшее количество забегов _в Кузьминках_:\n'
+    message = f'Наибольшее количество забегов _в {parkrun}_:\n'
     for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
     return message.rstrip()
 
 
-async def get_wr_purkruners():
-    data = await get_club_table()
+async def get_club_purkruners(parkrun: str, club_id: str):
+    data = await get_club_table(parkrun, club_id)
     table = data.sort_values(by=[data.columns[8]], ascending=False).reset_index(drop=True).head(10)
     sportsmens = table[table.columns[0]]
     pr_num = table[table.columns[8]]
@@ -113,12 +123,12 @@ async def get_wr_purkruners():
     return message.rstrip()
 
 
-async def get_kuzminki_top_results():
-    data = await get_club_table()
+async def get_parkrun_club_top_results(parkrun: str, club_id: str):
+    data = await get_club_table(parkrun, club_id)
     table = data.sort_values(by=[data.columns[1]]).reset_index(drop=True).head(10)
     sportsmens = table[table.columns[0]]
     result = table[table.columns[1]]
-    message = 'Самые быстрые одноклубники _на паркране Кузьминки_:\n'
+    message = f'Самые быстрые одноклубники _на паркране {parkrun}_:\n'
     for i, (name, num) in enumerate(zip(sportsmens, result), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
     return message.rstrip()
@@ -131,34 +141,88 @@ async def all_parkruns_records():
     return pd.read_html(html_all_parkruns)[0]
 
 
-async def top_parkruns(asc=True, men=True):
-    data = await all_parkruns_records()
-    sex_col = 7 if men else 3
-    table = data.sort_values(by=[data.columns[sex_col]], ascending=asc).reset_index(drop=True).head(10)
-    parkrun = table[table.columns[0]]
-    result = table[table.columns[sex_col]]
-    message = f"*10 самых {'быстрых' if asc else 'медленных'} паркранов:*\n"
-    for i, (name, num) in enumerate(zip(parkrun, result), 1):
-        message += f'{i:>2}.\xa0{name:<25}\xa0*{num:<3}*\n'
+async def update_parkruns_clubs():
+    if os.path.exists(__CLUBS_FILE) and os.path.getmtime(__CLUBS_FILE) + 605000 > time.time():
+        return
+    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+        async with session.get('https://www.parkrun.ru/results/largestclubs/') as resp:
+            html = await resp.text()
+    tree = fromstring(html)
+    rows = tree.xpath('//*[@id="results"]/tbody/tr')
+    all_clubs = []
+    for row in rows:
+        cells = row.xpath('.//td')
+        id_url = cells[0].xpath('.//a/@href')[0]
+        site_cell = cells[4].xpath('.//a/@href')
+        link = site_cell[0] if site_cell else 'https://www.parkrun.ru/results/largestclubs/' + id_url
+        all_clubs.append({
+            'id': id_url.replace('#featureClub=', ''),
+            'name': cells[0].text_content(),
+            'participants': cells[2].text_content(),
+            'runs': cells[3].text_content(),
+            'link': link
+        })
+    with open(__CLUBS_FILE, 'w', encoding='utf-8') as f:
+        fieldnames = ['id', 'name', 'participants', 'runs', 'link']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writerows(all_clubs)
+
+
+async def top_active_clubs():
+    CLUBS.sort(key=lambda club: -int(club['runs']))
+    message = f"*10 активных клубов (по числу пробежек):*\n"
+    for i, club in enumerate(CLUBS[:10], 1):
+        message += f"{i:>2}.\xa0[{club['name']:<29}]({club['link']})\xa0*{club['runs']:<3}*\n"
     return message.rstrip()
 
 
-async def top_records_count(men=True):
+async def top_parkruns():
     data = await all_parkruns_records()
-    sex_col = 6 if men else 2
-    most_recods = data[data.columns[sex_col]].value_counts()
-    most_recods = most_recods[most_recods > 1]
-    names = most_recods.index
-    vals = most_recods.values
-    message = f"*{'Мужчины' if men else 'Женщины'} с наибольшим количеством рекордов на разных паркранах:*\n"
-    for i, (name, val) in enumerate(zip(names, vals), 1):
-        message += f'{i:>2}.\xa0{name:<25}\xa0*{val:<2}*\n'
-    return message.rstrip()
+    tables = []
+    for men in [True, False]:
+        for asc in [True, False]:
+            sex_col = 7 if men else 3
+            table = data.sort_values(by=[data.columns[sex_col]], ascending=asc).head(10)
+            parkrun = table[table.columns[0]]
+            result = table[table.columns[sex_col]]
+            message = f"*10 самых {'быстрых' if asc else 'медленных'} паркранов:*\n"
+            for i, (name, num) in enumerate(zip(parkrun, result), 1):
+                message += f'{i:>2}.\xa0{name:<25}\xa0*{num:<3}*\n'
+            tables.append(message.rstrip())
+    return tables
+
+
+async def top_records_count(pic: str):
+    """
+    Create diagram with man and woman total records count.
+    Here function take in account only more then two records.
+    Argument is a picture name.
+    Result is a file object
+    """
+    data = await all_parkruns_records()
+    rec_men = data[data.columns[6]].value_counts()
+    rec_women = data[data.columns[2]].value_counts()
+    most_rec_men = rec_men[rec_men > 1]
+    most_rec_women = rec_women[rec_women > 1]
+    df = pd.concat([most_rec_men, most_rec_women], axis=0).sort_values(ascending=True)
+    plt.figure(figsize=(7, 7), dpi=200)
+    ax = df.plot(kind='barh', grid=True)
+    for ptch, tick in zip(ax.patches, ax.yaxis.get_major_ticks()):
+        c = '#2ca02c' if tick.label.get_text() in most_rec_men.index else '#9467bd'
+        ptch.set_facecolor(c)
+
+    ax.grid(b=False, which='major', axis='y')
+    ax.xaxis.set_major_locator(MaxNLocator(steps=[1, 2], integer=True))
+    ax.xaxis.tick_top()
+    plt.title('Учасники с наибольшим количеством рекордов\nна различных паркранах', size=11, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig(pic)
+    return open(pic, 'rb')
 
 
 async def update_parkruns_list():
     data = await all_parkruns_records()
-    with open(os.path.join(os.path.dirname(__file__), 'all_parkruns.txt'), 'w') as f:
+    with open(__PARKRUNS_FILE, 'w') as f:
         f.write('\n'.join(data[data.columns[0]].values))
 
 
@@ -268,11 +332,13 @@ if __name__ == '__main__':
     import asyncio
 
     loop = asyncio.get_event_loop()
-    t = loop.run_until_complete(get_parkruns_list())
+    # loop.run_until_complete(update_parkruns_clubs())
+    # t = loop.run_until_complete(top_active_clubs())
     # mes = most_slow_parkruns()
-    print(t, type(t), t[1])
+    # print(t)
     # get_latest_results_diagram()
     # f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
-    # f.close()
+    f = loop.run_until_complete(top_records_count('../utils/results.png'))
+    f.close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()

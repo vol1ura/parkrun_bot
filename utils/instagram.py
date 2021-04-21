@@ -24,7 +24,7 @@ def get_last_post(login, password, profile_name):
         how_long_ago = 'СЕГОДНЯ' if days_ago == 0 else 'ДЕНЬ НАЗАД' if days_ago == 1 \
             else f'{days_ago} ДНЯ НАЗАД' if 1 < days_ago < 4 else f'{days_ago} ДНЕЙ НАЗАД' if days_ago < 21 \
             else f'{days_ago} Д. НАЗАД'
-        return foto_url, f"📌 @{profile_name} ⏳{how_long_ago}\n{message}\n➡Полный текст: {post_url}"
+        return foto_url, f"📌 @{profile_name} ⏳{how_long_ago}\n{message}\n➡Ссылка на пост: {post_url}"
 
 
 if __name__ == '__main__':

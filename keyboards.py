@@ -1,10 +1,37 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
+
+# MAIN bot keyboard layout
+main = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+btn1 = KeyboardButton('🔧 настройки')
+btn2 = KeyboardButton('❓ справка')
+btn3 = KeyboardButton('📑 общая статистика')
+btn4 = KeyboardButton('📋 полезная информация')
+main.row(btn3).row(btn4).add(btn1, btn2)
+
+# STATISTICS inline keyboard layout
+inline_stat = InlineKeyboardMarkup(row_width=2)
+stat_btn1 = InlineKeyboardButton('Рекорды', switch_inline_query_current_chat='records')
+stat_btn2 = InlineKeyboardButton('Рекордсмены', callback_data='most_records_parkruns')
+# stat_btn3 = InlineKeyboardButton('Top10 медленных паркранов (м)', callback_data='slow_men_parkruns')
+# stat_btn4 = InlineKeyboardButton('Top10 медленных паркранов (ж)', callback_data='slow_women_parkruns')
+# stat_btn5 = InlineKeyboardButton('Top рекрдсменов мужчин', callback_data='most_records_men')
+# stat_btn6 = InlineKeyboardButton('Top рекордсменов женщин', callback_data='most_records_women')
+inline_stat.add(stat_btn1, stat_btn2)
+
+# INFORMATION keyboard layout with additional information
+inline_info = InlineKeyboardMarkup(row_width=2)
+inline_info.insert(InlineKeyboardButton("Ближайшие старты", switch_inline_query_current_chat='events'))
+
+info_btn1 = InlineKeyboardButton("Посмотреть погоду", switch_inline_query_current_chat='weather')
+info_btn2 = InlineKeyboardButton("Загрязнение воздуха", switch_inline_query_current_chat='air')
+info_btn3 = InlineKeyboardButton('Новость из Instagram', switch_inline_query_current_chat='instagram')
+info_btn4 = InlineKeyboardButton('Telegram каналы про бег', callback_data='telegram')
+inline_info.row(info_btn1, info_btn2)
+inline_info.add(info_btn4, info_btn3)
 
 
-inline_btn_1 = InlineKeyboardButton('Первая кнопка!', callback_data='button1')
-inline_kb1 = InlineKeyboardMarkup().add(inline_btn_1)
-
-inline_kb_parkrun = InlineKeyboardMarkup(row_width=2)
-
-inline_kb_parkrun.insert(InlineKeyboardButton("Выбрать parkrun", switch_inline_query_current_chat='parkrun'))
-inline_kb_parkrun.add(InlineKeyboardButton('Перейти на сайт', url='https://parkrun.ru/'))
+# SETTINGS inline keyboard layout
+inline_parkrun = InlineKeyboardMarkup(row_width=2)
+inline_parkrun.insert(InlineKeyboardButton("Выбрать parkrun", switch_inline_query_current_chat='parkrun'))
+inline_parkrun.insert(InlineKeyboardButton("Выбрать клуб", switch_inline_query_current_chat='clubs'))
+inline_parkrun.add(InlineKeyboardButton('Перейти на сайт parkrun.ru', url='https://parkrun.ru/'))
