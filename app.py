@@ -66,13 +66,11 @@ async def check_settings(callback_query: types.CallbackQuery):
     try:
         with Vedis(DB_FILE) as db:
             h = db.Hash(user_id)
+            mes1 = h['pr'].decode() if h['pr'] else 'не выбран.'
+            mes2 = h['cl'].decode() if h['cl'] else 'не выбран.'
     except:
         return await bot.send_message(callback_query.from_user.id, 'Не удалось получить настройки.')
-    print(h)
-    print(h['pr'], h['cl'])
-    mes1 = h['pr'] if h['pr'] else 'Паркран не выбран.\n'
-    mes2 = h['cl'] if h['cl'] else 'Клуб не выбран.'
-    await bot.send_message(callback_query.from_user.id, mes1 + mes2)
+    await bot.send_message(callback_query.from_user.id, f'*Паркран*: {mes1}\n*Клуб*: {mes2}', parse_mode='Markdown')
 
 
 @dp.message_handler(commands=['setparkrun'])
@@ -88,6 +86,7 @@ async def process_command_setparkrun(message: types.Message):
             h = db.Hash(user_id)
             h['pr'] = parkrun_name
             print(h, parkrun_name, user_id)
+            db.commit()
             return await message.answer(content.success_parkrun_set.format(parkrun_name))
         except:
             logger.error(f'Writing to DB failed. User ID={user_id}, argument {parkrun_name}')
@@ -99,16 +98,20 @@ async def process_command_setclub(message: types.Message):
     club = message.get_args()
     if not club:
         return await message.answer(content.no_club_message, reply_markup=kb.main)
-    club_r = [c['id'] for c in parkrun.CLUBS if c['name'] == club]
-    if not club_r:
+    club_id = [c['id'] for c in parkrun.CLUBS if c['name'] == club]
+    print(club_id)
+    if not club_id:
         return await message.answer('В моей базе нет такого клуба. Проверьте ввод.')
     user_id = message.from_user.id
+    print(user_id)
     with Vedis(DB_FILE) as db:
         try:
             h = db.Hash(user_id)
             h['cl'] = club
             print(h, club, user_id)
-            return await message.answer(content.success_club_set.format(club, club_r[0]['id']))
+            db.commit()
+            return await message.answer(content.success_club_set.format(club, club_id[0]),
+                                        disable_web_page_preview=True, parse_mode='Markdown')
         except:
             logger.error(f'Writing to DB failed. User ID={user_id}, argument {club}')
             return await message.answer(content.settings_save_failed)

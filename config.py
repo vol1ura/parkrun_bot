@@ -16,4 +16,4 @@ WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = int(os.environ.get('PORT', 5000))
 
-DB_FILE = 'database.vdb'
+DB_FILE = os.path.join(os.path.dirname(__file__), 'database.vdb')
