@@ -1,3 +1,4 @@
+import re
 import time
 from datetime import timedelta
 
@@ -18,13 +19,13 @@ def get_last_post(login, password, profile_name):
         foto_url = sorted(foto['candidates'], key=lambda pic: pic['width'])[0]['url']
         post_url = f"https://www.instagram.com/p/{f._media_info()['code']}"
         message = f._media_info()['caption']['text']
-        paragraphs = message.split('\n\n', maxsplit=2)
+        paragraphs = re.split(r'\n.?\n', message, maxsplit=2)
         message = '\n\n'.join(paragraphs[:min(len(paragraphs), 2)])
         days_ago = timedelta(seconds=time.time() - f._media_info()['taken_at']).days
         how_long_ago = 'СЕГОДНЯ' if days_ago == 0 else 'ДЕНЬ НАЗАД' if days_ago == 1 \
             else f'{days_ago} ДНЯ НАЗАД' if 1 < days_ago < 4 else f'{days_ago} ДНЕЙ НАЗАД' if days_ago < 21 \
             else f'{days_ago} Д. НАЗАД'
-        return foto_url, f"📌 @{profile_name} ⏳{how_long_ago}\n{message}\n➡Ссылка на пост: {post_url}"
+        return foto_url, f"📌 @{profile_name} ⏳{how_long_ago}\n{message}\n➡Весь пост: {post_url}"
 
 
 if __name__ == '__main__':
@@ -38,4 +39,4 @@ if __name__ == '__main__':
     USERNAME = os.environ.get('IG_USERNAME')
     PASSWD = os.environ.get('IG_PASSWORD')
 
-    print(get_last_post(USERNAME, PASSWD, 'rocketscienze'))
+    print(get_last_post(USERNAME, PASSWD, 'marathonecjournal'))
