@@ -77,9 +77,9 @@ async def get_volunteers():
     return result.strip()
 
 
-async def get_participants():
+async def get_participants(club_id: str):
     async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
-        async with session.get('https://www.parkrun.com/results/consolidatedclub/?clubNum=23212') as resp:
+        async with session.get(f'https://www.parkrun.com/results/consolidatedclub/?clubNum={club_id}') as resp:
             html = await resp.text()
     tree = fromstring(html)
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()

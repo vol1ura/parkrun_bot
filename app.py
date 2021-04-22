@@ -4,6 +4,7 @@ import re
 import time
 
 from aiogram import Bot, Dispatcher, types, executor
+from aiogram.utils.exceptions import TelegramAPIError, BotBlocked
 from geopy.geocoders import Nominatim
 from vedis import Vedis
 
@@ -14,8 +15,8 @@ from utils import content, fucomp, weather, vk, search, parkrun, news, instagram
 bot = Bot(TOKEN_BOT)
 dp = Dispatcher(bot)
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
+logging.basicConfig(format=u'[ LINE:%(lineno)+3s ]#%(levelname)+8s [%(asctime)s]  %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 @dp.message_handler(commands='start')
@@ -62,14 +63,16 @@ async def process_command_statistics(message: types.Message):
 async def check_settings(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Получение данных..')
     user_id = callback_query.from_user.id
-    print(user_id)
     try:
         with Vedis(DB_FILE) as db:
             h = db.Hash(user_id)
             mes1 = h['pr'].decode() if h['pr'] else 'не выбран.'
             mes2 = h['cl'].decode() if h['cl'] else 'не выбран.'
     except:
-        return await bot.send_message(callback_query.from_user.id, 'Не удалось получить настройки.')
+        logger.error(f'Getting settings from DB failed for user {user_id}.')
+        return await bot.answer_callback_query(callback_query.id,
+                                               text='⛔ Не удалось получить настройки.',
+                                               show_alert=True)
     await bot.send_message(callback_query.from_user.id, f'*Паркран*: {mes1}\n*Клуб*: {mes2}', parse_mode='Markdown')
 
 
@@ -86,10 +89,9 @@ async def process_command_setparkrun(message: types.Message):
             h = db.Hash(user_id)
             h['pr'] = parkrun_name
             print(h, parkrun_name, user_id)
-            db.commit()
             return await message.answer(content.success_parkrun_set.format(parkrun_name))
         except:
-            logger.error(f'Writing to DB failed. User ID={user_id}, argument {parkrun_name}')
+            logger.error(f'Writing parkrun to DB failed. User ID={user_id}, argument {parkrun_name}')
             return await message.answer(content.settings_save_failed)
 
 
@@ -109,11 +111,10 @@ async def process_command_setclub(message: types.Message):
             h = db.Hash(user_id)
             h['cl'] = club
             print(h, club, user_id)
-            db.commit()
             return await message.answer(content.success_club_set.format(club, club_id[0]),
                                         disable_web_page_preview=True, parse_mode='Markdown')
         except:
-            logger.error(f'Writing to DB failed. User ID={user_id}, argument {club}')
+            logger.error(f'Writing club to DB failed. User ID={user_id}, argument {club}')
             return await message.answer(content.settings_save_failed)
 
 
@@ -126,6 +127,7 @@ async def ask_weather(message: types.Message):
         try:
             location = app.geocode(place).raw
         except AttributeError:
+            logger.warning(f'Requesting location failed. No such place {place}.')
             return await message.reply(f'Есть такой населённый пункт - {place}? ...не знаю. Введите запрос в в формате '
                                        '"Бот, погода Город" или "Бот, воздух Название Область".')
         if match.group(1).startswith('погод'):
@@ -360,12 +362,37 @@ async def get_instagram_post(message):
     await bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
 
 
+@dp.errors_handler(exception=TelegramAPIError)
+async def errors_handler(update, error):
+    # Here we collect all available exceptions from Telegram and write them to file
+    # First, we don't want to log BotBlocked exception, so we skip it
+    if isinstance(error, BotBlocked):
+        return True
+    # We collect some info about an exception and write to file
+    error_msg = f"Exception of type {type(error)}. Chat ID: {update.message.chat.id}. " \
+                f"User ID: {update.message.from_user.id}. Error: {error}"
+    logger.error(error_msg)
+    return True
+
+
+async def setup_bot_commands(dispatcher: Dispatcher):
+    """
+    Here we setup bot commands to make them visible in Telegram UI
+    """
+    bot_commands = [
+        types.BotCommand(command="/help", description="Справочное сообщение"),
+        types.BotCommand(command="/settings", description="Сделать настройки"),
+    ]
+    await bot.set_my_commands(bot_commands)
+
+
 # Run after startup
 async def on_startup(dp):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
     await parkrun.update_parkruns_list()
     await parkrun.update_parkruns_clubs()
+    await setup_bot_commands(dp)
 
 
 # Run before shutdown
