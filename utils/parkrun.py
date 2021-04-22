@@ -10,6 +10,8 @@ from lxml.html import fromstring
 from matplotlib.colors import Normalize, PowerNorm
 from matplotlib.ticker import MaxNLocator
 
+from bot_exceptions import ParsingException
+
 PARKRUN_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
 __PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
 __CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
@@ -34,47 +36,47 @@ def anniversary_parkruns():
     pass
 
 
-async def add_volunteers(start, stop, session):
-    url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
-    parkrun_number = start
-    while parkrun_number <= stop:
-        async with session.get(url + str(parkrun_number)) as resp:
-            html = await resp.text()
-        tree = fromstring(html)
-        volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
-        with open('static/kuzminki_full_stat.txt', 'a') as f:
-            for volunteer in volunteers:
-                volunteer_name = volunteer.text_content()
-                volunteer_id = re.search(r'\d+', volunteer.attrib['href'])[0]
-                f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
-        parkrun_number += 1
-
-
-async def get_volunteers():
-    url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
-    session = aiohttp.ClientSession(headers=PARKRUN_HEADERS)
-    async with session.get(url) as resp:
-        html = await resp.text()
-    tree = fromstring(html)
-    parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
-    with open('static/kuzminki_full_stat.txt', 'r') as f:
-        all_stat = f.readlines()
-    last_parkrun_db = int(all_stat[-2].split()[1])
-    if last_parkrun_db < parkrun_number:
-        await add_volunteers(last_parkrun_db + 1, parkrun_number, session)
-        with open('static/kuzminki_full_stat.txt', 'r') as f:
-            all_stat = f.readlines()
-    await session.close()
-    volunteers = {}
-    for line in all_stat:
-        name = line.split(maxsplit=3)[-1].strip()
-        volunteers[name] = volunteers.setdefault(name, 0) + 1
-
-    top_volunteers = sorted(volunteers.items(), key=lambda v: v[1], reverse=True)[:10]
-    result = '*Toп 10 волонтёров parkrun Kuzminki*\n'
-    for i, volunteer in enumerate(top_volunteers, 1):
-        result += f'{i}. {volunteer[0]} | {volunteer[1]}\n'
-    return result.strip()
+# async def add_volunteers(start, stop, session):
+#     url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
+#     parkrun_number = start
+#     while parkrun_number <= stop:
+#         async with session.get(url + str(parkrun_number)) as resp:
+#             html = await resp.text()
+#         tree = fromstring(html)
+#         volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
+#         with open('static/kuzminki_full_stat.txt', 'a') as f:
+#             for volunteer in volunteers:
+#                 volunteer_name = volunteer.text_content()
+#                 volunteer_id = re.search(r'\d+', volunteer.attrib['href'])[0]
+#                 f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
+#         parkrun_number += 1
+#
+#
+# async def get_volunteers():
+#     url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
+#     session = aiohttp.ClientSession(headers=PARKRUN_HEADERS)
+#     async with session.get(url) as resp:
+#         html = await resp.text()
+#     tree = fromstring(html)
+#     parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
+#     with open('static/kuzminki_full_stat.txt', 'r') as f:
+#         all_stat = f.readlines()
+#     last_parkrun_db = int(all_stat[-2].split()[1])
+#     if last_parkrun_db < parkrun_number:
+#         await add_volunteers(last_parkrun_db + 1, parkrun_number, session)
+#         with open('static/kuzminki_full_stat.txt', 'r') as f:
+#             all_stat = f.readlines()
+#     await session.close()
+#     volunteers = {}
+#     for line in all_stat:
+#         name = line.split(maxsplit=3)[-1].strip()
+#         volunteers[name] = volunteers.setdefault(name, 0) + 1
+#
+#     top_volunteers = sorted(volunteers.items(), key=lambda v: v[1], reverse=True)[:10]
+#     result = '*Toп 10 волонтёров parkrun Kuzminki*\n'
+#     for i, volunteer in enumerate(top_volunteers, 1):
+#         result += f'{i}. {volunteer[0]} | {volunteer[1]}\n'
+#     return result.strip()
 
 
 async def get_participants(club_id: str):
@@ -98,14 +100,17 @@ async def get_club_table(parkrun: str, club_id: str):
     async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
         async with session.get(f'https://www.parkrun.ru/{parkrun}/results/clubhistory/?clubNum={club_id}') as resp:
             html_club_results = await resp.text()
-    data = pd.read_html(html_club_results)[0]
+    try:
+        data = pd.read_html(html_club_results)[0]
+    except Exception:
+        raise ParsingException
     data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
     return data
 
 
 async def get_club_fans(parkrun: str, club_id: str):
     data = await get_club_table(parkrun, club_id)
-    table = data.sort_values(by=[data.columns[7]], ascending=False).reset_index(drop=True).head(10)
+    table = data.sort_values(by=[data.columns[7]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]
     pr_num = table[table.columns[7]]
     message = f'Наибольшее количество забегов _в {parkrun}_:\n'
@@ -116,7 +121,7 @@ async def get_club_fans(parkrun: str, club_id: str):
 
 async def get_club_purkruners(parkrun: str, club_id: str):
     data = await get_club_table(parkrun, club_id)
-    table = data.sort_values(by=[data.columns[8]], ascending=False).reset_index(drop=True).head(10)
+    table = data.sort_values(by=[data.columns[8]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]
     pr_num = table[table.columns[8]]
     message = 'Рейтинг одноклубников _по количеству паркранов_:\n'
@@ -127,7 +132,7 @@ async def get_club_purkruners(parkrun: str, club_id: str):
 
 async def get_parkrun_club_top_results(parkrun: str, club_id: str):
     data = await get_club_table(parkrun, club_id)
-    table = data.sort_values(by=[data.columns[1]]).reset_index(drop=True).head(10)
+    table = data.sort_values(by=[data.columns[1]]).head(10)
     sportsmens = table[table.columns[0]]
     result = table[table.columns[1]]
     message = f'Самые быстрые одноклубники _на паркране {parkrun}_:\n'
@@ -256,7 +261,10 @@ async def parse_latest_results(parkrun: str):
             html = await resp.text()
     tree = fromstring(html)
     parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
-    df = pd.read_html(html)[0]
+    try:
+        df = pd.read_html(html)[0]
+    except Exception:
+        raise ParsingException
     return df, parkrun_date
 
 
