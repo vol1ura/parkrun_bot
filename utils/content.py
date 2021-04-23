@@ -95,8 +95,7 @@ phrases_about_parkrun = [
 
 instagram_profiles = [
     "i.yadgarov", "marathonecjournal", "across_the_runiverse", "begvreden", "wakeandrun", "runcomrun", "moscowmarathon",
-    "goldenringultratrail", "begovoy.monastyr", "diehardrunning", "russiarunning", "stepan_kiselev_run",
-    "rocketscienze", "sokslav", "trailrunningschool"
+    "begovoy.monastyr", "diehardrunning", "russiarunning", "stepan_kiselev_run", "sokslav"
 ]
 
 telegram_channels = """*Популярные беговые telegram каналы*:

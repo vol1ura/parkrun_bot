@@ -124,19 +124,22 @@ async def process_command_setclub(message: types.Message):
     club = message.get_args()
     if not club:
         return await message.answer(content.no_club_message, reply_markup=kb.main)
-    club_id = [c['id'] for c in parkrun.CLUBS if c['name'] == club]
+    if club.isdigit():
+        club_id = await parkrun.check_club_as_id(club)
+    else:
+        club_id = next((c['id'] for c in parkrun.CLUBS if c['name'] == club), None)
     if not club_id:
-        return await message.answer('В моей базе нет такого клуба. Проверьте ввод.')
+        return await message.answer('В базе нет такого клуба. Проверьте ввод.')
     user_id = message.from_user.id
     with Vedis(DB_FILE) as db:
         try:
             h = db.Hash(user_id)
             h['cl'] = club
-            h['cl_id'] = club_id[0]
-            return await message.answer(content.success_club_set.format(club, club_id[0]),
+            h['cl_id'] = club_id
+            return await message.answer(content.success_club_set.format(club, club_id),
                                         disable_web_page_preview=True, parse_mode='Markdown')
-        except:
-            logger.error(f'Writing club to DB failed. User ID={user_id}, argument {club}')
+        except Exception as e:
+            logger.error(f'Writing club to DB failed. User ID={user_id}, argument {club}. Error: {e}')
             return await message.answer(content.settings_save_failed)
 
 
@@ -245,7 +248,7 @@ async def query_all_parkruns(query):
         )
             for k, p in enumerate(quotes[:5])]
         await bot.answer_inline_query(query.id, parkruns_menu,
-                                      next_offset=m_next_offset if m_next_offset else "", cache_time=3)
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=600)
     except Exception as e:
         logger.error(e)
 
@@ -262,7 +265,7 @@ async def query_all_clubs(query):
         )
             for k, p in enumerate(quotes[:5])]
         await bot.answer_inline_query(query.id, clubs_menu,
-                                      next_offset=m_next_offset if m_next_offset else "", cache_time=30)
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=600)
     except Exception as e:
         logger.error(e)
 
@@ -278,7 +281,7 @@ async def query_weather(inline_query):
             id=f'{k}', title=k, description='погода сейчас',
             input_message_content=types.InputTextMessageContent(w))
             for (k, v), w in zip(content.places.items(), data)]
-        await bot.answer_inline_query(inline_query.id, places_weather, cache_time=35)
+        await bot.answer_inline_query(inline_query.id, places_weather, cache_time=3200)
     except Exception as e:
         logger.error(e)
 
@@ -294,7 +297,7 @@ async def query_air(inline_query):
             id=f'{k}', title=k, description='качество воздуха',
             input_message_content=types.InputTextMessageContent(aq[1]))
             for (k, v), aq in zip(content.places.items(), data)]
-        await bot.answer_inline_query(inline_query.id, places_air, cache_time=36)
+        await bot.answer_inline_query(inline_query.id, places_air, cache_time=3200)
     except Exception as e:
         logger.error(e)
 
@@ -366,7 +369,7 @@ async def display_records_menu(inline_query):
                                             description='по женским результатам',
                                             input_message_content=types.InputTextMessageContent(records_tables[3],
                                                                                                 parse_mode='Markdown'))
-        await bot.answer_inline_query(inline_query.id, [m1, m2, m3, m4], cache_time=600)
+        await bot.answer_inline_query(inline_query.id, [m1, m2, m3, m4], cache_time=100000)
     except Exception as e:
         logger.error(e)
 
@@ -401,7 +404,7 @@ async def query_teammates(inline_query):
             input_message_content=types.InputTextMessageContent(pattern + 'о рекордах...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/6.jpg',
             thumb_width=48, thumb_height=48)
-        await bot.answer_inline_query(inline_query.id, [m1, m3, m4, m5, m2], cache_time=36)  # TODO: change after debug
+        await bot.answer_inline_query(inline_query.id, [m1, m3, m4, m5, m2], cache_time=36000)
     except Exception as e:
         logger.error(e)
 
@@ -425,7 +428,7 @@ async def query_latestparkrun(inline_query):
             input_message_content=types.InputTextMessageContent(pattern + 'о клубах...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/9.jpg',
             thumb_width=48, thumb_height=48)
-        await bot.answer_inline_query(inline_query.id, [m1, m2], cache_time=36)  # TODO: change after debug
+        await bot.answer_inline_query(inline_query.id, [m1, m2], cache_time=36000)
     except Exception as e:
         logger.error(e)
 
@@ -534,7 +537,7 @@ async def display_instagram_menu(query):
         )
             for k, p in enumerate(quotes[:5])]
         await bot.answer_inline_query(query.id, inst_menu,
-                                      next_offset=m_next_offset if m_next_offset else "", cache_time=300)
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=300000)
     except Exception as e:
         logger.error(e)
 

@@ -17,20 +17,25 @@ __PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
 __CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
 
 PARKRUNS = []
-with open(__PARKRUNS_FILE, 'r', newline='\n') as f:
-    for line in f:
+with open(__PARKRUNS_FILE, 'r', newline='\n') as file:
+    for line in file:
         PARKRUNS.append(line.strip())
 
 CLUBS = []
-with open(__CLUBS_FILE, 'r', encoding='utf-8') as f:
+with open(__CLUBS_FILE, 'r', encoding='utf-8') as file:
     fieldnames = ['id', 'name', 'participants', 'runs', 'link']
-    reader = csv.DictReader(f, fieldnames=fieldnames)
-    for row in reader:
-        CLUBS.append(row)
+    reader = csv.DictReader(file, fieldnames=fieldnames)
+    for rec in reader:
+        CLUBS.append(rec)
 
 
 # TODO: добавить вывод предстоящих юбилейных паркранов
 def anniversary_parkruns():
+    pass
+
+
+# TODO: Можно ещё сделать какую-нибудь хрень типа личного счёта на паркранах, сколько раз мы друг друга с тобой обгоняли
+def parkrunners_battle():
     pass
 
 
@@ -159,7 +164,7 @@ async def update_parkruns_clubs():
         cells = row.xpath('.//td')
         id_url = cells[0].xpath('.//a/@href')[0]
         site_cell = cells[4].xpath('.//a/@href')
-        link = site_cell[0] if site_cell else 'https://www.parkrun.ru/results/largestclubs/' + id_url
+        link = site_cell[0] if site_cell else f'https://www.parkrun.ru/groups/{id_url}/'
         all_clubs.append({
             'id': id_url.replace('#featureClub=', ''),
             'name': cells[0].text_content(),
@@ -167,14 +172,40 @@ async def update_parkruns_clubs():
             'runs': cells[3].text_content(),
             'link': link
         })
+    all_clubs.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2152',
+                      'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov
     with open(__CLUBS_FILE, 'w', encoding='utf-8') as f:
         fieldnames = ['id', 'name', 'participants', 'runs', 'link']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writerows(all_clubs)
 
 
+async def check_club_as_id(club_id: str):
+    club_rec = [c for c in CLUBS if c['id'] == club_id]
+    if club_rec:
+        return club_id
+    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+        async with session.get(f'https://www.parkrun.ru/groups/{club_id}/') as resp:
+            html = await resp.text()
+    tree = fromstring(html)
+    notice = tree.xpath('//*[@id="content"]/div/p[@class="notice"]')
+    if notice:
+        return None
+    try:
+        CLUBS.append({
+                'id': club_id,
+                'name': tree.xpath('//*[@id="content"]/div/h1')[0].text_content(),
+                'participants': tree.xpath('//*[@id="content"]/div/p[2]')[0].text_content().split()[0],
+                'runs': tree.xpath('//*[@id="content"]/div/p[3]')[0].text_content().split()[-1],
+                'link': tree.xpath('//*[@id="content"]/div/ul/li[2]/a')[0].attrib['href']
+            })
+    except(KeyError, AttributeError):
+        return None
+    return club_id
+
+
 def top_active_clubs():
-    CLUBS.sort(key=lambda club: -int(club['runs']))
+    CLUBS.sort(key=lambda c: -int(c['runs']))
     message = f"*10 активных клубов (по числу пробежек):*\n"
     for i, club in enumerate(CLUBS[:10], 1):
         message += f"{i:>2}.\xa0[{club['name']:<29}]({club['link']})\xa0*{club['runs']:<3}*\n"
@@ -273,7 +304,7 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
     df = df.dropna(thresh=3)
     df['Время'] = df['Время'].dropna() \
         .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0]) \
-        .transform(lambda time: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], time.split(':')[::-1])))
+        .transform(lambda mmss: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], mmss.split(':')[::-1])))
 
     plt.figure(figsize=(5.5, 4), dpi=300)
     ax = df['Время'].hist(bins=32)
@@ -361,6 +392,9 @@ if __name__ == '__main__':
     import asyncio
 
     loop = asyncio.get_event_loop()
+    # t = loop.run_until_complete(check_club_as_id('246300'))
+    # print(t)
+    # print(CLUBS)
     # loop.run_until_complete(update_parkruns_clubs())
     # t = loop.run_until_complete(top_active_clubs())
     # mes = most_slow_parkruns()
@@ -368,7 +402,9 @@ if __name__ == '__main__':
     # get_latest_results_diagram()
     # f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
     # f = loop.run_until_complete(top_records_count('../utils/results.png'))
-    ff = top_active_clubs_diagram('../utils/clubs.png')
-    ff.close()
+    # ff = top_active_clubs_diagram('../utils/clubs.png')
+    # ff.close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()
+    # club_id = next((c['id'] for c in CLUBS if c['name'] == 'IQ_Runners1'), None)
+    # print(club_id)
