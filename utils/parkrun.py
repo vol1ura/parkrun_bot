@@ -181,9 +181,9 @@ async def update_parkruns_clubs():
 
 
 async def check_club_as_id(club_id: str):
-    club_rec = [c for c in CLUBS if c['id'] == club_id]
-    if club_rec:
-        return club_id
+    club_name = next((c['name'] for c in CLUBS if c['id'] == club_id), None)
+    if club_name:
+        return club_name
     async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
         async with session.get(f'https://www.parkrun.ru/groups/{club_id}/') as resp:
             html = await resp.text()
@@ -192,16 +192,17 @@ async def check_club_as_id(club_id: str):
     if notice:
         return None
     try:
+        club_name = tree.xpath('//*[@id="content"]/div/h1')[0].text_content()
         CLUBS.append({
                 'id': club_id,
-                'name': tree.xpath('//*[@id="content"]/div/h1')[0].text_content(),
+                'name': club_name,
                 'participants': tree.xpath('//*[@id="content"]/div/p[2]')[0].text_content().split()[0],
                 'runs': tree.xpath('//*[@id="content"]/div/p[3]')[0].text_content().split()[-1],
                 'link': tree.xpath('//*[@id="content"]/div/ul/li[2]/a')[0].attrib['href']
             })
     except(KeyError, AttributeError):
         return None
-    return club_id
+    return club_name
 
 
 def top_active_clubs():
@@ -392,8 +393,8 @@ if __name__ == '__main__':
     import asyncio
 
     loop = asyncio.get_event_loop()
-    # t = loop.run_until_complete(check_club_as_id('246300'))
-    # print(t)
+    t = loop.run_until_complete(check_club_as_id('24630'))
+    print(t)
     # print(CLUBS)
     # loop.run_until_complete(update_parkruns_clubs())
     # t = loop.run_until_complete(top_active_clubs())

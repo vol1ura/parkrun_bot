@@ -125,10 +125,11 @@ async def process_command_setclub(message: types.Message):
     if not club:
         return await message.answer(content.no_club_message, reply_markup=kb.main)
     if club.isdigit():
-        club_id = await parkrun.check_club_as_id(club)
+        club_id = club
+        club = await parkrun.check_club_as_id(club)
     else:
         club_id = next((c['id'] for c in parkrun.CLUBS if c['name'] == club), None)
-    if not club_id:
+    if not (club_id and club):
         return await message.answer('В базе нет такого клуба. Проверьте ввод.')
     user_id = message.from_user.id
     with Vedis(DB_FILE) as db:
