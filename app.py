@@ -20,7 +20,7 @@ bot = Bot(TOKEN_BOT)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-logging.basicConfig(format=u'%(levelname)s [%(asctime)s] [ LINE:%(lineno)+3s ]: %(message)s',
+logging.basicConfig(format=u'%(levelname)s [ LINE:%(lineno)+3s ]: %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -242,13 +242,13 @@ async def query_all_parkruns(query):
     try:
         parkruns_list = parkrun.PARKRUNS
         quotes = parkruns_list[offset:]
-        m_next_offset = str(offset + 5) if len(quotes) >= 5 else None
+        m_next_offset = str(offset + 15) if len(quotes) >= 15 else None
         parkruns_menu = [types.InlineQueryResultArticle(
-            id=f'{k}', title=p, input_message_content=types.InputTextMessageContent(f'/setparkrun {p}')
+            id=f'{offset + k}', title=p, input_message_content=types.InputTextMessageContent(f'/setparkrun {p}')
         )
-            for k, p in enumerate(quotes[:5])]
+            for k, p in enumerate(quotes[:15])]
         await bot.answer_inline_query(query.id, parkruns_menu,
-                                      next_offset=m_next_offset if m_next_offset else "", cache_time=600)
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=60000)
     except Exception as e:
         logger.error(e)
 
@@ -259,13 +259,13 @@ async def query_all_clubs(query):
     try:
         clubs_list = parkrun.CLUBS
         quotes = clubs_list[offset:]
-        m_next_offset = str(offset + 5) if len(quotes) >= 5 else None
+        m_next_offset = str(offset + 15) if len(quotes) >= 15 else None
         clubs_menu = [types.InlineQueryResultArticle(
-            id=f'{k}', title=p['name'], input_message_content=types.InputTextMessageContent(f"/setclub {p['name']}")
+            id=f'{k + offset}', title=p['name'], input_message_content=types.InputTextMessageContent(f"/setclub {p['name']}")
         )
-            for k, p in enumerate(quotes[:5])]
+            for k, p in enumerate(quotes[:15])]
         await bot.answer_inline_query(query.id, clubs_menu,
-                                      next_offset=m_next_offset if m_next_offset else "", cache_time=600)
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=60000)
     except Exception as e:
         logger.error(e)
 
@@ -530,12 +530,12 @@ async def display_instagram_menu(query):
     offset = int(query.offset) if query.offset else 0
     try:
         quotes = content.instagram_profiles[offset:]
-        m_next_offset = str(offset + 5) if len(quotes) >= 5 else None
+        m_next_offset = str(offset + 15) if len(quotes) >= 15 else None
         inst_menu = [types.InlineQueryResultArticle(
-            id=f'{k}', title=f'@{p}',
+            id=f'{k + offset}', title=f'@{p}',
             input_message_content=types.InputTextMessageContent(f"Достаю последний пост из @{p}. Подождите...")
         )
-            for k, p in enumerate(quotes[:5])]
+            for k, p in enumerate(quotes[:15])]
         await bot.answer_inline_query(query.id, inst_menu,
                                       next_offset=m_next_offset if m_next_offset else "", cache_time=300000)
     except Exception as e:
@@ -558,7 +558,6 @@ async def get_instagram_post(message):
 async def api_errors_handler(update, error):
     # Here we collect all available exceptions from Telegram and write them to log
     # First, we don't want to log BotBlocked exception, so we skip it
-    print('We in TG API Error handler')
     if isinstance(error, BotBlocked):
         return True
     # We collect some info about an exception and write to file
