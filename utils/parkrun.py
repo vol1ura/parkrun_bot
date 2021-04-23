@@ -214,10 +214,11 @@ def top_active_clubs():
 
 
 def top_active_clubs_diagram(pic: str):
-    df = pd.read_csv(__CLUBS_FILE)
-    df = df.sort_values(by=[df.columns[3]], ascending=False).head(10)
-    clubs = df[df.columns[1]]
-    vals = df[df.columns[3]].values
+    df = pd.DataFrame(CLUBS)
+    df['runs'] = df['runs'].apply(int)
+    df = df.sort_values(by=['runs'], ascending=False).head(10)
+    clubs = df['name']
+    vals = df['runs'].values
     fig = plt.figure(figsize=(6, 6), dpi=200)
     ax = fig.add_subplot()
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#8c564b',
@@ -393,8 +394,8 @@ if __name__ == '__main__':
     import asyncio
 
     loop = asyncio.get_event_loop()
-    t = loop.run_until_complete(check_club_as_id('24630'))
-    print(t)
+    # t = loop.run_until_complete(check_club_as_id('24630'))
+    # print(t)
     # print(CLUBS)
     # loop.run_until_complete(update_parkruns_clubs())
     # t = loop.run_until_complete(top_active_clubs())
@@ -403,8 +404,8 @@ if __name__ == '__main__':
     # get_latest_results_diagram()
     # f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
     # f = loop.run_until_complete(top_records_count('../utils/results.png'))
-    # ff = top_active_clubs_diagram('../utils/clubs.png')
-    # ff.close()
+    ff = top_active_clubs_diagram('../utils/clubs.png')
+    ff.close()
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()
     # club_id = next((c['id'] for c in CLUBS if c['name'] == 'IQ_Runners1'), None)
