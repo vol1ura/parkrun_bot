@@ -16,8 +16,6 @@ PARKRUN_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.
 __PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
 __CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
 
-club_link = '[Установи в профиле клуб Wake&Run, перейдя по ссылке](https://www.parkrun.com/profile/groups#id=23212&q=Wake%26Run)'
-
 PARKRUNS = []
 with open(__PARKRUNS_FILE, 'r', newline='\n') as f:
     for line in f:

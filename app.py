@@ -44,7 +44,8 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(commands=['help', 'помощь'])
 @dp.throttled(rate=3)
 async def commands(message: types.Message):
-    await message.answer(content.help_message, disable_notification=True, parse_mode='html')
+    await message.answer(content.help_message,
+                         disable_notification=True, parse_mode='html', disable_web_page_preview=True)
 
 
 @dp.message_handler(commands=['admin', 'админ'])
@@ -90,8 +91,8 @@ async def check_settings(callback_query: types.CallbackQuery):
             h = db.Hash(user_id)
             mes1 = h['pr'].decode() if h['pr'] else 'не выбран.'
             mes2 = h['cl'].decode() if h['cl'] else 'не выбран.'
-    except:
-        logger.error(f'Getting settings from DB failed for user {user_id}.')
+    except Exception as e:
+        logger.error(f'Getting settings from DB failed for user {user_id}. Error: {e}')
         return await bot.answer_callback_query(callback_query.id,
                                                text='⛔ Не удалось получить настройки.',
                                                show_alert=True)
@@ -111,7 +112,6 @@ async def process_command_setparkrun(message: types.Message):
         try:
             h = db.Hash(user_id)
             h['pr'] = parkrun_name
-            print(h, parkrun_name, user_id)
             return await message.answer(content.success_parkrun_set.format(parkrun_name))
         except:
             logger.error(f'Writing parkrun to DB failed. User ID={user_id}, argument {parkrun_name}')
@@ -125,17 +125,14 @@ async def process_command_setclub(message: types.Message):
     if not club:
         return await message.answer(content.no_club_message, reply_markup=kb.main)
     club_id = [c['id'] for c in parkrun.CLUBS if c['name'] == club]
-    print(club_id)
     if not club_id:
         return await message.answer('В моей базе нет такого клуба. Проверьте ввод.')
     user_id = message.from_user.id
-    print(user_id)
     with Vedis(DB_FILE) as db:
         try:
             h = db.Hash(user_id)
             h['cl'] = club
             h['cl_id'] = club_id[0]
-            print(h, club, user_id)
             return await message.answer(content.success_club_set.format(club, club_id[0]),
                                         disable_web_page_preview=True, parse_mode='Markdown')
         except:
@@ -173,9 +170,10 @@ async def parkrun_personal_result(message: types.Message):
     user_id = message.from_user.id
     with Vedis(DB_FILE) as db:
         h = db.Hash(user_id)
-        parkrun_name = h['pr'].decode()
+        parkrun_name = h['pr']
     if not parkrun_name:
         return await message.reply(content.no_parkrun_message)
+    parkrun_name = parkrun_name.decode()
     try:
         turn = re.search(r'\d+$', message.text)
         turn = int(turn[0]) % 360 if turn else 0
@@ -383,10 +381,9 @@ async def query_teammates(inline_query):
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/1.jpg',
             thumb_width=48, thumb_height=48)
         m2 = types.InlineQueryResultArticle(
-            id='2', title='Как установить мой клуб в системе parkrun?',
-            description='информация и ссылка на выбранный клуб',
-            input_message_content=types.InputTextMessageContent(parkrun.club_link,  # FIXME: make custom message
-                                                                parse_mode='Markdown', disable_web_page_preview=True),
+            id='2', title='Информация и установка клуба в системе parkrun',
+            description='отобразится выбранный клуб',
+            input_message_content=types.InputTextMessageContent(pattern + 'о выбранном клубе'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/2.jpg',
             thumb_width=48, thumb_height=48)
         m3 = types.InlineQueryResultArticle(
@@ -399,7 +396,7 @@ async def query_teammates(inline_query):
             input_message_content=types.InputTextMessageContent(pattern + 'о количестве всех стартов...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/5.jpg',
             thumb_width=48, thumb_height=48)
-        m5 = types.InlineQueryResultArticle(  # TODO: can be made this for all parkruns?
+        m5 = types.InlineQueryResultArticle(
             id='5', title='Топ 10 результатов моих одноклубников', description='на выбранном паркране',
             input_message_content=types.InputTextMessageContent(pattern + 'о рекордах...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/6.jpg',
@@ -412,7 +409,7 @@ async def query_teammates(inline_query):
 @dp.inline_handler(lambda query: 'latestresults' in query.query)
 async def query_latestparkrun(inline_query):
     try:
-        pattern = '⏳ Получение данных '
+        pattern = '📊 Получение данных '
         # m3 = types.InlineQueryResultArticle(
         #     f'{3}', 'Топ 10 волонтёров', description='на паркране Кузьминки',
         #     input_message_content=types.InputTextMessageContent(pattern + 'о волонтёрах.', parse_mode='Markdown'),
@@ -439,28 +436,29 @@ async def latestparkruns_club_participation(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
     with Vedis(DB_FILE) as db:
-        club_id = db.Hash(user_id)['cl_id'].decode()
+        club_id = db.Hash(user_id)['cl_id']
     if not club_id:
         await message.answer(content.no_club_message)
     else:
+        club_id = club_id.decode()
         data = await parkrun.get_participants(club_id)
         await message.answer(data, parse_mode='Markdown', disable_web_page_preview=True)
-    await bot.delete_message(message.chat.id, message.id)
+    await bot.delete_message(message.chat.id, message.message_id)
 
 
-@dp.message_handler(regexp='⏳ Получение данных', content_types=['text'])
+@dp.message_handler(regexp='📊 Получение данных', content_types=['text'])
 @dp.throttled(handle_throttled_query, rate=12)
 async def post_latestparkrun_diagrams(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
     with Vedis(DB_FILE) as db:
         h = db.Hash(user_id)
-        parkrun_name = h['pr'].decode()
-        club_id = h['cl_id'].decode()
+        parkrun_name = h['pr']
     if not parkrun_name:
-        await message.answer(content.no_parkrun_message)
+        return await message.answer(content.no_parkrun_message)
+    parkrun_name = parkrun_name.decode()
 
-    elif 'диаграммы' in message.text:
+    if 'диаграммы' in message.text:
         pic = await parkrun.make_latest_results_diagram(parkrun_name, 'results.png')
         if os.path.exists("results.png"):
             await bot.send_photo(message.chat.id, pic)
@@ -476,22 +474,52 @@ async def post_latestparkrun_diagrams(message):
         else:
             logger.error('File clubs.png not found! Or the picture wasn\'t generated.')
 
-    elif not club_id:
-        return await message.answer(content.no_club_message)
+    await bot.delete_message(message.chat.id, message.message_id)
 
-    elif 'о количестве локальных стартов' in message.text:
+
+@dp.message_handler(regexp='⏳ Получение данных о ', content_types=['text'])
+@dp.throttled(handle_throttled_query, rate=12)
+async def post_teammate_table(message):
+    await bot.send_chat_action(message.chat.id, 'typing')
+    user_id = message.from_user.id
+    with Vedis(DB_FILE) as db:
+        h = db.Hash(user_id)
+        parkrun_name = h['pr']
+        club_id = h['cl_id']
+    if not club_id:
+        await message.answer(content.no_club_message)
+    if not parkrun_name:
+        await message.answer(content.no_parkrun_message)
+    if not (club_id and parkrun_name):
+        return
+    parkrun_name = parkrun_name.decode()
+    club_id = club_id.decode()
+
+    if 'количестве локальных стартов' in message.text:
         data = await parkrun.get_club_fans(parkrun_name, club_id)
         await message.answer(data, parse_mode='Markdown')
 
-    elif 'о количестве всех стартов' in message.text:
+    elif 'количестве всех стартов' in message.text:
         data = await parkrun.get_club_purkruners(parkrun_name, club_id)
         await message.answer(data, parse_mode='Markdown')
 
-    elif 'о рекордах' in message.text:
+    elif 'рекордах' in message.text:
         data = await parkrun.get_parkrun_club_top_results(parkrun_name, club_id)
         await message.answer(data, parse_mode='Markdown')
 
-    await bot.delete_message(message.chat.id, message.id)
+    elif 'выбранном клубе' in message.text:
+        club_rec = [club for club in parkrun.CLUBS if club['id'] == club_id]
+        if club_rec:
+           info = f"""*Выбранный клуб*: {club_rec[0]['name']}.
+           *Зарегистрированных участников*: {club_rec[0]['participants']}.
+           *Ссылка на клуб в интернете*: {club_rec[0]['link']}.
+           *Ссылка на клуб на сайте parkrun.ru*: https://www.parkrun.com/profile/groups#id={club_rec[0]['id']}
+           Перейдите по последней ссылке и нажмите кнопку _Присоединиться_, 
+           чтобы установить клуб (вы должны быть залогинены)."""
+           await message.answer(info, parse_mode='Markdown')
+        else:
+            await message.answer('Информация о вашем клубе не найдена. Проверьте настройки.')
+    await bot.delete_message(message.chat.id, message.message_id)
 
 
 @dp.inline_handler(lambda query: 'instagram' in query.query)
@@ -520,6 +548,7 @@ async def get_instagram_post(message):
     user = re.search(r'из @([\w.]+)\. Подождите\.', message.text)[1]
     ig_post = instagram.get_last_post(login, password, user)
     await bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
+    await bot.delete_message(message.chat.id, message.message_id)
 
 
 @dp.errors_handler(exception=TelegramAPIError)
@@ -573,7 +602,6 @@ async def on_startup(dp):
 # Run before shutdown
 async def on_shutdown(dp):
     logging.warning("Shutting down..")
-    # await bot.delete_webhook()
     await dp.storage.close()
     await dp.storage.wait_closed()
     logging.warning("Bot down")
