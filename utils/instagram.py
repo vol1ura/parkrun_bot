@@ -39,4 +39,4 @@ if __name__ == '__main__':
     USERNAME = os.environ.get('IG_USERNAME')
     PASSWD = os.environ.get('IG_PASSWORD')
 
-    print(get_last_post(USERNAME, PASSWD, 'marathonecjournal'))
+    print(get_last_post(USERNAME, PASSWD, 'begovoy.monastyr'))

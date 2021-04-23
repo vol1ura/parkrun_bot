@@ -20,12 +20,10 @@ bot = Bot(TOKEN_BOT)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-logging.basicConfig(format=u'%(levelname)s [ LINE:%(lineno)+3s ]: %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(format=u'%(levelname)s [ LINE:%(lineno)+3s ]: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# the on_throttled object can be either a regular function or coroutine
 async def handle_throttled_query(*args, **kwargs):
     # args will be the same as in the original handler
     # kwargs will be updated with parameters given to .throttled (rate, key, user_id, chat_id)
@@ -113,8 +111,8 @@ async def process_command_setparkrun(message: types.Message):
             h = db.Hash(user_id)
             h['pr'] = parkrun_name
             return await message.answer(content.success_parkrun_set.format(parkrun_name))
-        except:
-            logger.error(f'Writing parkrun to DB failed. User ID={user_id}, argument {parkrun_name}')
+        except Exception as e:
+            logger.error(f'Writing parkrun to DB failed. User ID={user_id}, argument {parkrun_name}. Error: {e}')
             return await message.answer(content.settings_save_failed)
 
 
