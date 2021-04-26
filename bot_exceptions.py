@@ -7,3 +7,9 @@ class ParsingException(Exception):
     def __init__(self, message="Page parsing failed"):
         self.message = message
         super().__init__(self.message)
+
+
+class CallbackException(Exception):
+    def __init__(self, message='Введённые данные не верны.'):
+        self.message = message
+        super().__init__(self.message)

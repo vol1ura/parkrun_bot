@@ -8,11 +8,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from lxml.html import fromstring
 from matplotlib.colors import Normalize, PowerNorm
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from matplotlib.ticker import MaxNLocator
 
 from bot_exceptions import ParsingException
+from handlers.helper import ParkrunSite, min_to_mmss
 
-PARKRUN_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"}
 __PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
 __CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
 
@@ -34,56 +36,8 @@ def anniversary_parkruns():
     pass
 
 
-# TODO: Можно ещё сделать какую-нибудь хрень типа личного счёта на паркранах, сколько раз мы друг друга с тобой обгоняли
-def parkrunners_battle():
-    pass
-
-
-# async def add_volunteers(start, stop, session):
-#     url = 'https://www.parkrun.ru/kuzminki/results/weeklyresults/?runSeqNumber='
-#     parkrun_number = start
-#     while parkrun_number <= stop:
-#         async with session.get(url + str(parkrun_number)) as resp:
-#             html = await resp.text()
-#         tree = fromstring(html)
-#         volunteers = tree.xpath('//*[@class="paddedt left"]/p[1]/a')
-#         with open('static/kuzminki_full_stat.txt', 'a') as f:
-#             for volunteer in volunteers:
-#                 volunteer_name = volunteer.text_content()
-#                 volunteer_id = re.search(r'\d+', volunteer.attrib['href'])[0]
-#                 f.write(f'kuzminki\t{parkrun_number}\tA{volunteer_id} {volunteer_name}\n')
-#         parkrun_number += 1
-#
-#
-# async def get_volunteers():
-#     url = f'https://www.parkrun.ru/kuzminki/results/latestresults/'
-#     session = aiohttp.ClientSession(headers=PARKRUN_HEADERS)
-#     async with session.get(url) as resp:
-#         html = await resp.text()
-#     tree = fromstring(html)
-#     parkrun_number = int(tree.xpath('//div[@class="Results"]/div/h3/span[3]/text()')[0][1:])
-#     with open('static/kuzminki_full_stat.txt', 'r') as f:
-#         all_stat = f.readlines()
-#     last_parkrun_db = int(all_stat[-2].split()[1])
-#     if last_parkrun_db < parkrun_number:
-#         await add_volunteers(last_parkrun_db + 1, parkrun_number, session)
-#         with open('static/kuzminki_full_stat.txt', 'r') as f:
-#             all_stat = f.readlines()
-#     await session.close()
-#     volunteers = {}
-#     for line in all_stat:
-#         name = line.split(maxsplit=3)[-1].strip()
-#         volunteers[name] = volunteers.setdefault(name, 0) + 1
-#
-#     top_volunteers = sorted(volunteers.items(), key=lambda v: v[1], reverse=True)[:10]
-#     result = '*Toп 10 волонтёров parkrun Kuzminki*\n'
-#     for i, volunteer in enumerate(top_volunteers, 1):
-#         result += f'{i}. {volunteer[0]} | {volunteer[1]}\n'
-#     return result.strip()
-
-
 async def get_participants(club_id: str):
-    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get(f'https://www.parkrun.com/results/consolidatedclub/?clubNum={club_id}') as resp:
             html = await resp.text()
     tree = fromstring(html)
@@ -100,7 +54,7 @@ async def get_participants(club_id: str):
 
 
 async def get_club_table(parkrun: str, club_id: str):
-    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get(f'https://www.parkrun.ru/{parkrun}/results/clubhistory/?clubNum={club_id}') as resp:
             html_club_results = await resp.text()
     try:
@@ -145,7 +99,7 @@ async def get_parkrun_club_top_results(parkrun: str, club_id: str):
 
 
 async def all_parkruns_records():
-    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get('https://www.parkrun.ru/results/courserecords/') as resp:
             html_all_parkruns = await resp.text()
     return pd.read_html(html_all_parkruns)[0]
@@ -154,7 +108,7 @@ async def all_parkruns_records():
 async def update_parkruns_clubs():
     if os.path.exists(__CLUBS_FILE) and os.path.getmtime(__CLUBS_FILE) + 605000 > time.time():
         return
-    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get('https://www.parkrun.ru/results/largestclubs/') as resp:
             html = await resp.text()
     tree = fromstring(html)
@@ -184,7 +138,7 @@ async def check_club_as_id(club_id: str):
     club_name = next((c['name'] for c in CLUBS if c['id'] == club_id), None)
     if club_name:
         return club_name
-    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get(f'https://www.parkrun.ru/groups/{club_id}/') as resp:
             html = await resp.text()
     tree = fromstring(html)
@@ -194,12 +148,12 @@ async def check_club_as_id(club_id: str):
     try:
         club_name = tree.xpath('//*[@id="content"]/div/h1')[0].text_content()
         CLUBS.append({
-                'id': club_id,
-                'name': club_name,
-                'participants': tree.xpath('//*[@id="content"]/div/p[2]')[0].text_content().split()[0],
-                'runs': tree.xpath('//*[@id="content"]/div/p[3]')[0].text_content().split()[-1],
-                'link': tree.xpath('//*[@id="content"]/div/ul/li[2]/a')[0].attrib['href']
-            })
+            'id': club_id,
+            'name': club_name,
+            'participants': tree.xpath('//*[@id="content"]/div/p[2]')[0].text_content().split()[0],
+            'runs': tree.xpath('//*[@id="content"]/div/p[3]')[0].text_content().split()[-1],
+            'link': tree.xpath('//*[@id="content"]/div/ul/li[2]/a')[0].attrib['href']
+        })
     except(KeyError, AttributeError):
         return None
     return club_name
@@ -287,7 +241,7 @@ async def update_parkruns_list():
 
 async def parse_latest_results(parkrun: str):
     pr = re.sub('[- ]', '', parkrun)
-    async with aiohttp.ClientSession(headers=PARKRUN_HEADERS) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get(f"https://www.parkrun.ru/{pr}/results/latestresults/") as resp:
             html = await resp.text()
     tree = fromstring(html)
@@ -390,6 +344,106 @@ async def make_clubs_bar(parkrun: str, pic: str):
     return open(pic, 'rb')
 
 
+async def get_athlete_data(athlete_id):
+    athlete_url = f'https://www.parkrun.ru/results/athleteeventresultshistory?athleteNumber={athlete_id}&eventNumber=0'
+    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
+        async with session.get(athlete_url) as resp:
+            html = await resp.text()
+    tree = fromstring(html)
+    title = tree.xpath('//div[@id="content"]/h2/text()')
+    athlete_name = (title[0] if title else '').split('- ')[0].strip()
+    return athlete_name, html if athlete_name else ''
+
+
+def parse_personal_results(html_page: str):
+    df = pd.read_html(html_page)[2]
+    df['m'] = df['Время'].transform(lambda t: sum(k * int(p) for k, p in zip([1 / 60, 1, 60], t.split(':')[::-1])))
+    return df
+
+
+def make_pic_battle(pic: str, athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2):
+    df1 = parse_personal_results(athlete_page_1)
+    df2 = parse_personal_results(athlete_page_2)
+
+    battle_df = pd.merge(df1, df2, on=['Дата parkrun', 'Паркран'])
+    wins = battle_df['m_x'] < battle_df['m_y']
+    score = pd.value_counts(wins)
+    battle_df = battle_df.head(10)
+    joint_races = len(battle_df)
+
+    fig = plt.figure(figsize=(6, 4.5), dpi=200)
+    ax = fig.add_subplot()
+    if joint_races == 0:
+        plt.text(0.1, 0.1, f'У вас пока ещё не было совместных пробежек\nс {athlete_name_2}',
+                 size=11, fontweight='bold', rotation=45)
+        plt.tight_layout()
+        plt.savefig(pic)
+        return open(pic, 'rb')
+
+    battle_df = battle_df.head(10)
+
+    def label_bars(marks, heights, rects, wins, color):
+        for mark, height, rect, win in zip(marks, heights, rects, wins):
+            ax.annotate(f'{mark}',
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, -10 if win else 2),  # 3 points vertical offset.
+                        textcoords='offset points',
+                        ha='center', va='bottom', size=8, color=color, fontweight='bold')
+
+    xlabels = battle_df['Дата parkrun']
+    x = xlabels.index
+    ax.set_xticks(x)
+    ax.set_xticklabels(xlabels, rotation=70)
+    heights0 = battle_df['m_x'].combine(battle_df['m_y'], min)
+    heights1 = battle_df['m_x'].combine(battle_df['m_y'], max)
+
+    rects = ax.bar(x, heights1 - heights0, 0.6, bottom=heights0, label='Выигрыш', edgecolor='black',
+                   color=wins.where(wins, '#ff7f0e').where(~wins, '#2ca02c'))
+    label_bars(battle_df['Время_y'], battle_df['m_y'], rects, ~wins, '#7f7f7f')
+    label_bars(battle_df['Время_x'], battle_df['m_x'], rects, wins, 'black')
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_xlabel('Последние 10 паркранов', fontweight='bold')
+    ax.set_ylabel('Результат')
+    ax.set_ylim(int(min(battle_df['m_x'].min(), battle_df['m_y'].min())) - 1,
+                int(max(battle_df['m_x'].max(), battle_df['m_y'].max())) + 2)
+    ax.set_title(f'Соотношение результатов\nна совместных забегах {score[True]}:{score[False]}',
+                 size=15, fontweight='bold')
+    legend_elements = [Patch(facecolor='#ff7f0e', edgecolor='black', label='Проигрыш'),
+                       Patch(facecolor='#2ca02c', edgecolor='black', label='Выигрыш'),
+                       Line2D([0], [0], color='black', lw=2, label=athlete_name_1.split()[0]),
+                       Line2D([0], [0], color='#7f7f7f', lw=2, label=athlete_name_2.split()[0])]
+    ax.legend(handles=legend_elements)
+
+    plt.tight_layout()
+    plt.savefig(pic)
+    return open(pic, 'rb')
+
+
+def make_battle_table(athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2):
+    df1 = parse_personal_results(athlete_page_1)
+    df2 = parse_personal_results(athlete_page_2)
+    battle_df = pd.merge(df1, df2, on=['Дата parkrun', 'Паркран'])
+    joint_races = len(battle_df)
+    if joint_races == 0:
+        return f'У вас пока ещё не было совместных пробежек с {athlete_name_2}.'
+    battle_df['time_diff'] = battle_df['m_x'] - battle_df['m_y']
+    wins = battle_df['m_x'] < battle_df['m_y']
+    score = pd.value_counts(wins)
+    battle_df = battle_df.head(10)
+    result_message = '*Последние 10 совместных забегов:*\n' \
+                     '#     Дата     | *Время* | Время | Паркран\n'
+    for i, row in battle_df.iterrows():
+        result_message += f"{i} {row['Дата parkrun']} | {row['Время_x']} | {row['Время_y']} | {row['Паркран']}\n"
+    result_message += '---------------------------------------\n'
+    result_message += f'*Всего совместных забегов*: {joint_races}\n'
+    result_message += f'*Счёт* {athlete_name_1.split()[0]}:{athlete_name_2.split()[0]} = {score[True]}:{score[False]}\n'
+    time_diff = battle_df['time_diff'].sum()
+    result_message += f"По сумме отставаний вы {'выигрываете' if time_diff < 0 else 'проигрываете'} = " \
+                      f"{min_to_mmss(abs(time_diff))}"
+    return result_message
+
+
 if __name__ == '__main__':
     import asyncio
 
@@ -404,8 +458,12 @@ if __name__ == '__main__':
     # get_latest_results_diagram()
     # f = loop.run_until_complete(make_clubs_bar('Kolomenskoe', '../utils/results.png'))
     # f = loop.run_until_complete(top_records_count('../utils/results.png'))
-    ff = top_active_clubs_diagram('../utils/clubs.png')
-    ff.close()
+    # ff = loop.run_until_complete(make_pic_battle('../utils/battle.png', 875743, 925293))
+    # ff = top_active_clubs_diagram('../utils/clubs.png')
+    # ff = top_active_clubs_diagram('../utils/clubs.png')
+    # ff.close()
+    # ff, _ = loop.run_until_complete(get_athlete_data(925293))
+    # print(ff)
     # add_volunteers(204, 204)
     # make_clubs_bar('../utils/clubs.png').close()
     # club_id = next((c['id'] for c in CLUBS if c['name'] == 'IQ_Runners1'), None)
