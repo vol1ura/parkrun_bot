@@ -13,3 +13,9 @@ class CallbackException(Exception):
     def __init__(self, message='Введённые данные не верны.'):
         self.message = message
         super().__init__(self.message)
+
+
+class NoCollationRuns(Exception):
+    def __init__(self, message='У вас пока ещё не было совместных пробежек.'):
+        self.message = message
+        super().__init__(self.message)

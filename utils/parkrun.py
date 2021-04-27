@@ -10,9 +10,9 @@ from lxml.html import fromstring
 from matplotlib.colors import Normalize, PowerNorm
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, MultipleLocator
 
-from bot_exceptions import ParsingException
+from bot_exceptions import ParsingException, NoCollationRuns
 from handlers.helper import ParkrunSite, min_to_mmss
 
 __PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
@@ -60,7 +60,7 @@ async def get_club_table(parkrun: str, club_id: str):
     try:
         data = pd.read_html(html_club_results)[0]
     except Exception:
-        raise ParsingException
+        raise ParsingException(f'Parsing club history page id={club_id} for {parkrun} is failed.')
     data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
     return data
 
@@ -249,7 +249,7 @@ async def parse_latest_results(parkrun: str):
     try:
         df = pd.read_html(html)[0]
     except Exception:
-        raise ParsingException
+        raise ParsingException(f'Parsing latest results page for {parkrun} if failed.')
     return df, parkrun_date
 
 
@@ -361,87 +361,119 @@ def parse_personal_results(html_page: str):
     return df
 
 
-def make_pic_battle(pic: str, athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2):
-    df1 = parse_personal_results(athlete_page_1)
-    df2 = parse_personal_results(athlete_page_2)
+class CollationMaker:
+    def __init__(self, athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2):
+        self.__name_1 = athlete_name_1
+        self.__name_2 = athlete_name_2
+        df1 = parse_personal_results(athlete_page_1)
+        df2 = parse_personal_results(athlete_page_2)
 
-    battle_df = pd.merge(df1, df2, on=['Дата parkrun', 'Паркран'])
-    wins = battle_df['m_x'] < battle_df['m_y']
-    score = pd.value_counts(wins)
-    battle_df = battle_df.head(10)
-    joint_races = len(battle_df)
+        self.__df = pd.merge(df1, df2, on=['Дата parkrun', 'Паркран'])
+        self.__joint_races = len(self.__df)
+        if not self.__joint_races:
+            raise NoCollationRuns(athlete_name_2)
+        self.__wins = self.__df['m_x'] < self.__df['m_y']
+        count_wins = pd.value_counts(self.__wins)
+        self.__score = f'{count_wins[True]}:{count_wins[False]}'
 
-    fig = plt.figure(figsize=(6, 4.5), dpi=200)
-    ax = fig.add_subplot()
-    if joint_races == 0:
-        plt.text(0.1, 0.1, f'У вас пока ещё не было совместных пробежек\nс {athlete_name_2}',
-                 size=11, fontweight='bold', rotation=45)
+    def __color(self):
+        return self.__wins.where(self.__wins, '#ff7f0e').where(~self.__wins, '#2ca02c')
+
+    @staticmethod
+    def __ll(df):
+        return int(min(df['m_x'].min(), df['m_y'].min()))
+
+    @staticmethod
+    def __ur(df):
+        return int(max(df['m_x'].max(), df['m_y'].max()))
+
+    def bars(self, pic: str):
+        fig = plt.figure(figsize=(6, 4.5), dpi=200)
+        ax = fig.add_subplot()
+        battle_df = self.__df.head(10)
+
+        def label_bars(marks, heights, rects, wins, color):
+            for mark, height, rect, win in zip(marks, heights, rects, wins):
+                ax.annotate(f'{mark}',
+                            xy=(rect.get_x() + rect.get_width() / 2, height),
+                            xytext=(0, -10 if win else 2),  # 3 points vertical offset.
+                            textcoords='offset points',
+                            ha='center', va='bottom', size=8, color=color, fontweight='bold')
+
+        xlabels = battle_df['Дата parkrun']
+        x = xlabels.index
+        ax.set_xticks(x)
+        ax.set_xticklabels(xlabels, rotation=70)
+        heights0 = battle_df['m_x'].combine(battle_df['m_y'], min)
+        heights1 = battle_df['m_x'].combine(battle_df['m_y'], max)
+
+        rects = ax.bar(x, heights1 - heights0, 0.6, bottom=heights0,
+                       edgecolor='black', color=self.__color())
+        label_bars(battle_df['Время_y'], battle_df['m_y'], rects, ~self.__wins, '#7f7f7f')
+        label_bars(battle_df['Время_x'], battle_df['m_x'], rects, self.__wins, 'black')
+
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        ax.set_xlabel(f'Последние {len(battle_df)} паркранов', fontweight='bold')
+        ax.set_ylabel('Результат')
+        ax.set_ylim(self.__ll(battle_df) - 1, self.__ur(battle_df) + 2)
+        ax.set_title(f'Соотношение результатов\nна совместных забегах {self.__score}',
+                     size=15, fontweight='bold')
+        legend_elements = [Patch(facecolor='#ff7f0e', edgecolor='black', label='Проигрыш'),
+                           Patch(facecolor='#2ca02c', edgecolor='black', label='Выигрыш'),
+                           Line2D([0], [0], color='black', lw=2, label=self.__name_1.split()[0]),
+                           Line2D([0], [0], color='#7f7f7f', lw=2, label=self.__name_2.split()[0])]
+        ax.legend(handles=legend_elements)
         plt.tight_layout()
         plt.savefig(pic)
         return open(pic, 'rb')
 
-    battle_df = battle_df.head(10)
+    def scatter(self, pic: str):
+        fig = plt.figure(figsize=(5, 5), dpi=150)
+        ax = fig.add_subplot()
+        ax.scatter(self.__df['m_x'], self.__df['m_y'], c=self.__color())
 
-    def label_bars(marks, heights, rects, wins, color):
-        for mark, height, rect, win in zip(marks, heights, rects, wins):
-            ax.annotate(f'{mark}',
-                        xy=(rect.get_x() + rect.get_width() / 2, height),
-                        xytext=(0, -10 if win else 2),  # 3 points vertical offset.
-                        textcoords='offset points',
-                        ha='center', va='bottom', size=8, color=color, fontweight='bold')
+        ll_ur = [self.__ll(self.__df), self.__ur(self.__df) + 1]
+        plt.plot(ll_ur, ll_ur, color='r', alpha=0.6)
 
-    xlabels = battle_df['Дата parkrun']
-    x = xlabels.index
-    ax.set_xticks(x)
-    ax.set_xticklabels(xlabels, rotation=70)
-    heights0 = battle_df['m_x'].combine(battle_df['m_y'], min)
-    heights1 = battle_df['m_x'].combine(battle_df['m_y'], max)
+        ax.set_xlabel(self.__name_1, fontweight='bold')
+        ax.set_ylabel(self.__name_2, fontweight='bold')
+        ax.xaxis.set_major_locator(MultipleLocator(2))
+        ax.yaxis.set_major_locator(MultipleLocator(2))
+        ax.set_title(f'Соотношение результатов\nна совместных забегах {self.__score}', size=15, fontweight='bold')
+        legend_elements = [Patch(facecolor='#ff7f0e', label='Проигрыш'),
+                           Patch(facecolor='#2ca02c', label='Выигрыш')]
+        ax.legend(handles=legend_elements)
 
-    rects = ax.bar(x, heights1 - heights0, 0.6, bottom=heights0, label='Выигрыш', edgecolor='black',
-                   color=wins.where(wins, '#ff7f0e').where(~wins, '#2ca02c'))
-    label_bars(battle_df['Время_y'], battle_df['m_y'], rects, ~wins, '#7f7f7f')
-    label_bars(battle_df['Время_x'], battle_df['m_x'], rects, wins, 'black')
+        plt.tight_layout()
+        plt.savefig(pic)
+        return open(pic, 'rb')
 
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_xlabel('Последние 10 паркранов', fontweight='bold')
-    ax.set_ylabel('Результат')
-    ax.set_ylim(int(min(battle_df['m_x'].min(), battle_df['m_y'].min())) - 1,
-                int(max(battle_df['m_x'].max(), battle_df['m_y'].max())) + 2)
-    ax.set_title(f'Соотношение результатов\nна совместных забегах {score[True]}:{score[False]}',
-                 size=15, fontweight='bold')
-    legend_elements = [Patch(facecolor='#ff7f0e', edgecolor='black', label='Проигрыш'),
-                       Patch(facecolor='#2ca02c', edgecolor='black', label='Выигрыш'),
-                       Line2D([0], [0], color='black', lw=2, label=athlete_name_1.split()[0]),
-                       Line2D([0], [0], color='#7f7f7f', lw=2, label=athlete_name_2.split()[0])]
-    ax.legend(handles=legend_elements)
+    def table(self):
+        self.__df['time_diff'] = self.__df['m_x'] - self.__df['m_y']
+        battle_df = self.__df.head(10)
+        result_message = f'*Последние {len(battle_df)} совместных забегов:*\n' \
+                         '#     Дата     | *Время* | Время | Паркран\n'
+        for i, row in battle_df.iterrows():
+            result_message += f"{i} {row['Дата parkrun']} | {row['Время_x']} | {row['Время_y']} | {row['Паркран']}\n"
+        result_message += '---------------------------------------\n'
+        result_message += f'*Всего совместных забегов*: {self.__joint_races}\n'
+        result_message += f'*Счёт* {self.__name_1.split()[0]}:{self.__name_2.split()[0]} = {self.__score}\n'
+        time_diff = self.__df['time_diff'].sum()
+        result_message += f"По разнице результатов вы {'выигрываете' if time_diff < 0 else 'проигрываете'} " \
+                          f"{min_to_mmss(abs(time_diff))} (мин:сек)."
+        return result_message
 
-    plt.tight_layout()
-    plt.savefig(pic)
-    return open(pic, 'rb')
-
-
-def make_battle_table(athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2):
-    df1 = parse_personal_results(athlete_page_1)
-    df2 = parse_personal_results(athlete_page_2)
-    battle_df = pd.merge(df1, df2, on=['Дата parkrun', 'Паркран'])
-    joint_races = len(battle_df)
-    if joint_races == 0:
-        return f'У вас пока ещё не было совместных пробежек с {athlete_name_2}.'
-    battle_df['time_diff'] = battle_df['m_x'] - battle_df['m_y']
-    wins = battle_df['m_x'] < battle_df['m_y']
-    score = pd.value_counts(wins)
-    battle_df = battle_df.head(10)
-    result_message = '*Последние 10 совместных забегов:*\n' \
-                     '#     Дата     | *Время* | Время | Паркран\n'
-    for i, row in battle_df.iterrows():
-        result_message += f"{i} {row['Дата parkrun']} | {row['Время_x']} | {row['Время_y']} | {row['Паркран']}\n"
-    result_message += '---------------------------------------\n'
-    result_message += f'*Всего совместных забегов*: {joint_races}\n'
-    result_message += f'*Счёт* {athlete_name_1.split()[0]}:{athlete_name_2.split()[0]} = {score[True]}:{score[False]}\n'
-    time_diff = battle_df['time_diff'].sum()
-    result_message += f"По сумме отставаний вы {'выигрываете' if time_diff < 0 else 'проигрываете'} = " \
-                      f"{min_to_mmss(abs(time_diff))}"
-    return result_message
+    def make_csv(self, file_name: str):
+        vizavi = f'{self.__name_2}'
+        with open(file_name, 'w', encoding='utf-8') as fd:
+            fieldnames = ['Дата', 'Паркран', 'Ваше время', vizavi, 'Ваше место', f'Место {vizavi}']
+            writer = csv.DictWriter(fd, fieldnames=fieldnames)
+            writer.writeheader()
+            for _, row in self.__df.iterrows():
+                writer.writerow({'Дата': row['Дата parkrun'], 'Паркран': row['Паркран'],
+                                 'Ваше время': row['Время_x'], vizavi: row['Время_y'],
+                                 'Ваше место': row['Место_x'], f'Место {vizavi}': row['Место_y']})
+        return open(file_name)
 
 
 if __name__ == '__main__':

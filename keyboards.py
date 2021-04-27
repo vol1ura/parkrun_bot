@@ -36,11 +36,11 @@ inline_info.add(info_btn4, info_btn3)
 
 # SETTINGS inline keyboard layout
 inline_parkrun = InlineKeyboardMarkup(row_width=2)
+inline_parkrun.insert(InlineKeyboardButton('Мои установки', callback_data='check_settings'))
+inline_parkrun.insert(InlineKeyboardButton('Выбрать участника', callback_data='set_athlete'))
+
 inline_parkrun.insert(InlineKeyboardButton('Выбрать parkrun', switch_inline_query_current_chat='parkrun'))
 inline_parkrun.insert(InlineKeyboardButton("Выбрать клуб", switch_inline_query_current_chat='clubs'))
-
-inline_parkrun.insert(InlineKeyboardButton('Выбрать участника', callback_data='set_athlete'))
-inline_parkrun.insert(InlineKeyboardButton('Мои установки', callback_data='check_settings'))
 
 inline_parkrun.insert(InlineKeyboardButton('Перейти на сайт parkrun.ru', url='https://parkrun.ru/'))
 
@@ -50,3 +50,5 @@ inline_personal = InlineKeyboardMarkup(row_width=2)
 inline_personal.row(InlineKeyboardButton('Ввести ID участника', callback_data='enter_compare_id'))
 inline_personal.add(InlineKeyboardButton('Баттл-таблица', callback_data='battle_table'))
 inline_personal.insert(InlineKeyboardButton('Баттл-диаграмма', callback_data='battle_diagram'))
+inline_personal.insert(InlineKeyboardButton('Файл csv', callback_data='csv_table'))
+inline_personal.insert(InlineKeyboardButton('Scatter', callback_data='battle_scatter'))

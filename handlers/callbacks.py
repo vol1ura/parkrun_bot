@@ -90,10 +90,21 @@ async def get_compared_pages(user_id):
 @dp.callback_query_handler(lambda c: c.data == 'battle_diagram')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_battle_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Построение диаграммы. Подождите...')
+    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    pic = parkrun.make_pic_battle('battle.png', *pages)
+    pic = parkrun.CollationMaker(*pages).bars('battle.png')
+    await bot.send_photo(user_id, pic)
+    pic.close()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'battle_scatter')
+@dp.throttled(handle_throttled_query, rate=10)
+async def process_battle_scatter(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Строю график. Подождите...')
+    user_id = callback_query.from_user.id
+    pages = await get_compared_pages(user_id)
+    pic = parkrun.CollationMaker(*pages).scatter('scatter.png')
     await bot.send_photo(user_id, pic)
     pic.close()
 
@@ -101,7 +112,18 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'battle_table')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_battle_table(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Расчёт таблицы. Подождите...')
+    await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    await bot.send_message(callback_query.from_user.id, parkrun.make_battle_table(*pages), parse_mode='Markdown')
+    await bot.send_message(callback_query.from_user.id, parkrun.CollationMaker(*pages).table(), parse_mode='Markdown')
+
+
+@dp.callback_query_handler(lambda c: c.data == 'csv_table')
+@dp.throttled(handle_throttled_query, rate=10)
+async def process_scv_table(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Создаю файл. Подождите...')
+    user_id = callback_query.from_user.id
+    pages = await get_compared_pages(user_id)
+    parkrun.CollationMaker(*pages).make_csv('compare_parkrun.csv').close()
+    await bot.send_document(user_id, types.InputFile('compare_parkrun.csv'),
+                            caption='Сравнительная таблица для анализа в Excel')
