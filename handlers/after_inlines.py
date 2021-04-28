@@ -35,7 +35,6 @@ async def post_latestparkrun_diagrams(message):
     if not parkrun_name:
         return await message.answer(content.no_parkrun_message)
     parkrun_name = parkrun_name.decode()
-    print(parkrun_name)
 
     if 'диаграммы' in message.text:
         pic = await parkrun.make_latest_results_diagram(parkrun_name, 'results.png')

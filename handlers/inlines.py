@@ -36,7 +36,7 @@ async def query_all_clubs(inline_query: types.InlineQuery):
             input_message_content=types.InputTextMessageContent(f"/setclub {p['name']}"))
             for k, p in enumerate(quotes[:15])]
         await bot.answer_inline_query(inline_query.id, clubs_menu,
-                                      next_offset=m_next_offset if m_next_offset else "", cache_time=60000)
+                                      next_offset=m_next_offset if m_next_offset else "", cache_time=0)
     except Exception as e:
         logger.error(e)
 

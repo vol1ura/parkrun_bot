@@ -30,6 +30,9 @@ with open(__CLUBS_FILE, 'r', encoding='utf-8') as file:
     for rec in reader:
         CLUBS.append(rec)
 
+CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2152',
+              'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov
+
 
 # TODO: добавить вывод предстоящих юбилейных паркранов
 def anniversary_parkruns():
@@ -107,7 +110,9 @@ async def all_parkruns_records():
 
 async def update_parkruns_clubs():
     if os.path.exists(__CLUBS_FILE) and os.path.getmtime(__CLUBS_FILE) + 605000 > time.time():
+        print(os.path.getmtime(__CLUBS_FILE), time.time())
         return
+    print('request for club list on parkrun.ru')
     async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get('https://www.parkrun.ru/results/largestclubs/') as resp:
             html = await resp.text()
@@ -126,8 +131,6 @@ async def update_parkruns_clubs():
             'runs': cells[3].text_content(),
             'link': link
         })
-    all_clubs.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2152',
-                      'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov
     with open(__CLUBS_FILE, 'w', encoding='utf-8') as f:
         fieldnames = ['id', 'name', 'participants', 'runs', 'link']
         writer = csv.DictWriter(f, fieldnames=fieldnames)

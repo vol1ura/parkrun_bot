@@ -29,5 +29,6 @@ async def setup_bot_commands(dispatcher: Dispatcher):
     bot_commands = [
         types.BotCommand(command="/help", description="Справочное сообщение"),
         types.BotCommand(command="/settings", description="Сделать настройки"),
+        # types.BotCommand(command='/start', description='Показать клавиатуру')
     ]
     await bot.set_my_commands(bot_commands)
