@@ -374,7 +374,7 @@ class CollationMaker:
             raise NoCollationRuns(athlete_name_2)
         self.__wins = self.__df['m_x'] < self.__df['m_y']
         count_wins = pd.value_counts(self.__wins)
-        self.__score = f'{count_wins[True]}:{count_wins[False]}'
+        self.__score = f'{count_wins.get(True, 0)}:{count_wins.get(False, 0)}'
 
     def __color(self):
         return self.__wins.where(self.__wins, '#ff7f0e').where(~self.__wins, '#2ca02c')
