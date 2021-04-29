@@ -466,16 +466,12 @@ class CollationMaker:
                           f"{min_to_mmss(abs(time_diff))} (мин:сек)."
         return result_message
 
-    def make_csv(self, file_name: str):
-        vizavi = f'{self.__name_2}'
-        with open(file_name, 'w', encoding='utf-8') as fd:
-            fieldnames = ['Дата', 'Паркран', 'Ваше время', vizavi, 'Ваше место', f'Место {vizavi}']
-            writer = csv.DictWriter(fd, fieldnames=fieldnames)
-            writer.writeheader()
-            for _, row in self.__df.iterrows():
-                writer.writerow({'Дата': row['Дата parkrun'], 'Паркран': row['Паркран'],
-                                 'Ваше время': row['Время_x'], vizavi: row['Время_y'],
-                                 'Ваше место': row['Место_x'], f'Место {vizavi}': row['Место_y']})
+    def to_excel(self, file_name: str):
+        vizavi = f'{self.__name_2}'.split()[0]
+        df = self.__df.iloc[:, [0, 1, 3, 4, 6, 9, 10, 12]].copy()
+        df.rename(columns={'Место_x': 'Ваше место', 'Время_x': 'Ваше время', 'ЛР?_x': 'Личник?', 'ЛР?_y': 'Личник',
+                           'Место_y': f'Место ({vizavi})', 'Время_y': f'Время ({vizavi})'}, inplace=True)
+        df.to_excel(file_name, index=False, sheet_name='Сравнение результатов')
         return open(file_name)
 
 

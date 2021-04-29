@@ -118,12 +118,12 @@ async def process_battle_table(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, parkrun.CollationMaker(*pages).table(), parse_mode='Markdown')
 
 
-@dp.callback_query_handler(lambda c: c.data == 'csv_table')
+@dp.callback_query_handler(lambda c: c.data == 'excel_table')
 @dp.throttled(handle_throttled_query, rate=10)
-async def process_scv_table(callback_query: types.CallbackQuery):
+async def process_excel_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Создаю файл. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    parkrun.CollationMaker(*pages).make_csv('compare_parkrun.csv').close()
-    await bot.send_document(user_id, types.InputFile('compare_parkrun.csv'),
+    parkrun.CollationMaker(*pages).to_excel('compare_parkrun.xlsx').close()
+    await bot.send_document(user_id, types.InputFile('compare_parkrun.xlsx'),
                             caption='Сравнительная таблица для анализа в Excel')
