@@ -67,7 +67,7 @@ async def get_parkrun_picture(message: types.Message):
     await bot.send_photo(message.chat.id, photo_url, disable_notification=True)
 
 
-@dp.message_handler(lambda mes: mes.reply_to_message.from_user.is_bot)
+@dp.message_handler(lambda mes: mes.reply_to_message and mes.reply_to_message.from_user.is_bot)
 @dp.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
 @dp.throttled(handle_throttled_query, rate=2)
 async def simple_answers(message: types.Message):
