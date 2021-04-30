@@ -30,7 +30,7 @@ with open(__CLUBS_FILE, 'r', encoding='utf-8') as file:
     for rec in reader:
         CLUBS.append(rec)
 
-CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2152',
+CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2157',
               'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov
 
 
@@ -45,14 +45,16 @@ async def get_participants(club_id: str):
             html = await resp.text()
     tree = fromstring(html)
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
-    data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members, (\d+) took part', head)
+    data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
+    participants = tree.xpath('//table/tr/td[4]')
+    count = sum(1 for p in participants if p.text_content() != 'Unattached')
     places = tree.xpath('//div[@class="floatleft"]/h2')
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
     message = f'Паркраны, где побывали наши одноклубники {data.group(1)}:\n'
     for i, (p, l) in enumerate(zip(places, links_to_results), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
         message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l})\n"
-    message += f'\nУчаствовало {data.group(3)} из {data.group(2)} чел.'
+    message += f'\nУчаствовало {count} из {data.group(2)} чел.'
     return message
 
 
@@ -102,6 +104,7 @@ async def get_parkrun_club_top_results(parkrun: str, club_id: str):
 
 
 async def all_parkruns_records():
+    # TODO: add caching for this page
     async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get('https://www.parkrun.ru/results/courserecords/') as resp:
             html_all_parkruns = await resp.text()
@@ -110,9 +113,8 @@ async def all_parkruns_records():
 
 async def update_parkruns_clubs():
     if os.path.exists(__CLUBS_FILE) and os.path.getmtime(__CLUBS_FILE) + 605000 > time.time():
-        print(os.path.getmtime(__CLUBS_FILE), time.time())
         return
-    print('request for club list on parkrun.ru')
+    # TODO: add caching for this page
     async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
         async with session.get('https://www.parkrun.ru/results/largestclubs/') as resp:
             html = await resp.text()
@@ -162,12 +164,12 @@ async def check_club_as_id(club_id: str):
     return club_name
 
 
-def top_active_clubs():
-    CLUBS.sort(key=lambda c: -int(c['runs']))
-    message = f"*10 активных клубов (по числу пробежек):*\n"
-    for i, club in enumerate(CLUBS[:10], 1):
-        message += f"{i:>2}.\xa0[{club['name']:<29}]({club['link']})\xa0*{club['runs']:<3}*\n"
-    return message.rstrip()
+# def top_active_clubs():
+#     CLUBS.sort(key=lambda c: -int(c['runs']))
+#     message = f"*10 активных клубов (по числу пробежек):*\n"
+#     for i, club in enumerate(CLUBS[:10], 1):
+#         message += f"{i:>2}.\xa0[{club['name']:<29}]({club['link']})\xa0*{club['runs']:<3}*\n"
+#     return message.rstrip()
 
 
 def top_active_clubs_diagram(pic: str):
