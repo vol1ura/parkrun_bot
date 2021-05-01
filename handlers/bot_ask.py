@@ -4,13 +4,11 @@ from os import getenv
 
 from aiogram import types
 from geopy import Nominatim
-from vedis import Vedis
 
 from app import bot, logger, dp
-from config import DB_FILE
 from handlers.helpers import handle_throttled_query
-from utils import content, fucomp, search, vk, weather
 from parkrun import latest
+from utils import content, fucomp, search, vk, weather, redis
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -41,12 +39,10 @@ async def ask_weather(message: types.Message):
 async def parkrun_personal_result(message: types.Message):
     await types.ChatActions.upload_photo()
     user_id = message.from_user.id
-    with Vedis(DB_FILE) as db:
-        h = db.Hash(user_id)
-        parkrun_name = h['pr']
+    settings = await redis.get_value(user_id)
+    parkrun_name = settings.get('pr', None)
     if not parkrun_name:
         return await message.reply(content.no_parkrun_message)
-    parkrun_name = parkrun_name.decode()
     try:
         turn = re.search(r'\d+$', message.text)
         turn = int(turn[0]) % 360 if turn else 0
@@ -55,8 +51,8 @@ async def parkrun_personal_result(message: types.Message):
         pic = await latest.make_latest_results_diagram(parkrun_name, 'results.png', person, turn)
         await bot.send_photo(message.chat.id, pic)
         pic.close()
-    except:
-        logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}')
+    except Exception as e:
+        logger.warning(f'Attempt to generate personal diagram failed. Query: {message.text}. Error: {e}')
         await message.reply('Что-то пошло не так. Возможно, вы неправильно ввели имя '
                             f'или  такого участника не было на выбранном вами паркране {parkrun_name}.')
 

@@ -77,7 +77,7 @@ async def get_participants(club_id: str):
     count = sum(1 for p in participants if p.text_content() != 'Unattached')
     places = tree.xpath('//div[@class="floatleft"]/h2')
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
-    message = f'Паркраны, где побывали наши одноклубники {data.group(1)}:\n'
+    message = f'Паркраны, где побывали наши одноклубники *{data.group(1)}*:\n'
     for i, (p, l) in enumerate(zip(places, links_to_results), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
         message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l})\n"
@@ -150,11 +150,3 @@ def top_active_clubs_diagram(pic: str):
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
-
-
-# def top_active_clubs():
-#     CLUBS.sort(key=lambda c: -int(c['runs']))
-#     message = f"*10 активных клубов (по числу пробежек):*\n"
-#     for i, club in enumerate(CLUBS[:10], 1):
-#         message += f"{i:>2}.\xa0[{club['name']:<29}]({club['link']})\xa0*{club['runs']:<3}*\n"
-#     return message.rstrip()

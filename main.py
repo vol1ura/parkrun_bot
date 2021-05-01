@@ -16,7 +16,7 @@ async def setup_bot_commands(dispatcher: Dispatcher):
     bot_commands = [
         types.BotCommand(command="/help", description="Справочное сообщение"),
         types.BotCommand(command="/settings", description="Сделать настройки"),
-        types.BotCommand(command="/setclub", description="Установить клуб (по ID)"),
+        # types.BotCommand(command="/setclub", description="Установить клуб (по ID)"),
         # types.BotCommand(command="/setparkrun", description="Установить паркран"),
         # types.BotCommand(command='/start', description='Показать клавиатуру')
     ]

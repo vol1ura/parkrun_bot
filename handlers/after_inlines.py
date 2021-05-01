@@ -1,12 +1,9 @@
 import os
 import re
 
-from vedis import Vedis
-
 from app import dp, bot, logger
-from config import DB_FILE
 from handlers.helpers import handle_throttled_query
-from utils import content, instagram
+from utils import content, instagram, redis
 from parkrun import clubs, latest, helpers
 
 
@@ -15,12 +12,11 @@ from parkrun import clubs, latest, helpers
 async def latestparkruns_club_participation(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
-    with Vedis(DB_FILE) as db:
-        club_id = db.Hash(user_id)['cl_id']
+    user_settings = await redis.get_value(user_id)
+    club_id = user_settings.get('cl_id', None)
     if not club_id:
         await message.answer(content.no_club_message)
     else:
-        club_id = club_id.decode()
         data = await clubs.get_participants(club_id)
         await message.answer(data, parse_mode='Markdown', disable_web_page_preview=True)
     await bot.delete_message(message.chat.id, message.message_id)
@@ -31,12 +27,10 @@ async def latestparkruns_club_participation(message):
 async def post_latestparkrun_diagrams(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
-    with Vedis(DB_FILE) as db:
-        h = db.Hash(user_id)
-        parkrun_name = h['pr']
+    user_settings = await redis.get_value(user_id)
+    parkrun_name = user_settings.get('pr', None)
     if not parkrun_name:
         return await message.answer(content.no_parkrun_message)
-    parkrun_name = parkrun_name.decode()
 
     if 'диаграммы' in message.text:
         pic = await latest.make_latest_results_diagram(parkrun_name, 'results.png')
@@ -62,18 +56,15 @@ async def post_latestparkrun_diagrams(message):
 async def post_teammate_table(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
-    with Vedis(DB_FILE) as db:
-        h = db.Hash(user_id)
-        parkrun_name = h['pr']
-        club_id = h['cl_id']
+    user_settings = await redis.get_value(user_id)
+    parkrun_name = user_settings.get('pr', None)
+    club_id = user_settings.get('cl_id', None)
     if not club_id:
         await message.answer(content.no_club_message)
     if not parkrun_name:
         await message.answer(content.no_parkrun_message)
     if not (club_id and parkrun_name):
         return
-    parkrun_name = parkrun_name.decode()
-    club_id = club_id.decode()
 
     if 'количестве локальных стартов' in message.text:
         data = await clubs.get_club_fans(parkrun_name, club_id)

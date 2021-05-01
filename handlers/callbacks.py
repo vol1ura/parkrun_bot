@@ -6,9 +6,9 @@ from app import dp, bot, logger
 from bot_exceptions import CallbackException
 from config import DB_FILE
 from handlers.helpers import UserStates, handle_throttled_query
-from parkrun.collations import CollationMaker
-from utils import content
 from parkrun import records, clubs
+from parkrun.collations import CollationMaker
+from utils import content, redis
 
 
 @dp.callback_query_handler(lambda c: c.data == 'telegram')
@@ -63,10 +63,9 @@ async def process_enter_compare_id(callback_query: types.CallbackQuery):
 
 
 async def get_compared_pages(user_id):
-    with Vedis(DB_FILE) as db:
-        h = db.Hash(user_id)
-        athlete_id_1 = h['id'].decode() if h['id'] else None
-        athlete_id_2 = h['compare_id'].decode() if h['compare_id'] else None
+    settings = await redis.get_value(user_id)
+    athlete_id_1 = settings.get('id', None)
+    athlete_id_2 = settings.get('compare_id', None)
     if not athlete_id_1:
         raise CallbackException('Вы не ввели свой parkrun ID.\n'
                                 'Перейдите в настройки и нажмите кнопку Выбрать участника')

@@ -17,3 +17,4 @@ WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = int(os.environ.get('PORT', 5000))
 
 DB_FILE = os.path.join(os.path.dirname(__file__), 'database.vdb')
+REDIS_URL = os.getenv('REDIS_URL')
