@@ -1,4 +1,5 @@
 from . import settings
+from . import helpers
 from . import base_commands
 from . import callbacks
 from . import inlines

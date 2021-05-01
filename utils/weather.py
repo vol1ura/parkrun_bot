@@ -23,9 +23,9 @@ async def get_weather(place, lat, lon, lang='ru'):
     wind_dir = compass_direction(w['wind']['deg'], lang)
     sunset = time.strftime("%H:%M", time.localtime(w['sys']['sunset']))
     weather_description = f"🏙 {place}: сейчас {w['weather'][0]['description']}\n" \
-                   f"🌡 {w['main']['temp']:.1f}°C, ощущ. как {w['main']['feels_like']:.0f}°C\n" \
-                   f"💨 {w['wind']['speed']:.1f}м/с с\xa0{wind_dir}, 💦\xa0{w['main']['humidity']}%\n" \
-                   f"🌇 {sunset} "
+                          f"🌡 {w['main']['temp']:.1f}°C, ощущ. как {w['main']['feels_like']:.0f}°C\n" \
+                          f"💨 {w['wind']['speed']:.1f}м/с с\xa0{wind_dir}, 💦\xa0{w['main']['humidity']}%\n" \
+                          f"🌇 {sunset} "
     return weather_description
 
 
@@ -41,8 +41,8 @@ async def get_air_quality(place, lat, lon, lang='ru'):
     aqi_e = ['👍', '🙂', '😐', '🙁', '🤢'][aqi - 1]
     air = {'ru': 'воздух', 'en': 'air'}
     air_description = f"{place}: {air[lang]} {aqi_e} PM2.5~{aq['list'][0]['components']['pm2_5']:.0f}, " \
-                     f"SO₂~{aq['list'][0]['components']['so2']:.0f}, NO₂~{aq['list'][0]['components']['no2']:.0f}, " \
-                     f"NH₃~{aq['list'][0]['components']['nh3']:.1f} (в µg/m³)."
+                      f"SO₂~{aq['list'][0]['components']['so2']:.0f}, NO₂~{aq['list'][0]['components']['no2']:.0f}, " \
+                      f"NH₃~{aq['list'][0]['components']['nh3']:.1f} (в µg/m³)."
     return aqi, air_description
 
 

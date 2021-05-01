@@ -4,14 +4,15 @@ import time
 from aiogram import types
 
 from app import logger, bot, dp
-from utils import parkrun, content, weather, news
+from utils import content, weather, news
+from parkrun import helpers, records
 
 
 @dp.inline_handler(lambda query: 'parkrun' in query.query or 'паркран' in query.query)
 async def query_all_parkruns(inline_query: types.InlineQuery):
     offset = int(inline_query.offset) if inline_query.offset else 0
     try:
-        parkruns_list = parkrun.PARKRUNS
+        parkruns_list = helpers.PARKRUNS
         quotes = parkruns_list[offset:]
         m_next_offset = str(offset + 15) if len(quotes) >= 15 else None
         parkruns_menu = [types.InlineQueryResultArticle(
@@ -28,7 +29,7 @@ async def query_all_parkruns(inline_query: types.InlineQuery):
 async def query_all_clubs(inline_query: types.InlineQuery):
     offset = int(inline_query.offset) if inline_query.offset else 0
     try:
-        clubs_list = parkrun.CLUBS
+        clubs_list = helpers.CLUBS
         quotes = clubs_list[offset:]
         m_next_offset = str(offset + 15) if len(quotes) >= 15 else None
         clubs_menu = [types.InlineQueryResultArticle(
@@ -100,7 +101,7 @@ async def query_competitions(inline_query: types.InlineQuery):
 @dp.inline_handler(lambda query: 'records' in query.query)
 async def display_records_menu(inline_query: types.InlineQuery):
     try:
-        records_tables = await parkrun.top_parkruns()
+        records_tables = await records.top_parkruns()
         m1 = types.InlineQueryResultArticle(id='1', title='Top10 быстрых паркранов', description='по мужским рекордам',
                                             input_message_content=types.InputTextMessageContent(records_tables[0],
                                                                                                 parse_mode='Markdown'))

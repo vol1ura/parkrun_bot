@@ -6,9 +6,11 @@ from aiogram import types
 from geopy import Nominatim
 from vedis import Vedis
 
-from app import bot, logger, handle_throttled_query, dp
+from app import bot, logger, dp
 from config import DB_FILE
-from utils import content, fucomp, search, vk, parkrun, weather
+from handlers.helpers import handle_throttled_query
+from utils import content, fucomp, search, vk, weather
+from parkrun import latest
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -50,13 +52,13 @@ async def parkrun_personal_result(message: types.Message):
         turn = int(turn[0]) % 360 if turn else 0
         person = re.sub(r'.*(паркран\w?|parkrun) ', '', message.text)
         person = re.sub(r'\d', '', person).strip()
-        pic = await parkrun.make_latest_results_diagram(parkrun_name, 'results.png', person, turn)
+        pic = await latest.make_latest_results_diagram(parkrun_name, 'results.png', person, turn)
         await bot.send_photo(message.chat.id, pic)
         pic.close()
     except:
         logger.error(f'Attempt to generate personal diagram failed. Query: {message.text}')
         await message.reply('Что-то пошло не так. Возможно, вы неправильно ввели имя '
-                            'или  такого участника не было на установленном вами паркране.')
+                            f'или  такого участника не было на выбранном вами паркране {parkrun_name}.')
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (паркран|parkrun)')
@@ -103,4 +105,3 @@ async def simple_answers(message: types.Message):
         else:
             ans = [fucomp.best_answer(message.text, fucomp.message_base_m)]
     await message.answer(random.choice(ans), disable_web_page_preview=True, disable_notification=True)
-

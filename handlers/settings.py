@@ -5,8 +5,9 @@ from vedis import Vedis
 import keyboards as kb
 from app import bot, logger, dp
 from config import DB_FILE
-from handlers.helper import UserStates
-from utils import content, parkrun
+from handlers.helpers import UserStates
+from utils import content
+from parkrun import helpers, clubs
 
 
 @dp.message_handler(commands='reset', state='*')
@@ -46,7 +47,7 @@ async def process_command_setparkrun(message: types.Message):
     parkrun_name = message.get_args()
     if not parkrun_name:
         return await message.answer(content.no_parkrun_message, reply_markup=kb.main)
-    if not next((True for p in parkrun.PARKRUNS if parkrun_name.lower() == p.lower()), False):
+    if not next((True for p in helpers.PARKRUNS if parkrun_name.lower() == p.lower()), False):
         return await message.answer('В моей базе нет такого паркрана. Проверьте ввод.')
     user_id = message.from_user.id
     with Vedis(DB_FILE) as db:
@@ -67,9 +68,9 @@ async def process_command_setclub(message: types.Message):
         return await message.answer(content.no_club_message, reply_markup=kb.main)
     if club.isdigit():
         club_id = club
-        club = await parkrun.check_club_as_id(club)
+        club = await clubs.check_club_as_id(club)
     else:
-        club_id = next((c['id'] for c in parkrun.CLUBS if c['name'] == club), None)
+        club_id = next((c['id'] for c in helpers.CLUBS if c['name'] == club), None)
     if not (club_id and club):
         return await message.answer('В базе нет такого клуба. Проверьте ввод.')
     user_id = message.from_user.id

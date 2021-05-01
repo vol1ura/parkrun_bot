@@ -3,9 +3,11 @@ import re
 
 from vedis import Vedis
 
-from app import dp, bot, handle_throttled_query, logger
+from app import dp, bot, logger
 from config import DB_FILE
-from utils import parkrun, content, instagram
+from handlers.helpers import handle_throttled_query
+from utils import content, instagram
+from parkrun import clubs, latest, helpers
 
 
 @dp.message_handler(regexp='⏳ Получение данных об участии...')
@@ -19,7 +21,7 @@ async def latestparkruns_club_participation(message):
         await message.answer(content.no_club_message)
     else:
         club_id = club_id.decode()
-        data = await parkrun.get_participants(club_id)
+        data = await clubs.get_participants(club_id)
         await message.answer(data, parse_mode='Markdown', disable_web_page_preview=True)
     await bot.delete_message(message.chat.id, message.message_id)
 
@@ -37,7 +39,7 @@ async def post_latestparkrun_diagrams(message):
     parkrun_name = parkrun_name.decode()
 
     if 'диаграммы' in message.text:
-        pic = await parkrun.make_latest_results_diagram(parkrun_name, 'results.png')
+        pic = await latest.make_latest_results_diagram(parkrun_name, 'results.png')
         if os.path.exists("results.png"):
             await bot.send_photo(message.chat.id, pic)
             pic.close()
@@ -45,7 +47,7 @@ async def post_latestparkrun_diagrams(message):
             logger.error('File results.png not found! Or the picture wasn\'t generated.')
 
     elif 'о клубах...' in message.text:
-        pic = await parkrun.make_clubs_bar(parkrun_name, 'clubs.png')
+        pic = await latest.make_clubs_bar(parkrun_name, 'clubs.png')
         if os.path.exists("clubs.png"):
             await bot.send_photo(message.chat.id, pic)
             pic.close()
@@ -74,19 +76,19 @@ async def post_teammate_table(message):
     club_id = club_id.decode()
 
     if 'количестве локальных стартов' in message.text:
-        data = await parkrun.get_club_fans(parkrun_name, club_id)
+        data = await clubs.get_club_fans(parkrun_name, club_id)
         await message.answer(data, parse_mode='Markdown')
 
     elif 'количестве всех стартов' in message.text:
-        data = await parkrun.get_club_purkruners(parkrun_name, club_id)
+        data = await clubs.get_club_purkruners(parkrun_name, club_id)
         await message.answer(data, parse_mode='Markdown')
 
     elif 'рекордах' in message.text:
-        data = await parkrun.get_parkrun_club_top_results(parkrun_name, club_id)
+        data = await clubs.get_parkrun_club_top_results(parkrun_name, club_id)
         await message.answer(data, parse_mode='Markdown')
 
     elif 'выбранном клубе' in message.text:
-        club_rec = [club for club in parkrun.CLUBS if club['id'] == club_id]
+        club_rec = [club for club in helpers.CLUBS if club['id'] == club_id]
         if club_rec:
             info = f"""*Выбранный клуб*: {club_rec[0]['name']}.
             *Зарегистрированных участников*: {club_rec[0]['participants']}.

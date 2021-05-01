@@ -1,0 +1,117 @@
+import re
+
+import aiohttp
+import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib.colors import Normalize, PowerNorm
+from lxml.html import fromstring
+from matplotlib.ticker import MaxNLocator
+
+from bot_exceptions import ParsingException
+from parkrun import helpers
+
+
+async def parse_latest_results(parkrun: str):
+    pr = re.sub('[- ]', '', parkrun)
+    async with aiohttp.ClientSession(headers=helpers.ParkrunSite.headers()) as session:
+        async with session.get(f"https://www.parkrun.ru/{pr}/results/latestresults/") as resp:
+            html = await resp.text()
+    tree = fromstring(html)
+    parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
+    try:
+        df = pd.read_html(html)[0]
+    except Exception:
+        raise ParsingException(f'Parsing latest results page for {parkrun} if failed.')
+    return df, parkrun_date
+
+
+async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0):
+    parsed_results = await parse_latest_results(parkrun)
+    df = parsed_results[0].copy()
+    number_runners = len(df)
+    df = df.dropna(thresh=3)
+    df['Время'] = df['Время'].dropna() \
+        .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0]) \
+        .transform(lambda mmss: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], mmss.split(':')[::-1])))
+
+    plt.figure(figsize=(5.5, 4), dpi=300)
+    ax = df['Время'].hist(bins=32)
+    ptchs = ax.patches
+    med = df['Время'].median()
+    m_height = 0
+    personal_y_mark = 0
+
+    norm = Normalize(0, med)
+
+    if name:
+        personal_res = df[df['Участник'].str.contains(name.upper())].reset_index(drop=True)
+        if personal_res.empty:
+            raise AttributeError
+        personal_name = re.search(r'([^\d]+)\d.*', personal_res["Участник"][0])[1]
+        personal_name = ' '.join(n.capitalize() for n in personal_name.split())
+        personal_time = personal_res['Время'][0]
+    else:
+        personal_time = 0
+        personal_name = ''
+
+    for ptch in ptchs:
+        ptch_x = ptch.get_x()
+        color = plt.cm.viridis(norm(med - abs(med - ptch_x)))
+        ptch.set_facecolor(color)
+        if ptch_x <= med:
+            m_height = ptch.get_height() + 0.3
+        if ptch_x <= personal_time:
+            personal_y_mark = ptch.get_height() + 0.3
+
+    med_message = f'Медиана {int(med)}:{(med - int(med)) * 60:02.0f}'
+    ax.annotate(med_message, (med - 0.5, m_height + 0.1), rotation=turn)
+    plt.plot([med, med], [0, m_height], 'b')
+
+    ldr_time = ptchs[0].get_x()
+    ldr_y_mark = ptchs[0].get_height() + 0.3
+    ldr_message = f'Лидер {int(ldr_time)}:{(ldr_time - int(ldr_time)) * 60:02.0f}'
+    ax.annotate(ldr_message, (ldr_time - 0.5, ldr_y_mark + 0.2), rotation=90)
+    plt.plot([ldr_time, ldr_time], [0, ldr_y_mark], 'r')
+
+    lst_time = ptchs[-1].get_x() + ptchs[-1].get_width()
+    lst_y_mark = ptchs[-1].get_height() + 0.3
+    ax.annotate(f'Всего\nучастников {number_runners}', (lst_time - 0.6, lst_y_mark + 0.1), rotation=90)
+    plt.plot([lst_time, lst_time], [0, lst_y_mark], 'r')
+
+    if name and personal_time:
+        ax.annotate(f'{personal_name}\n{int(personal_time)}:{(personal_time - int(personal_time)) * 60:02.0f}',
+                    (personal_time - 0.5, personal_y_mark + 0.2),
+                    rotation=turn, color='red', size=12, fontweight='bold')
+        plt.plot([personal_time, personal_time], [0, personal_y_mark], 'r')
+
+    ax.xaxis.set_major_locator(MaxNLocator(steps=[2, 4, 5], integer=True))
+    ax.yaxis.set_major_locator(MaxNLocator(steps=[1, 2], integer=True))
+    ax.set_xlabel("Результаты участников (минуты)")
+    ax.set_ylabel("Результатов в диапазоне")
+    plt.title(f'Результаты паркрана {parkrun} {parsed_results[1]}', size=10, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig(pic)
+    return open(pic, 'rb')
+
+
+async def make_clubs_bar(parkrun: str, pic: str):
+    parsed_results = await parse_latest_results(parkrun)
+    df = parsed_results[0].copy()
+    df = df.dropna(thresh=3)
+
+    clubs = df['Клуб'].value_counts()
+    norm = PowerNorm(gamma=0.6)
+    colors = plt.cm.cool(norm(clubs.values))
+    fig = plt.figure(figsize=(6, 6), dpi=200)
+    ax = fig.add_subplot()
+    ax.grid(False, axis='x')
+    ax.grid(True, axis='y')
+    ax.yaxis.set_major_locator(MaxNLocator(steps=[1, 2, 4, 8], integer=True))
+    plt.xticks(rotation=80, size=8)
+    plt.bar(clubs.index, clubs.values, color=colors)
+    plt.title(f'Клубы на паркране {parkrun} {parsed_results[1]}', size=10, fontweight='bold')
+    plt.ylabel('Количество участников')
+    plt.tight_layout()
+    plt.savefig(pic)
+    return open(pic, 'rb')
+

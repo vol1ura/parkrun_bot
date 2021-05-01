@@ -2,11 +2,13 @@ from aiogram import types
 from vedis import Vedis
 
 import keyboards as kb
-from app import dp, bot, handle_throttled_query, logger
+from app import dp, bot, logger
 from bot_exceptions import CallbackException
 from config import DB_FILE
-from handlers.helper import UserStates
-from utils import content, parkrun
+from handlers.helpers import UserStates, handle_throttled_query
+from parkrun.collations import CollationMaker
+from utils import content
+from parkrun import records, clubs
 
 
 @dp.callback_query_handler(lambda c: c.data == 'telegram')
@@ -20,7 +22,7 @@ async def process_callback_telegram(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=15)
 async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
-    pic = await parkrun.top_records_count('records.png')
+    pic = await records.top_records_count('records.png')
     await bot.send_photo(callback_query.from_user.id, pic)
     pic.close()
 
@@ -29,7 +31,7 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=15)
 async def process_top_active_clubs(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
-    pic = parkrun.top_active_clubs_diagram('top_clubs.png')
+    pic = clubs.top_active_clubs_diagram('top_clubs.png')
     await bot.send_photo(callback_query.from_user.id, pic)
     pic.close()
 
@@ -83,7 +85,7 @@ async def get_compared_pages(user_id):
             athlete_page_2 = h['athlete_page'].decode()
         except Exception as e:
             logger.error(e)
-            raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести IDшники снова.')
+            raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
     return athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2
 
 
@@ -93,8 +95,8 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    pic = parkrun.CollationMaker(*pages).bars('battle.png')
-    await bot.send_photo(user_id, pic)
+    pic = CollationMaker(*pages).bars('battle.png')
+    await bot.send_photo(user_id, pic, caption='Трактовка: чем меньше по высоте столбцы, тем ближе ваши результаты.')
     pic.close()
 
 
@@ -104,8 +106,9 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю график. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    pic = parkrun.CollationMaker(*pages).scatter('scatter.png')
-    await bot.send_photo(user_id, pic)
+    pic = CollationMaker(*pages).scatter('scatter.png')
+    await bot.send_photo(user_id, pic, caption='Трактовка: каждая точка - совместный забег, чем ближе точки к '
+                                               'левому нижнему углу и красной линией, тем  больше соперничество.')
     pic.close()
 
 
@@ -115,7 +118,7 @@ async def process_battle_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    await bot.send_message(callback_query.from_user.id, parkrun.CollationMaker(*pages).table(), parse_mode='Markdown')
+    await bot.send_message(callback_query.from_user.id, CollationMaker(*pages).table(), parse_mode='Markdown')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'excel_table')
@@ -124,6 +127,6 @@ async def process_excel_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Создаю файл. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    parkrun.CollationMaker(*pages).to_excel('compare_parkrun.xlsx').close()
+    CollationMaker(*pages).to_excel('compare_parkrun.xlsx').close()
     await bot.send_document(user_id, types.InputFile('compare_parkrun.xlsx'),
                             caption='Сравнительная таблица для анализа в Excel')

@@ -1,20 +1,34 @@
 from os import environ
 
-from aiogram import Dispatcher
+from aiogram import Dispatcher, types
 from aiogram.utils import executor
 
 from config import *
-from app import bot, setup_bot_commands, dp
-from utils import parkrun
+from app import bot, dp
+from parkrun import records, clubs
 import handlers  # important import!!!
+
+
+async def setup_bot_commands(dispatcher: Dispatcher):
+    """
+    Here we setup bot commands to make them visible in Telegram UI
+    """
+    bot_commands = [
+        types.BotCommand(command="/help", description="Справочное сообщение"),
+        types.BotCommand(command="/settings", description="Сделать настройки"),
+        types.BotCommand(command="/setclub", description="Установить клуб (по ID)"),
+        # types.BotCommand(command="/setparkrun", description="Установить паркран"),
+        # types.BotCommand(command='/start', description='Показать клавиатуру')
+    ]
+    await bot.set_my_commands(bot_commands)
 
 
 # Run after startup
 async def on_startup(dispatcher: Dispatcher):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
-    await parkrun.update_parkruns_list()
-    await parkrun.update_parkruns_clubs()
+    await records.update_parkruns_list()
+    await clubs.update_parkruns_clubs()
     await setup_bot_commands(dispatcher)
 
 

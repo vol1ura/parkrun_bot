@@ -4,7 +4,7 @@ from vedis import Vedis
 
 from app import dp, bot
 from config import DB_FILE
-from handlers.helper import UserStates, add_db_athlete
+from handlers.helpers import UserStates, add_db_athlete
 
 
 @dp.message_handler(state=UserStates.ATHLETE_ID)
