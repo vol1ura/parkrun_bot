@@ -18,7 +18,7 @@ def parse_personal_results(html_page: str):
 
 async def get_athlete_data(athlete_id):
     athlete_url = f'https://www.parkrun.ru/results/athleteeventresultshistory?athleteNumber={athlete_id}&eventNumber=0'
-    async with aiohttp.ClientSession(headers=helpers.ParkrunSite.headers()) as session:
+    async with aiohttp.ClientSession(headers=helpers.ParkrunSite().headers) as session:
         async with session.get(athlete_url) as resp:
             html = await resp.text()
     tree = fromstring(html)

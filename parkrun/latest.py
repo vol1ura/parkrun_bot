@@ -1,6 +1,5 @@
 import re
 
-import aiohttp
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.colors import Normalize, PowerNorm
@@ -8,14 +7,13 @@ from lxml.html import fromstring
 from matplotlib.ticker import MaxNLocator
 
 from bot_exceptions import ParsingException
-from parkrun import helpers
+from parkrun.helpers import ParkrunSite
 
 
 async def parse_latest_results(parkrun: str):
     pr = re.sub('[- ]', '', parkrun)
-    async with aiohttp.ClientSession(headers=helpers.ParkrunSite.headers()) as session:
-        async with session.get(f"https://www.parkrun.ru/{pr}/results/latestresults/") as resp:
-            html = await resp.text()
+    url = f'https://www.parkrun.ru/{pr}/results/latestresults/'
+    html = await ParkrunSite().get_html(f'latestresults_{pr}', url)
     tree = fromstring(html)
     parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
     try:

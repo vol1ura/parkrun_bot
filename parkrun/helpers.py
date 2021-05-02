@@ -1,6 +1,11 @@
 import csv
 import os
 import random
+from datetime import date, timedelta
+
+import aiohttp
+
+from utils import redis
 
 PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
 CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
@@ -32,9 +37,38 @@ class ParkrunSite:
                        "Chrome/90.0.4430.85 Safari/537.36"}
     ]
 
-    @classmethod
-    def headers(cls):
-        return random.choice(ParkrunSite.PARKRUN_HEADERS)
+    PARKRUN_URL = {
+        'largestclubs': 'https://www.parkrun.ru/results/largestclubs/',
+        'courserecords': 'https://www.parkrun.ru/results/courserecords/'
+    }
+
+    def __init__(self):
+        self.headers = random.choice(ParkrunSite.PARKRUN_HEADERS)
+
+    @staticmethod
+    def compare_dates(date1, date2) -> bool:
+        if not (date1 and date2):
+            return False
+        date1 = date.fromisoformat(date1)
+        if date2 - timedelta(date2.isoweekday()) > date1 - timedelta(date1.isoweekday()):
+            return False
+        else:
+            return True
+
+    async def get_html(self, key, url=None):
+        redis_key = f'parkrun_{key}'
+        content = await redis.get_value(redis_key)
+        content_date = content.get('date', None)
+        today = date.today()
+        if ParkrunSite.compare_dates(content_date, today):
+            return content['html']
+        if not url:
+            url = ParkrunSite.PARKRUN_URL[key]
+        async with aiohttp.ClientSession(headers=self.headers) as session:
+            async with session.get(url) as resp:
+                html = await resp.text()
+        await redis.set_value(redis_key, date=today.isoformat(), html=html)
+        return html
 
 
 def min_to_mmss(m) -> str:

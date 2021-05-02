@@ -72,7 +72,6 @@ async def process_command_setclub(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data == 'set_athlete')
 @dp.throttled(rate=5)
 async def process_callback_set_athlete(callback_query: types.CallbackQuery):
-    # запрашиваем у пользователя его айдишник в системе паркран
     await bot.answer_callback_query(callback_query.id)
     user_id = callback_query.from_user.id
     await UserStates.ATHLETE_ID.set()

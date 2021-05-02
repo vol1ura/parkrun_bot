@@ -1,18 +1,13 @@
-import aiohttp
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from parkrun import helpers
-from parkrun.helpers import ParkrunSite
+from parkrun.helpers import ParkrunSite, PARKRUNS_FILE
 
 
 async def all_parkruns_records():
-    # TODO: add caching for this page
-    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
-        async with session.get('https://www.parkrun.ru/results/courserecords/') as resp:
-            html_all_parkruns = await resp.text()
-    return pd.read_html(html_all_parkruns)[0]
+    html = await ParkrunSite().get_html('courserecords')
+    return pd.read_html(html)[0]
 
 
 async def top_parkruns():
@@ -61,5 +56,5 @@ async def top_records_count(pic: str):
 
 async def update_parkruns_list():
     data = await all_parkruns_records()
-    with open(helpers.PARKRUNS_FILE, 'w') as f:
+    with open(PARKRUNS_FILE, 'w') as f:
         f.write('\n'.join(data[data.columns[0]].values))

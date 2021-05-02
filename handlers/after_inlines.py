@@ -23,7 +23,7 @@ async def latestparkruns_club_participation(message):
 
 
 @dp.message_handler(regexp='📊 Получение данных')
-@dp.throttled(handle_throttled_query, rate=12)
+@dp.throttled(handle_throttled_query, rate=6)
 async def post_latestparkrun_diagrams(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id

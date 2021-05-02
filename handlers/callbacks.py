@@ -19,7 +19,7 @@ async def process_callback_telegram(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
-@dp.throttled(handle_throttled_query, rate=15)
+@dp.throttled(handle_throttled_query, rate=6)
 async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
     pic = await records.top_records_count('records.png')
@@ -28,7 +28,7 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'top_active_clubs')
-@dp.throttled(handle_throttled_query, rate=15)
+@dp.throttled(handle_throttled_query, rate=6)
 async def process_top_active_clubs(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
     pic = clubs.top_active_clubs_diagram('top_clubs.png')
@@ -51,7 +51,7 @@ async def process_personal_results(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'enter_compare_id')
-@dp.throttled(handle_throttled_query, rate=15)
+@dp.throttled(handle_throttled_query, rate=8)
 async def process_enter_compare_id(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(

@@ -4,22 +4,19 @@ import re
 import time
 
 import aiohttp
+from datetime import date, timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
 from lxml.html import fromstring
 
 from bot_exceptions import ParsingException
-from parkrun import helpers
-from parkrun.helpers import ParkrunSite
+from parkrun.helpers import ParkrunSite, CLUBS_FILE, CLUBS
 
 
 async def update_parkruns_clubs():
-    if os.path.exists(helpers.CLUBS_FILE) and os.path.getmtime(helpers.CLUBS_FILE) + 605000 > time.time():
+    if os.path.exists(CLUBS_FILE) and os.path.getmtime(CLUBS_FILE) + 605000 > time.time():
         return
-    # TODO: add caching for this page
-    async with aiohttp.ClientSession(headers=helpers.ParkrunSite.headers()) as session:
-        async with session.get('https://www.parkrun.ru/results/largestclubs/') as resp:
-            html = await resp.text()
+    html = await ParkrunSite().get_html('largestclubs')
     tree = fromstring(html)
     rows = tree.xpath('//*[@id="results"]/tbody/tr')
     all_clubs = []
@@ -35,17 +32,17 @@ async def update_parkruns_clubs():
             'runs': cells[3].text_content(),
             'link': link
         })
-    with open(helpers.CLUBS_FILE, 'w', encoding='utf-8') as f:
+    with open(CLUBS_FILE, 'w', encoding='utf-8') as f:
         fieldnames = ['id', 'name', 'participants', 'runs', 'link']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writerows(all_clubs)
 
 
 async def check_club_as_id(club_id: str):
-    club_name = next((c['name'] for c in helpers.CLUBS if c['id'] == club_id), None)
+    club_name = next((c['name'] for c in CLUBS if c['id'] == club_id), None)
     if club_name:
         return club_name
-    async with aiohttp.ClientSession(headers=helpers.ParkrunSite.headers()) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
         async with session.get(f'https://www.parkrun.ru/groups/{club_id}/') as resp:
             html = await resp.text()
     tree = fromstring(html)
@@ -54,7 +51,7 @@ async def check_club_as_id(club_id: str):
         return None
     try:
         club_name = tree.xpath('//*[@id="content"]/div/h1')[0].text_content()
-        helpers.CLUBS.append({
+        CLUBS.append({
             'id': club_id,
             'name': club_name,
             'participants': tree.xpath('//*[@id="content"]/div/p[2]')[0].text_content().split()[0],
@@ -67,17 +64,23 @@ async def check_club_as_id(club_id: str):
 
 
 async def get_participants(club_id: str):
-    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
         async with session.get(f'https://www.parkrun.com/results/consolidatedclub/?clubNum={club_id}') as resp:
             html = await resp.text()
     tree = fromstring(html)
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
     data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
+    date_info = date.fromisoformat(data.group(1))
+    if date.today() > date_info + timedelta(6):
+        message = 'Извините, но результаты в системе parkrun ещё не обновились 😿 Всё, что могу предложить ' \
+                  'на данный момент - результаты за прошлую неделю.\n'
+    else:
+        message = ''
     participants = tree.xpath('//table/tr/td[4]')
     count = sum(1 for p in participants if p.text_content() != 'Unattached')
     places = tree.xpath('//div[@class="floatleft"]/h2')
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
-    message = f'Паркраны, где побывали наши одноклубники *{data.group(1)}*:\n'
+    message += f'Паркраны, где побывали наши одноклубники *{data.group(1)}*:\n'
     for i, (p, l) in enumerate(zip(places, links_to_results), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
         message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l})\n"
@@ -86,7 +89,7 @@ async def get_participants(club_id: str):
 
 
 async def get_club_table(parkrun: str, club_id: str):
-    async with aiohttp.ClientSession(headers=ParkrunSite.headers()) as session:
+    async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
         async with session.get(f'https://www.parkrun.ru/{parkrun}/results/clubhistory/?clubNum={club_id}') as resp:
             html_club_results = await resp.text()
     try:
@@ -131,7 +134,7 @@ async def get_parkrun_club_top_results(parkrun: str, club_id: str):
 
 
 def top_active_clubs_diagram(pic: str):
-    df = pd.DataFrame(helpers.CLUBS)
+    df = pd.DataFrame(CLUBS)
     df['runs'] = df['runs'].apply(int)
     df = df.sort_values(by=['runs'], ascending=False).head(10)
     clubs = df['name']
