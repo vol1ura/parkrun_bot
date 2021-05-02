@@ -170,12 +170,12 @@ async def query_latestparkrun(inline_query: types.InlineQuery):
             input_message_content=types.InputTextMessageContent(pattern + 'о клубах...'),
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/9.jpg',
             thumb_width=48, thumb_height=48)
-        # m3 = types.InlineQueryResultArticle(
-        #     f'{3}', 'Топ 10 волонтёров', description='на паркране Кузьминки',
-        #     input_message_content=types.InputTextMessageContent(pattern + 'о волонтёрах.', parse_mode='Markdown'),
-        #     thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/3.jpg',
-        #     thumb_width=48, thumb_height=48)
-        await bot.answer_inline_query(inline_query.id, [m1, m2], cache_time=36000)
+        m3 = types.InlineQueryResultArticle(
+            id='3', title='Сводка основных показателей', description='общая статистика и лидеры',
+            input_message_content=types.InputTextMessageContent(pattern + 'с общей инфой.', parse_mode='Markdown'),
+            thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/3.jpg',
+            thumb_width=48, thumb_height=48)
+        await bot.answer_inline_query(inline_query.id, [m1, m2, m3], cache_time=0)
     except Exception as e:
         logger.error(e)
 

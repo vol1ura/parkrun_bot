@@ -47,7 +47,9 @@ async def post_latestparkrun_diagrams(message):
             pic.close()
         else:
             logger.error('File clubs.png not found! Or the picture wasn\'t generated.')
-
+    elif 'с общей инфой.' in message.text:
+        report = await latest.review_table(parkrun_name)
+        await message.answer(report, parse_mode='Markdown')
     await bot.delete_message(message.chat.id, message.message_id)
 
 
