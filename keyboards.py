@@ -11,10 +11,11 @@ main.row(btn3, btn4).add(btn1, btn2)
 
 # STATISTICS inline keyboard layout
 inline_stat = InlineKeyboardMarkup(row_width=2)
-inline_stat.insert(InlineKeyboardButton('Последний паркран', switch_inline_query_current_chat='latestresults'))
 inline_stat.insert(InlineKeyboardButton('Личные результаты', callback_data='personal_results'))
+inline_stat.insert(InlineKeyboardButton('Сравнение результатов', callback_data='compare_results'))
+inline_stat.row(InlineKeyboardButton('Последний паркран', switch_inline_query_current_chat='latestresults'))
 
-inline_stat.insert(InlineKeyboardButton('Одноклубники', switch_inline_query_current_chat='teammates'))
+inline_stat.row(InlineKeyboardButton('Одноклубники', switch_inline_query_current_chat='teammates'))
 inline_stat.insert(InlineKeyboardButton('Top10 клубов', callback_data='top_active_clubs'))
 
 inline_stat.insert(InlineKeyboardButton('Рекорды', switch_inline_query_current_chat='records'))
@@ -47,8 +48,14 @@ inline_parkrun.insert(InlineKeyboardButton('Перейти на сайт parkrun
 
 # PERSONAL RESULTS inline keyboard layout
 inline_personal = InlineKeyboardMarkup(row_width=2)
-inline_personal.row(InlineKeyboardButton('Ввести ID участника', callback_data='enter_compare_id'))
-inline_personal.add(InlineKeyboardButton('Баттл-таблица', callback_data='battle_table'))
-inline_personal.insert(InlineKeyboardButton('Баттл-диаграмма', callback_data='battle_diagram'))
-inline_personal.insert(InlineKeyboardButton('Файл Excel', callback_data='excel_table'))
-inline_personal.insert(InlineKeyboardButton('Scatter', callback_data='battle_scatter'))
+inline_personal.insert(InlineKeyboardButton('Ваша история', callback_data='personal_history'))
+inline_personal.insert(InlineKeyboardButton('Ваши личники', callback_data='personal_bests'))
+inline_personal.insert(InlineKeyboardButton('Паркран-туризм', callback_data='personal_tourism'))
+
+# COMPARATION of personal results
+inline_compare = InlineKeyboardMarkup(row_width=2)
+inline_compare.row(InlineKeyboardButton('Ввести ID участника', callback_data='enter_compare_id'))
+inline_compare.add(InlineKeyboardButton('Баттл-таблица', callback_data='battle_table'))
+inline_compare.insert(InlineKeyboardButton('Баттл-диаграмма', callback_data='battle_diagram'))
+inline_compare.insert(InlineKeyboardButton('Файл Excel', callback_data='excel_table'))
+inline_compare.insert(InlineKeyboardButton('Scatter', callback_data='battle_scatter'))
