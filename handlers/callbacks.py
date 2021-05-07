@@ -5,7 +5,7 @@ import keyboards as kb
 from app import dp, bot, logger
 from bot_exceptions import CallbackException
 from config import DB_FILE
-from handlers.helpers import UserStates, handle_throttled_query
+from handlers.helpers import UserStates, handle_throttled_query, add_db_athlete
 from parkrun import records, clubs
 from parkrun.collations import CollationMaker
 from parkrun.personal import PersonalResults
@@ -87,13 +87,13 @@ async def get_compared_pages(user_id):
                                 'Нажмите кнопку Ввести ID участника.')
     if athlete_id_1 == athlete_id_2:
         raise CallbackException('Ваш parkrun ID не должен совпадать с parkrun ID, выбранного участника.')
+    athlete_name_1 = await add_db_athlete(athlete_id_1)
+    athlete_name_2 = await add_db_athlete(athlete_id_2)
     with Vedis(DB_FILE) as db:
         try:
             h = db.Hash(f'A{athlete_id_1}')
-            athlete_name_1 = h['athlete'].decode()
             athlete_page_1 = h['athlete_page'].decode()
             h = db.Hash(f'A{athlete_id_2}')
-            athlete_name_2 = h['athlete'].decode()
             athlete_page_2 = h['athlete_page'].decode()
         except Exception as e:
             logger.error(e)
@@ -107,15 +107,15 @@ async def get_personal_page(user_id):
     if not athlete_id:
         raise CallbackException('Вы не ввели свой parkrun ID.\n'
                                 'Перейдите в настройки и нажмите кнопку Выбрать участника')
+    athlete_name = await add_db_athlete(athlete_id)
     with Vedis(DB_FILE) as db:
         try:
             h = db.Hash(f'A{athlete_id}')
-            athlete_name_1 = h['athlete'].decode()
-            athlete_page_1 = h['athlete_page'].decode()
+            athlete_page = h['athlete_page'].decode()
         except Exception as e:
             logger.error(e)
             raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
-    return athlete_name_1, athlete_page_1
+    return athlete_name, athlete_page
 
 
 @dp.callback_query_handler(lambda c: c.data == 'battle_diagram')
