@@ -27,7 +27,7 @@ CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs'
 
 
 class ParkrunSite:
-    PARKRUN_HEADERS = [
+    __PARKRUN_HEADERS = [
         {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"},
         {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) "
                        "Chrome/83.0.4103.61 Safari/537.36"},
@@ -37,38 +37,39 @@ class ParkrunSite:
                        "Chrome/90.0.4430.85 Safari/537.36"}
     ]
 
-    PARKRUN_URL = {
+    __PARKRUN_URL = {
         'largestclubs': 'https://www.parkrun.ru/results/largestclubs/',
         'courserecords': 'https://www.parkrun.ru/results/courserecords/'
     }
 
-    def __init__(self):
-        self.headers = random.choice(ParkrunSite.PARKRUN_HEADERS)
+    def __init__(self, key=''):
+        self.__key = key
+        self.__redis_key = f'parkrun_{key}'
+        self.headers = random.choice(ParkrunSite.__PARKRUN_HEADERS)
 
     @staticmethod
-    def compare_dates(date1, date2) -> bool:
-        if not (date1 and date2):
+    def _compare_dates(date1: str, date2) -> bool:
+        if not date1:
             return False
         date1 = date.fromisoformat(date1)
-        if date2 - timedelta(date2.isoweekday()) > date1 - timedelta(date1.isoweekday()):
-            return False
-        else:
-            return True
+        return date2 <= date1 + timedelta(13 - date1.isoweekday())
 
-    async def get_html(self, key, url=None):
-        redis_key = f'parkrun_{key}'
-        content = await redis.get_value(redis_key)
+    async def get_html(self, url=None):
+        content = await redis.get_value(self.__redis_key)
         content_date = content.get('date', None)
         today = date.today()
-        if ParkrunSite.compare_dates(content_date, today):
+        if ParkrunSite._compare_dates(content_date, today):
             return content['html']
         if not url:
-            url = ParkrunSite.PARKRUN_URL[key]
+            url = ParkrunSite.__PARKRUN_URL[self.__key]
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.get(url) as resp:
                 html = await resp.text()
-        await redis.set_value(redis_key, date=today.isoformat(), html=html)
+        await redis.set_value(self.__redis_key, date=today.isoformat(), html=html)
         return html
+
+    async def update_info(self, actual_date: str):
+        await redis.set_value(self.__redis_key, date=actual_date)
 
 
 def min_to_mmss(m) -> str:

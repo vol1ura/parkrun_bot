@@ -57,9 +57,9 @@ class PersonalResults:
 
     def tourism(self, pic: str):
         fig, ax = plt.subplots(figsize=(9, 6), dpi=150)
-        aggfun = lambda parkruns: len(np.unique(parkruns, return_counts=True)[1])
         # pivot df into long form and aggregate by fastest time
-        rundata = self.df.pivot_table(index='Месяц', columns='Год', values='Паркран', aggfunc=aggfun, fill_value=0)
+        rundata = self.df.pivot_table(index='Месяц', columns='Год', values='Паркран', fill_value=0,
+                                      aggfunc=lambda parkruns: len(np.unique(parkruns, return_counts=True)[1]))
         maxuniq = rundata.max().max()
 
         # add rows of zeros for any months missed

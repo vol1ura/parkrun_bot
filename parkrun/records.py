@@ -6,7 +6,7 @@ from parkrun.helpers import ParkrunSite, PARKRUNS_FILE
 
 
 async def all_parkruns_records():
-    html = await ParkrunSite().get_html('courserecords')
+    html = await ParkrunSite('courserecords').get_html()
     return pd.read_html(html)[0]
 
 

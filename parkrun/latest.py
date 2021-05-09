@@ -13,9 +13,12 @@ from parkrun.helpers import ParkrunSite, min_to_mmss
 async def parse_latest_results(parkrun: str):
     pr = re.sub('[- ]', '', parkrun)
     url = f'https://www.parkrun.ru/{pr}/results/latestresults/'
-    html = await ParkrunSite().get_html(f'latestresults_{pr}', url)
+    parkrun_site = ParkrunSite(f'latestresults_{pr}')
+    html = await parkrun_site.get_html(url)
     tree = fromstring(html)
     parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
+    parkrun_iso_date = '-'.join(parkrun_date.split('/')[::-1])
+    await parkrun_site.update_info(parkrun_iso_date)
     try:
         df = pd.read_html(html)[0]
     except Exception:
@@ -120,11 +123,13 @@ async def review_table(parkrun: str):
     if count_total == 0:
         return f'Паркран {parkrun} {parkrun_date} не состоялся.'
     df = df.dropna(thresh=3)
-    df['Позиция м/ж'] = df[df.columns[2]].dropna().transform(lambda s: int(re.search(r'(?:Мужской|Женский)[ ]+(\d+)', s)[1]))
+    df['Позиция м/ж'] = df[df.columns[2]].dropna()\
+        .transform(lambda s: int(re.search(r'(?:Мужской|Женский)[ ]+(\d+)', s)[1]))
     df['Участник'] = df['Участник'].transform(lambda s: re.search(r'([^\d]+)\d.*|Неизвестный', s)[1])
     df['Личник'] = df['Время'].dropna().transform(lambda s: re.search(r'(?<=\d\d:\d\d)(.*)', s)[1])
     df['Время'] = df['Время'].dropna().transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0])
-    df['result_m'] = df['Время'].transform(lambda time: sum(x * int(t) for x, t in zip([1/60, 1, 60], time.split(':')[::-1])))
+    df['result_m'] = df['Время']\
+        .transform(lambda time: sum(x * int(t) for x, t in zip([1/60, 1, 60], time.split(':')[::-1])))
     pb = df['Личник'][df['Личник'] == 'Новый ЛР!'].count() * 100.0 / count_total
     median = min_to_mmss(df['result_m'].median())
     q95 = min_to_mmss(df['result_m'].quantile(q=0.95))

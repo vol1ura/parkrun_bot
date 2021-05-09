@@ -16,7 +16,7 @@ from parkrun.helpers import ParkrunSite, CLUBS_FILE, CLUBS
 async def update_parkruns_clubs():
     if os.path.exists(CLUBS_FILE) and os.path.getmtime(CLUBS_FILE) + 605000 > time.time():
         return
-    html = await ParkrunSite().get_html('largestclubs')
+    html = await ParkrunSite('largestclubs').get_html()
     tree = fromstring(html)
     rows = tree.xpath('//*[@id="results"]/tbody/tr')
     all_clubs = []

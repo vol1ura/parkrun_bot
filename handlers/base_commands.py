@@ -28,8 +28,8 @@ async def admin(message: types.Message):
     if message.chat.type == 'private':  # private chat message
         await message.reply('Здесь нет админов, это персональный чат.')
     else:
-        admin = random.choice(await bot.get_chat_administrators(message.chat.id)).user
-        about_admin = f'\nАдмин @{admin.username} - {admin.first_name}  {admin.last_name}'
+        group_admin = random.choice(await bot.get_chat_administrators(message.chat.id)).user
+        about_admin = f'\nАдмин @{group_admin.username} - {group_admin.first_name}  {group_admin.last_name}'
         await message.answer(random.choice(content.phrases_about_admin) + about_admin)
 
 
