@@ -1,4 +1,6 @@
 .env
+*.png
+*.vdb
 /.idea
 /env
 /__pycache__

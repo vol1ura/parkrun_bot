@@ -33,22 +33,12 @@ phrases_admin = [
     "позови админа", 'модератор', "модератор чата"
 ]
 
-phrases_social = [
-    'соцсети клуба', 'ссылки на клуб', 'клуб в интернете', 'информация о клубе', 'клуб в vk', "клуб в фейсбук",
-    'клуб в страве'
-]
-
 phrases_weather = [
     'погода на улице', 'информация о погоде', 'прогноз погоды', "какая погода"
 ]
 
 phrases_parkrun = [
     "расскажи о паркран", "новости о паркран", "что известно о паркран", "когда откроют паркран"
-]
-
-phrases_schedule = [
-    "расписание", "тренировки клуба", "четверговые", "длительная тренировка", "расписание тренировок",
-    "когда тренировка"
 ]
 
 with open(os.path.join(os.path.dirname(__file__), 'message_base_meschch.pkl'), 'rb') as f:
@@ -63,16 +53,13 @@ if __name__ == '__main__':
 
     phrase1 = 'бот, покажи статью о беге'
     phrase2 = 'Бот, позови администратора'
-    phrase3 = 'Бот, покажи ссылки на клуб'
     phrase4 = 'бот, когда откроют паркраны?'
-    test_phrases = [phrase1, phrase2, phrase3, phrase4]
+    test_phrases = [phrase1, phrase2, phrase4]
 
     compare1 = list(map(lambda p: bot_compare(p, phrases_instagram), test_phrases))
     compare2 = list(map(lambda p: bot_compare(p, phrases_admin), test_phrases))
-    compare3 = list(map(lambda p: bot_compare(p, phrases_social), test_phrases))
     compare4 = list(map(lambda p: bot_compare(p, phrases_parkrun), test_phrases))
 
     print(compare1)
     print(compare2)
-    print(compare3)
     print(compare4)

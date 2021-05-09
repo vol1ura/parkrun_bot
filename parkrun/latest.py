@@ -151,10 +151,3 @@ async def review_table(parkrun: str):
     for _, row in df[df['Позиция м/ж'] < 4].iterrows():
         report += f"  *{row['Позиция м/ж']}*      | {row['Участник']} | {row['Время']}\n"
     return report
-
-if __name__ == '__main__':
-    import asyncio
-
-    loop = asyncio.get_event_loop()
-    ff = loop.run_until_complete(review_table('Kolomenskoe'))
-    print(ff)
