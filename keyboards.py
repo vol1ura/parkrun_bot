@@ -51,6 +51,7 @@ inline_personal = InlineKeyboardMarkup(row_width=2)
 inline_personal.insert(InlineKeyboardButton('Ваша история', callback_data='personal_history'))
 inline_personal.insert(InlineKeyboardButton('Ваши личники', callback_data='personal_bests'))
 inline_personal.insert(InlineKeyboardButton('Паркран-туризм', callback_data='personal_tourism'))
+inline_personal.insert(InlineKeyboardButton('Победы/участия', callback_data='personal_wins'))
 
 # COMPARATION of personal results
 inline_compare = InlineKeyboardMarkup(row_width=2)

@@ -194,3 +194,12 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     await bot.send_photo(user_id, pic, caption='Трактовка: по цвету можно понять, когда и как часто вы '
                                                'посещали разные паркраны.')
     pic.close()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'personal_wins')
+@dp.throttled(handle_throttled_query, rate=10)
+async def process_personal_wins_table(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
+    user_id = callback_query.from_user.id
+    page = await get_personal_page(user_id)
+    await bot.send_message(callback_query.from_user.id, PersonalResults(*page).wins_table(), parse_mode='Markdown')
