@@ -81,7 +81,9 @@ class PersonalResults:
     def wins_table(self):
         pos_df = pd.crosstab(self.df['Паркран'], self.df['Место'], margins=True).loc[:, [1, 2, 3, 'All']]
         pos_df = pos_df.sort_values(by=pos_df.columns[0], ascending=False)
-        table = 'Паркран_____\\_____Место_|__1__|__2__|__3__|_Всего\n'
+        separator = '-------------+-----+-----+-----+----'
+        rows = ['```', 'Паркран/Место|  1  |  2  |  3  | ∑ ', separator]
         for row in pos_df.itertuples():
-            table += f'{row[0]:<23} | {row[1]:3d} | {row[2]:3d} | {row[3]:3d} | {row[4]:3d}\n'
-        return table
+            rows.append(f'{row[0][:12]:<12} | {row[1]:3d} | {row[2]:3d} | {row[3]:3d} | {row[4]:3d}')
+        rows += [separator, rows.pop(3).replace('All  ', 'Итого'), '```']
+        return '\n'.join(rows)
