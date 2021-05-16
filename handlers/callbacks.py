@@ -23,7 +23,7 @@ async def process_callback_telegram(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=6)
 async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
-    pic = await records.top_records_count('records.png')
+    pic = await records.top_records_count('gen_png/records.png')
     await bot.send_photo(callback_query.from_user.id, pic)
     pic.close()
 
@@ -32,7 +32,7 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=6)
 async def process_top_active_clubs(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
-    pic = clubs.top_active_clubs_diagram('top_clubs.png')
+    pic = clubs.top_active_clubs_diagram('gen_png/top_clubs.png')
     await bot.send_photo(callback_query.from_user.id, pic)
     pic.close()
 
@@ -124,7 +124,7 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    pic = CollationMaker(*pages).bars('battle.png')
+    pic = CollationMaker(*pages).bars('gen_png/battle.png')
     await bot.send_photo(user_id, pic, caption='Трактовка: чем меньше по высоте столбцы, тем ближе ваши результаты.')
     pic.close()
 
@@ -135,7 +135,7 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю график. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    pic = CollationMaker(*pages).scatter('scatter.png')
+    pic = CollationMaker(*pages).scatter('gen_png/scatter.png')
     await bot.send_photo(user_id, pic, caption='Трактовка: каждая точка - совместный забег, чем ближе точки к '
                                                'левому нижнему углу и красной линией, тем  больше соперничество.')
     pic.close()
@@ -167,7 +167,7 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     user_id = callback_query.from_user.id
     page = await get_personal_page(user_id)
-    pic = PersonalResults(*page).history('participate.png')
+    pic = PersonalResults(*page).history('gen_png/participate.png')
     await bot.send_photo(user_id, pic, caption='Трактовка: равномерность и интенсивность цвета показывает '
                                                'регулярность участия в паркранах.')
     pic.close()
@@ -179,7 +179,7 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     user_id = callback_query.from_user.id
     page = await get_personal_page(user_id)
-    pic = PersonalResults(*page).personal_bests('pb.png')
+    pic = PersonalResults(*page).personal_bests('gen_png/pb.png')
     await bot.send_photo(user_id, pic, caption='Трактовка: по цвету можно понять, когда у вас были лучшие результаты.')
     pic.close()
 
@@ -190,7 +190,7 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     user_id = callback_query.from_user.id
     page = await get_personal_page(user_id)
-    pic = PersonalResults(*page).tourism('tourism.png')
+    pic = PersonalResults(*page).tourism('gen_png/tourism.png')
     await bot.send_photo(user_id, pic, caption='Трактовка: по цвету можно понять, когда и как часто вы '
                                                'посещали разные паркраны.')
     pic.close()

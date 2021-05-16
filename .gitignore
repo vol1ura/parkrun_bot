@@ -2,8 +2,8 @@
 *.png
 *.vdb
 /.idea
-/env
-/__pycache__
+/aienv
+*__pycache__/
 /.instapi_cache
 /utils/__pycache__
 /service_scripts
