@@ -38,7 +38,7 @@ inline_info.add(info_btn4, info_btn3)
 # SETTINGS inline keyboard layout
 inline_parkrun = InlineKeyboardMarkup(row_width=2)
 inline_parkrun.insert(InlineKeyboardButton('Мои установки', callback_data='check_settings'))
-inline_parkrun.insert(InlineKeyboardButton('Выбрать участника', callback_data='set_athlete'))
+inline_parkrun.insert(InlineKeyboardButton('Ввести ParkrunID', callback_data='set_athlete'))
 
 inline_parkrun.insert(InlineKeyboardButton('Выбрать parkrun', switch_inline_query_current_chat='parkrun'))
 inline_parkrun.insert(InlineKeyboardButton("Выбрать клуб", switch_inline_query_current_chat='clubs'))
@@ -48,8 +48,8 @@ inline_parkrun.insert(InlineKeyboardButton('Перейти на сайт parkrun
 
 # PERSONAL RESULTS inline keyboard layout
 inline_personal = InlineKeyboardMarkup(row_width=2)
-inline_personal.insert(InlineKeyboardButton('Ваша история', callback_data='personal_history'))
-inline_personal.insert(InlineKeyboardButton('Ваши личники', callback_data='personal_bests'))
+inline_personal.insert(InlineKeyboardButton('Моя история', callback_data='personal_history'))
+inline_personal.insert(InlineKeyboardButton('Мои личники', callback_data='personal_bests'))
 inline_personal.insert(InlineKeyboardButton('Паркран-туризм', callback_data='personal_tourism'))
 inline_personal.insert(InlineKeyboardButton('Победы/участия', callback_data='personal_wins'))
 
