@@ -41,8 +41,8 @@ async def post_latestparkrun_diagrams(message):
             logger.error('File results.png not found! Or the picture wasn\'t generated.')
 
     elif 'о клубах...' in message.text:
-        pic = await latest.make_clubs_bar(parkrun_name, 'clubs.png')
-        if os.path.exists("clubs.png"):
+        pic = await latest.make_clubs_bar(parkrun_name, 'gen_png/clubs.png')
+        if os.path.exists("gen_png/clubs.png"):
             await bot.send_photo(message.chat.id, pic)
             pic.close()
         else:
