@@ -33,7 +33,7 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
     df = df.dropna(thresh=3)
     df['Время'] = df['Время'].dropna() \
         .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0]) \
-        .transform(lambda mmss: sum(x * int(t) for x, t in zip([1 / 60, 1, 60], mmss.split(':')[::-1])))
+        .transform(lambda mmss: sum(x * float(t) for x, t in zip([1 / 60, 1, 60], mmss.split(':')[::-1])))
 
     plt.figure(figsize=(5.5, 4), dpi=300)
     ax = df['Время'].hist(bins=32)
@@ -68,7 +68,7 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
     ax.annotate(med_message, (med - 0.5, m_height + 0.1), rotation=turn)
     plt.plot([med, med], [0, m_height], 'b')
 
-    ldr_time = ptchs[0].get_x()
+    ldr_time = round(ptchs[0].get_x(), 4)
     ldr_y_mark = ptchs[0].get_height() + 0.3
     ldr_message = f'Лидер {int(ldr_time)}:{(ldr_time - int(ldr_time)) * 60:02.0f}'
     ax.annotate(ldr_message, (ldr_time - 0.5, ldr_y_mark + 0.2), rotation=90)
