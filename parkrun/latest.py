@@ -71,12 +71,12 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
     ldr_time = round(ptchs[0].get_x(), 4)
     ldr_y_mark = ptchs[0].get_height() + 0.3
     ldr_message = f'Лидер {int(ldr_time)}:{(ldr_time - int(ldr_time)) * 60:02.0f}'
-    ax.annotate(ldr_message, (ldr_time - 0.5, ldr_y_mark + 0.2), rotation=90)
+    ax.annotate(ldr_message, (ldr_time - 0.5, ldr_y_mark + 0.2), rotation=90, va='bottom')
     plt.plot([ldr_time, ldr_time], [0, ldr_y_mark], 'r')
 
     lst_time = ptchs[-1].get_x() + ptchs[-1].get_width()
     lst_y_mark = ptchs[-1].get_height() + 0.3
-    ax.annotate(f'Всего\nучастников {number_runners}', (lst_time - 0.6, lst_y_mark + 0.1), rotation=90)
+    ax.annotate(f'Всего\nучастников {number_runners}', (lst_time - 0.6, lst_y_mark + 0.1), rotation=90, va='bottom')
     plt.plot([lst_time, lst_time], [0, lst_y_mark], 'r')
 
     if name and personal_time:
