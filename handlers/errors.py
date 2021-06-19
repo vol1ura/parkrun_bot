@@ -1,4 +1,4 @@
-from aiogram.utils.exceptions import TelegramAPIError, BotBlocked
+from aiogram.utils.exceptions import TelegramAPIError, BotBlocked, InvalidQueryID
 
 from app import dp, logger, bot
 from bot_exceptions import ParsingException, CallbackException, NoCollationRuns
@@ -36,13 +36,28 @@ async def no_collation_runs_handler(update, error):
     return True
 
 
+@dp.errors_handler(exception=InvalidQueryID)
+async def invalid_query_id_handler(update, error):
+    message = 'Извините, запуск бота занял много времени. Теперь бот готов отвечать. Повторите запрос.'
+    if update.callback_query:
+        await bot.send_message(update.callback_query.from_user.id, message)
+    elif update.message:
+        await bot.send_message(update.message.chat.id, message)
+    else:
+        logger.warning(f'{update} update object was not processed')  # TODO: remove or change after testing
+    # We collect some info about an exception and write them to log
+    error_msg = f"Bot started too long. Error: {error}"
+    logger.error(error_msg)
+    return True
+
+
 @dp.errors_handler(exception=TelegramAPIError)
 async def api_errors_handler(update, error):
     # Here we collect all available exceptions from Telegram and write them to log
     # First, we don't want to log BotBlocked exception, so we skip it
     if isinstance(error, BotBlocked):
         return True
-    # We collect some info about an exception and write to file
+    # We collect some info about an exception and write to log
     error_msg = f"Exception of type {type(error)}. Error: {error}"
     logger.error(error_msg)
     return True
