@@ -11,3 +11,10 @@ It is my personal project.
 ```shell
 heroku config | grep REDIS
 ```
+
+### Tests
+
+```shell
+pip install -r tests/requirements.txt
+pytest --cov-report=term-missing:skip-covered --cov=. tests/
+```
