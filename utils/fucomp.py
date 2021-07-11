@@ -43,23 +43,3 @@ phrases_parkrun = [
 
 with open(os.path.join(os.path.dirname(__file__), 'message_base_meschch.pkl'), 'rb') as f:
     message_base_m = pickle.load(f)
-
-
-# ===================== TESTING =============================
-if __name__ == '__main__':
-    with open('message_base_meschch.pkl', 'rb') as f:
-        message_base_wr = pickle.load(f)
-    print(best_answer('бот, знаешь девиз?', message_base_wr))
-
-    phrase1 = 'бот, покажи статью о беге'
-    phrase2 = 'Бот, позови администратора'
-    phrase4 = 'бот, когда откроют паркраны?'
-    test_phrases = [phrase1, phrase2, phrase4]
-
-    compare1 = list(map(lambda p: bot_compare(p, phrases_instagram), test_phrases))
-    compare2 = list(map(lambda p: bot_compare(p, phrases_admin), test_phrases))
-    compare4 = list(map(lambda p: bot_compare(p, phrases_parkrun), test_phrases))
-
-    print(compare1)
-    print(compare2)
-    print(compare4)
