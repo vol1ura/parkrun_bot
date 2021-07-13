@@ -1,9 +1,18 @@
 .env
 *.png
 *.vdb
-/.idea
-/aienv
+
+# DEV DIR
+.idea/
+aienv/
+
+# CACHES
 *__pycache__/
-/.instapi_cache
+.instapi_cache/
 /utils/__pycache__
-/service_scripts
+
+service_scripts/
+
+# TESTS
+.coverage
+htmlcov/
