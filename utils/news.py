@@ -31,7 +31,7 @@ async def get_competitions(month, year):
                 'Костром' in where or 'Калуж' in where or 'Белгород' in where:
             continue
         kontacts = cells[5].text_content()
-        if 'Скоблина' in kontacts or 'alleviate@yandex' in kontacts:
+        if 'Скоблина' in kontacts or 'alleviate@yandex' in kontacts:  # pragma: no cover
             continue
         title = cells[0].text_content().strip()
         url = cells[0].xpath('.//b/a/@href')[0].strip()
@@ -41,11 +41,3 @@ async def get_competitions(month, year):
                       f'\n➡️ <b>Дистанции</b>: {dist}'
         competitions.append((title, when, description))
     return competitions
-
-
-if __name__ == '__main__':
-    import asyncio
-
-    loop = asyncio.get_event_loop()
-    a = loop.run_until_complete(get_competitions(4, 2021))
-    print(a)
