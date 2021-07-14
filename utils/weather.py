@@ -47,8 +47,6 @@ async def get_air_quality(place, lat, lon, lang='ru'):
 
 
 async def get_air_accu_quality(lat, lon):
-    url_host = 'https://www.accuweather.com'
-    url_path = f'/en/search-locations?query={lat}%2C{lon}'
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate, br",
@@ -62,12 +60,19 @@ async def get_air_accu_quality(lat, lon):
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"
     }
     session = aiohttp.ClientSession(headers=headers)
+    url = await get_url_accu(lat, lon, session)
+    result = await parse_air_accu(url, session)
+    await session.close()
+    return result
+
+
+async def get_url_accu(lat, lon, session):
+    url_host = 'https://www.accuweather.com'
+    url_path = f'/en/search-locations?query={lat}%2C{lon}'
     async with session.get(url_host + url_path) as resp:
         url = url_host + resp.url.path
         print('URL: ', url)
-        result = await parse_air_accu(url, session)
-    await session.close()
-    return result
+    return url
 
 
 async def parse_air_accu(url: str, session):
@@ -91,28 +96,3 @@ async def parse_air_accu(url: str, session):
         air_description += f', {v_aqp}({pollutant[p]})-{category[cat]}'
     air_description += ', в µg/m³.'
     return air_index[aqi_category], air_description
-
-
-# TESTING
-if __name__ == '__main__':
-    import asyncio
-    from dotenv import load_dotenv
-
-    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
-    lat = 54.045048
-    lon = 37.507175
-    my_name = 'tyelyatinki'
-    my_key = 2442389
-    loop = asyncio.get_event_loop()
-    # t = loop.run_until_complete(get_air_accu_quality(lat, lon))
-#     t = loop.run_until_complete(get_air_quality('Some place', 43.585472, 39.723089))
-#     # get_place_accu_params(lat, lon)
-#     # aqu = get_air_accu_quality(lat, lon)
-#     # print(aqu)
-#     # w = get_weather('Test', 43.585472, 39.723089)
-#     print(t)
-#     # a = get_air_quality('Some place', 43.585472, 39.723089)
-#     # print(a[1])
