@@ -21,7 +21,7 @@ async def google(phrase):
             result = await resp.json()
     try:
         res1 = random.choice(result['items'])['htmlSnippet']
-    except KeyError:
+    except KeyError:  # pragma: no cover
         return ''
     res2 = re.sub(r'(?im)<b>|</b>|\.\.\.|<br>|&nbsp;|&quot;|\n', '', res1)
     res3 = re.sub(r'Марафорум - форум о любительском беге, тренировках,( соревнованиях.)?', '', res2, re.MULTILINE)
@@ -30,7 +30,7 @@ async def google(phrase):
     res6 = re.sub(r'Сообщение Добавлено: \w{,2} \d{,2} \w+ \d{2,4}, \d\d:\d\d', '', res5)
     res7 = re.sub(r'Марафорум|» Соревнования|» Кроссы, трейлы\.|Часовой пояс:|UTC\.|Кто сейчас на форуме\.*', '', res6)
     res8 = re.sub(r'Последний раз редактировалось .*, \d\d:\d\d, всего', '', res7)
-    return [].append(re.sub(r'[,.!?][\w ]+$', '.', res8.strip(), re.MULTILINE))
+    return [re.sub(r'[.!?] [\w ]+$', '.', res8.strip(), re.MULTILINE)]
 
 
 async def bashim(phrase):
@@ -46,19 +46,3 @@ async def bashim(phrase):
             [cite.remove(s) for s in list(cite) if s == '']
             print(f'"{cite[0].strip()}",')
     return ''
-
-
-if __name__ == '__main__':
-    import asyncio
-    from dotenv import load_dotenv
-
-    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
-    loop = asyncio.get_event_loop()
-    srch1 = loop.run_until_complete(google('бот, гречка'))
-    srch2 = loop.run_until_complete(bashim('бот, гречка'))
-
-    print(srch1)
-    print(srch2)
