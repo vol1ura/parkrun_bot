@@ -39,7 +39,7 @@ async def process_top_active_clubs(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == 'compare_results')
 @dp.throttled(rate=2)
-async def process_personal_results(callback_query: types.CallbackQuery):
+async def process_compare_results(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
