@@ -14,6 +14,17 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      redis:
+        # Docker Hub image
+        image: redis
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -33,6 +44,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        echo $REDIS_URL
         pytest --cov-report=xml --cov=. tests/
       env:
         API_BOT_TOKEN: ${{ secrets.API_BOT_TOKEN }}
@@ -42,6 +54,7 @@ jobs:
         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         GOOGLE_CX: ${{ secrets.GOOGLE_CX }}
         VK_SERVICE_TOKEN: ${{ secrets.VK_SERVICE_TOKEN }}
+        REDIS_URL: redis:6379
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
@@ -51,4 +64,4 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: true
         path_to_write_report: ./coverage/codecov_report.txt
-        verbose: true
+        verbose: false
