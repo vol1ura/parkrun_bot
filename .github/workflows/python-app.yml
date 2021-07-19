@@ -49,6 +49,7 @@ jobs:
       env:
         API_BOT_TOKEN: ${{ secrets.API_BOT_TOKEN }}
         OWM_TOKEN: ${{ secrets.OWM_TOKEN }}
+        WEBHOOK: ${{ secrets.WEBHOOK }}
         IG_PASSWORD: ${{ secrets.IG_PASSWORD }}
         IG_USERNAME: ${{ secrets.IG_USERNAME }}
         GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
