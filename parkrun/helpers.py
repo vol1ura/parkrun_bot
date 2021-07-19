@@ -77,4 +77,4 @@ class ParkrunSite:
 
 def min_to_mmss(m) -> str:
     mins = int(m)
-    return f'{mins}:{int((m - mins) * 60):02d}'
+    return f'{mins}:{round((m - mins) * 60):02d}'
