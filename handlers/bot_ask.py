@@ -48,7 +48,7 @@ async def parkrun_personal_result(message: types.Message):
         turn = int(turn[0]) % 360 if turn else 0
         person = re.sub(r'.*(паркран\w?|parkrun) ', '', message.text)
         person = re.sub(r'\d', '', person).strip()
-        pic = await latest.make_latest_results_diagram(parkrun_name, 'results.png', person, turn)
+        pic = await latest.make_latest_results_diagram(parkrun_name, 'gen_png/results.png', person, turn)
         await bot.send_photo(message.chat.id, pic)
         pic.close()
     except Exception as e:
