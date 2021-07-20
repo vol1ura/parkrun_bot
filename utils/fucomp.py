@@ -4,10 +4,6 @@ from fuzzywuzzy import process, fuzz
 import pickle
 
 
-def compare(user_phrase, dictionary: list) -> bool:
-    return process.extractOne(user_phrase, dictionary)[1] >= 70
-
-
 def bot_compare(user_phrase, dictionary: list) -> bool:
     accost_bot = re.compile(r'(?i)\bбот\b')
     user_str = str(user_phrase)

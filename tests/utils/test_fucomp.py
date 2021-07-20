@@ -10,7 +10,7 @@ phrases_to_try = [fucomp.phrases_parkrun, fucomp.phrases_admin,
 
 
 @pytest.mark.parametrize('phrase_set', phrases_to_try)
-def test_compare(phrase_set):
+def test_bot_compare(phrase_set):
     compare = list(map(lambda p: fucomp.bot_compare(p, phrase_set), test_phrases))
     assert sum(1 for b in compare if b) == 1
 
