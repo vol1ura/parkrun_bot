@@ -12,7 +12,7 @@ It is my personal project.
 
 ```shell
 heroku logs -a <app_name> -d web.1 -n 100
-heroku config -a <app_name> | grep REDIS
+heroku config -a <app_name> | grep REDIS_URL
 ```
 
 ### Tests

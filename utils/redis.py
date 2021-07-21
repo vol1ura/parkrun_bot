@@ -1,5 +1,4 @@
 import aioredis
-
 from config import REDIS_URL
 
 
