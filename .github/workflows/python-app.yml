@@ -46,7 +46,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        echo $REDIS_URL
         pytest --cov-report=xml --cov=. tests/
       env:
         API_BOT_TOKEN: ${{ secrets.API_BOT_TOKEN }}

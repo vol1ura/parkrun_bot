@@ -26,4 +26,3 @@ def test_inline_parkrun_kb():
 def test_inline_personal_kb():
     inline_personal_kb = keyboards.inline_stat
     assert isinstance(inline_personal_kb, InlineKeyboardMarkup)
-
