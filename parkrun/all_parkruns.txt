@@ -5,6 +5,7 @@ Belgorod Park Pobedy
 Bitsa
 Boeva Dacha
 Butovo
+Buzuluk Park Pushkina
 Cheboksary naberezhnaya
 Chelyabinsk
 Chelyabinsk Ekopark
@@ -18,6 +19,7 @@ Gatchina Prioratsky
 Gorky Park
 Gorodskoy Park Semya
 Gubernsky Park
+Internatsionalistov
 Izmailovo
 Kazan Central
 Khimki
@@ -33,12 +35,16 @@ Kurgan Central Park
 Kuzminki
 Lesopark Severny
 Lobnya Gorodskoy Park
+Magnitogorsk Ecopark
 Maykop Gorodskoy Park
 Mega Park Kudrovo
+Memorialny Park
 Meshchersky
+Mikhalkovo
 Mitino
 Moskovsky Park Pobedy
 Mytishchi Central Park
+Naberezhnaya Reki Velikoy
 Natashinsky
 Nizhny Novgorod Meshchersky
 Nizhny Prud
@@ -53,8 +59,10 @@ Park Talalikhina
 Pavlovsky Posad
 Perm Balatovo
 Petergof Aleksandriysky
+Petrovskaya naberezhnaya
 Plotinka
 Pokrovskoe-Streshnevo
+Pur-Navolok
 Pushkin
 Ramenskoe Gorodskoy Park
 Readovsky Park
