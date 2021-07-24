@@ -111,7 +111,7 @@ async def get_club_fans(parkrun: str, club_id: str):
     return message.rstrip()
 
 
-async def get_club_purkruners(parkrun: str, club_id: str):
+async def get_club_parkruners(parkrun: str, club_id: str):
     data = await get_club_table(parkrun, club_id)
     table = data.sort_values(by=[data.columns[8]], ascending=False).head(10)
     sportsmens = table[table.columns[0]]

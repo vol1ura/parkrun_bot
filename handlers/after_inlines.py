@@ -73,7 +73,7 @@ async def post_teammate_table(message):
         await message.answer(data, parse_mode='Markdown')
 
     elif 'количестве всех стартов' in message.text:
-        data = await clubs.get_club_purkruners(parkrun_name, club_id)
+        data = await clubs.get_club_parkruners(parkrun_name, club_id)
         await message.answer(data, parse_mode='Markdown')
 
     elif 'рекордах' in message.text:
