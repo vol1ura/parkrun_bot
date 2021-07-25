@@ -55,7 +55,8 @@ class ParkrunSite:
         if not date1:
             return False
         date1 = date.fromisoformat(date1)
-        return date2 <= date1 + timedelta(13 - date1.isoweekday())
+        date_sun = date2 if date2.isoweekday() == 7 else date2 - timedelta(date2.isoweekday())
+        return date1 >= date_sun
 
     async def get_html(self, url=None):
         content = await redis.get_value(self.__redis_key)

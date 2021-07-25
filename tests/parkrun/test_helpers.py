@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 
 from parkrun import helpers
@@ -37,3 +39,22 @@ def test_parkrun_site():
     header = parkrun_site.headers
     assert isinstance(header, dict)
     assert 'User-Agent' in header
+
+
+dates_to_try = [
+    ('2021-07-24', '2021-07-24', True), ('2021-07-24', '2021-07-25', False),
+    ('2021-07-23', '2021-07-23', True), ('2021-07-25', '2021-07-25', True),
+    ('2021-07-20', '2021-07-23', True), ('2021-07-19', '2021-07-24', True),
+    ('2021-07-16', '2021-07-24', False), ('2021-07-12', '2021-07-25', False),
+    ('2021-07-17', '2021-07-24', False), ('2021-07-17', '2021-07-25', False),
+    ('2021-07-09', '2021-07-23', False), ('2021-05-29', '2021-07-24', False),
+    ('2020-10-24', '2021-07-20', False), ('2020-10-24', '2021-01-01', False),
+    ('2021-07-17', '2021-07-20', False), ('2021-06-26', '2021-07-24', False),
+    ('', '2021-07-24', False), (None, '2021-07-20', False)
+]
+
+
+@pytest.mark.parametrize('content_date, request_date, result', dates_to_try)
+def test_date_comparison(content_date, request_date, result):
+    h = helpers.ParkrunSite._compare_dates(content_date, date.fromisoformat(request_date))
+    assert result == h
