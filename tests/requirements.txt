@@ -3,4 +3,3 @@
 coverage
 pytest
 pytest-cov
-responses

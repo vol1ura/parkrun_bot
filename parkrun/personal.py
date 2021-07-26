@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from matplotlib.ticker import MultipleLocator, NullLocator
 
 from parkrun import parkrun
 
@@ -74,6 +75,28 @@ class PersonalResults:
         sns.heatmap(rundata, linewidths=0.4, cmap=cmap,
                     cbar_kws={"ticks": ticks, 'label': 'Количество разных паркранов', "boundaries": boundaries}, ax=ax)
         ax.set_title(f'{self.athlete_name}: интенсивность паркран-туризма', fontweight='bold')
+        plt.tight_layout()
+        plt.savefig(pic)
+        return open(pic, 'rb')
+
+    def last_runs(self, pic: str):
+        plt.figure(figsize=(7, 9), dpi=150)
+        df_last = self.df.head(10)[::-1].reset_index(drop=True)
+        ax = df_last.plot(x='Дата parkrun', y='m', lw=2, label='Результат')
+        xlabels = df_last['Дата parkrun']
+        ax.set_xticks(xlabels.index)
+        ax.set_xticklabels(xlabels, rotation=70)
+        ax.minorticks_on()
+        ax.grid(which='major', axis='x', lw=0.5)
+        ax.grid(which='major', axis='y', lw=1)
+        ax.grid(which='minor', axis='y', lw=0.5, ls=':')
+        ax.yaxis.set_major_locator(MultipleLocator(1))
+        ax.yaxis.set_minor_locator(MultipleLocator(1 / 6))
+        ax.yaxis.tick_right()
+        ax.xaxis.set_minor_locator(NullLocator())
+        plt.xlabel('Дата паркрана')
+        plt.ylabel('Минуты')
+        plt.title('10 забегов parkrun', fontweight='bold')
         plt.tight_layout()
         plt.savefig(pic)
         return open(pic, 'rb')

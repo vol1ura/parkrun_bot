@@ -196,6 +196,17 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     pic.close()
 
 
+@dp.callback_query_handler(lambda c: c.data == 'personal_last')
+@dp.throttled(handle_throttled_query, rate=10)
+async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    user_id = callback_query.from_user.id
+    page = await get_personal_page(user_id)
+    pic = PersonalResults(*page).last_runs('gen_png/last_runs.png')
+    await bot.send_photo(user_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
+    pic.close()
+
+
 @dp.callback_query_handler(lambda c: c.data == 'personal_wins')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_wins_table(callback_query: types.CallbackQuery):
