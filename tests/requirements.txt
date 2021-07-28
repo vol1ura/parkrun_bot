@@ -1,5 +1,6 @@
 -r ../requirements.txt
 
+aioresponses
 coverage
 pytest
 pytest-cov
