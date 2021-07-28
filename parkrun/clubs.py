@@ -2,11 +2,11 @@ import csv
 import os
 import re
 import time
+from datetime import date, timedelta
 
 import aiohttp
-from datetime import date, timedelta
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 from lxml.html import fromstring
 
 from bot_exceptions import ParsingException
@@ -58,7 +58,7 @@ async def check_club_as_id(club_id: str):
             'runs': tree.xpath('//*[@id="content"]/div/p[3]')[0].text_content().split()[-1],
             'link': tree.xpath('//*[@id="content"]/div/ul/li[2]/a')[0].attrib['href']
         })
-    except(KeyError, AttributeError):
+    except(KeyError, IndexError):
         return None
     return club_name
 
@@ -70,22 +70,25 @@ async def get_participants(club_id: str):
     tree = fromstring(html)
     head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
     data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
-    date_info = date.fromisoformat(data.group(1))
-    if date.today() > date_info + timedelta(6):
-        message = 'Извините, но результаты в системе parkrun ещё не обновились 😿 Всё, что могу предложить ' \
-                  'на данный момент - результаты за прошлую неделю.\n'
-    else:
-        message = ''
-    participants = tree.xpath('//table/tr/td[4]')
-    count = sum(1 for p in participants if p.text_content() != 'Unattached')
+    info_date = date.fromisoformat(data.group(1))
+    message = add_relevance_notification(info_date)
     places = tree.xpath('//div[@class="floatleft"]/h2')
+    results_tables = tree.xpath('//table[contains(@id, "results")]')
+    counts = [len(table.xpath('.//tr/td[4]//*[not(contains(text(), "Unattached"))]')) for table in results_tables]
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
-    message += f'Паркраны, где побывали наши одноклубники *{data.group(1)}*:\n'
-    for i, (p, l) in enumerate(zip(places, links_to_results), 1):
+    message += f'Паркраны, где побывали одноклубники {data.group(1)}:\n'
+
+    for i, (p, l, count) in enumerate(zip(places, links_to_results, counts), 1):
         p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
-        message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l})\n"
-    message += f'\nУчаствовало {count} из {data.group(2)} чел.'
+        message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l}) ({count}\xa0чел.)\n"
+    message += f'\nУчаствовало {sum(counts)} из {data.group(2)} чел.'
     return message
+
+
+def add_relevance_notification(content_date: date) -> str:
+    notification = 'Извините, но результаты в системе parkrun ещё не обновились 😿 ' \
+                   'Всё, что могу предложить на данный момент - результаты за прошлую неделю.\n'
+    return notification if date.today() > content_date + timedelta(6) else ''
 
 
 async def get_club_table(parkrun: str, club_id: str):
@@ -103,10 +106,10 @@ async def get_club_table(parkrun: str, club_id: str):
 async def get_club_fans(parkrun: str, club_id: str):
     data = await get_club_table(parkrun, club_id)
     table = data.sort_values(by=[data.columns[7]], ascending=False).head(10)
-    sportsmens = table[table.columns[0]]
+    sportsman = table[table.columns[0]]
     pr_num = table[table.columns[7]]
     message = f'Наибольшее количество забегов _в {parkrun}_:\n'
-    for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
+    for i, (name, num) in enumerate(zip(sportsman, pr_num), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
     return message.rstrip()
 
@@ -114,10 +117,10 @@ async def get_club_fans(parkrun: str, club_id: str):
 async def get_club_parkruners(parkrun: str, club_id: str):
     data = await get_club_table(parkrun, club_id)
     table = data.sort_values(by=[data.columns[8]], ascending=False).head(10)
-    sportsmens = table[table.columns[0]]
+    sportsman = table[table.columns[0]]
     pr_num = table[table.columns[8]]
     message = 'Рейтинг одноклубников _по количеству паркранов_:\n'
-    for i, (name, num) in enumerate(zip(sportsmens, pr_num), 1):
+    for i, (name, num) in enumerate(zip(sportsman, pr_num), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
     return message.rstrip()
 
@@ -125,10 +128,10 @@ async def get_club_parkruners(parkrun: str, club_id: str):
 async def get_parkrun_club_top_results(parkrun: str, club_id: str):
     data = await get_club_table(parkrun, club_id)
     table = data.sort_values(by=[data.columns[1]]).head(10)
-    sportsmens = table[table.columns[0]]
+    sportsman = table[table.columns[0]]
     result = table[table.columns[1]]
     message = f'Самые быстрые одноклубники _на паркране {parkrun}_:\n'
-    for i, (name, num) in enumerate(zip(sportsmens, result), 1):
+    for i, (name, num) in enumerate(zip(sportsman, result), 1):
         message += f'{i:>2}.\xa0{name:<20}\xa0*{num:<3}*\n'
     return message.rstrip()
 
