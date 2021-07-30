@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  LANG: ru_RU.UTF-8
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,6 +32,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup locale
+      run: |
+        sudo locale-gen ru_RU.UTF-8
+        sudo update-locale LANG=ru_RU.UTF-8
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
