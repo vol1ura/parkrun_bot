@@ -16,13 +16,13 @@ async def parse_latest_results(parkrun: str):
     parkrun_site = ParkrunSite(f'latestresults_{pr}')
     html = await parkrun_site.get_html(url)
     tree = fromstring(html)
-    parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
-    parkrun_iso_date = '-'.join(parkrun_date.split('/')[::-1])
-    await parkrun_site.update_info(parkrun_iso_date)
     try:
         df = pd.read_html(html)[0]
+        parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
+        parkrun_iso_date = '-'.join(parkrun_date.split('/')[::-1])
     except Exception:
         raise ParsingException(f'Parsing latest results page for {parkrun} if failed.')
+    await parkrun_site.update_info(parkrun_iso_date)
     return df, parkrun_date
 
 
@@ -30,7 +30,7 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
     parsed_results = await parse_latest_results(parkrun)
     df = parsed_results[0].copy()
     number_runners = len(df)
-    df = df.dropna(thresh=3)
+    df.dropna(thresh=4, inplace=True)
     df['Время'] = df['Время'].dropna() \
         .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0]) \
         .transform(lambda mmss: sum(x * float(t) for x, t in zip([1 / 60, 1, 60], mmss.split(':')[::-1])))
@@ -98,7 +98,7 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
 async def make_clubs_bar(parkrun: str, pic: str):
     parsed_results = await parse_latest_results(parkrun)
     df = parsed_results[0].copy()
-    df = df.dropna(thresh=3)
+    df.dropna(thresh=4, inplace=True)
 
     clubs = df['Клуб'].value_counts()
     norm = PowerNorm(gamma=0.6)
@@ -122,7 +122,7 @@ async def review_table(parkrun: str):
     count_total = len(df)
     if count_total == 0:
         return f'Паркран {parkrun} {parkrun_date} не состоялся.'
-    df = df.dropna(thresh=3)
+    df.dropna(thresh=4, inplace=True)
     df['Позиция м/ж'] = df[df.columns[2]].dropna()\
         .transform(lambda s: int(re.search(r'(?:Мужской|Женский)[ ]+(\d+)', s)[1]))
     df['Участник'] = df['Участник'].transform(lambda s: re.search(r'([^\d]+)\d.*|Неизвестный', s)[1])
