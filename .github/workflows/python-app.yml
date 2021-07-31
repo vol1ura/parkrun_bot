@@ -32,14 +32,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup locale
+    - name: Set up locale
       run: |
         sudo locale-gen ru_RU.UTF-8
         sudo update-locale LANG=ru_RU.UTF-8
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8.6
+        python-version: 3.8.10
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

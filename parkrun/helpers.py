@@ -73,6 +73,10 @@ class ParkrunSite:
         return html
 
     async def update_info(self, actual_date: str):
+        """
+        Method to set actual date of content. It is used to rewrite date of access to requested
+        page that will be assign by default in get_html().
+        """
         await redis.set_value(self.__redis_key, date=actual_date)
 
 
