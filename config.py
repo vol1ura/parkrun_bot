@@ -10,7 +10,7 @@ PROJECT_NAME = os.getenv('PROJECT')
 TOKEN_BOT = os.getenv('API_BOT_TOKEN')
 
 WEBHOOK_HOST = f'https://{PROJECT_NAME}.herokuapp.com'
-WEBHOOK_PATH = '/webhook/' + os.getenv('WEBHOOK')
+WEBHOOK_PATH = f'/webhook/{os.getenv("WEBHOOK")}'
 WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 
 WEBAPP_HOST = '0.0.0.0'
