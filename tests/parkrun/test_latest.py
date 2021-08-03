@@ -7,7 +7,9 @@ import os
 import pandas
 import pytest
 
+from bot_exceptions import ParsingException
 from parkrun import latest
+from parkrun.helpers import ParkrunSite
 
 PARKRUN = 'Yoshkar-Ola Alleya Zdorovya'
 
@@ -24,6 +26,15 @@ def test_parse_latest_results(yoshka_latest_results):
     assert isinstance(datetime.strptime(parkrun_date, '%d/%m/%Y'), datetime)
 
 
+async def test_parse_latest_results_fail(empty_page, monkeypatch):
+    future = asyncio.Future()
+    future.set_result(empty_page)
+    monkeypatch.setattr(ParkrunSite, 'get_html', lambda *args: future)
+    with pytest.raises(ParsingException) as e:
+        await latest.parse_latest_results('no_such_parkrun')
+    assert 'no_such_parkrun' in e.value.message
+
+
 async def test_make_latest_results_diagram(yoshka_latest_results, monkeypatch, tmpdir):
     future = asyncio.Future()
     future.set_result(yoshka_latest_results)
@@ -31,8 +42,8 @@ async def test_make_latest_results_diagram(yoshka_latest_results, monkeypatch, t
     pic_path = tmpdir.join('latest_diag.png')
     pic_file = await latest.make_latest_results_diagram(PARKRUN, pic_path)
     pic_file.close()
-    assert os.path.exists(pic_path)
     print(pic_path)
+    assert os.path.exists(pic_path)
 
 
 async def test_make_latest_results_diagram_personal(yoshka_latest_results, monkeypatch, tmpdir):
@@ -49,8 +60,8 @@ async def test_make_latest_results_diagram_personal(yoshka_latest_results, monke
         PARKRUN, pic_path, random_name.split()[-1], random.randrange(800)
     )
     pic_file.close()
-    assert os.path.exists(pic_path)
     print(pic_path)
+    assert os.path.exists(pic_path)
 
 
 async def test_make_latest_results_diagram_noperson(yoshka_latest_results, monkeypatch, tmpdir):
@@ -69,8 +80,8 @@ async def test_make_clubs_bar(yoshka_latest_results, monkeypatch, tmpdir):
     pic_path = tmpdir.join('latest_clubs.png')
     pic_file = await latest.make_clubs_bar(PARKRUN, pic_path)
     pic_file.close()
-    assert os.path.exists(pic_path)
     print(pic_path)
+    assert os.path.exists(pic_path)
 
 
 async def test_review_table(yoshka_latest_results, monkeypatch):
