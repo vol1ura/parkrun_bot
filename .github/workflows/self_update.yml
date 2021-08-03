@@ -35,8 +35,7 @@ jobs:
         pip install -r tests/requirements.txt
     - name: Check for updates
       run: |
-        pytest tests/parkrun/test_clubs.py::test_update_parkruns_clubs
-        pytest tests/parkrun/test_records.py::test_update_parkruns_list
+        pytest -k test_update_parkruns_
       env:
         REDIS_URL: redis://localhost:6379
         WEBHOOK: test

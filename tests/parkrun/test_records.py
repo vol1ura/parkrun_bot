@@ -10,7 +10,7 @@ from parkrun import records, helpers
 
 @pytest.fixture(scope='module')
 def course_records():
-    time.sleep(2)
+    time.sleep(2.5)
     return asyncio.run(records.all_parkruns_records())
 
 
