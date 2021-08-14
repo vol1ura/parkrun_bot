@@ -18,6 +18,8 @@ def test_min_to_mmss(mmss):
     actual_mmss = helpers.min_to_mmss(mins)
     assert isinstance(actual_mmss, str)
     assert actual_mmss == mmss
+    assert helpers.min_to_mmss(mins - 10**(-8)) == mmss
+    assert helpers.min_to_mmss(mins + 10**(-8)) == mmss
 
 
 def test_clubs_dict():
