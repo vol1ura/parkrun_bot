@@ -53,6 +53,7 @@ Novosibirsk naberezhnaya
 Obninsk
 Olimpiyskaya Derevnya
 Orsk Park Stroiteley
+park 850-letiya Moskvy
 Park Guskova
 Park Kirova
 Park Talalikhina
@@ -88,6 +89,7 @@ Tsaritsyno
 Tula Central
 Tver Rechnoy Vokzal
 Ufa Botanichesky Sad
+Ulitsa Golubaya
 Velikiy Novgorod Kremlevsky
 Vernadskogo
 Volgograd Panorama
