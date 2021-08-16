@@ -15,7 +15,7 @@ def course_records():
 
 
 @pytest.fixture
-async def async_patch_df(loop, course_records, monkeypatch):
+async def mock_parkrun_records(course_records, monkeypatch):
     future = asyncio.Future()
     future.set_result(course_records)
     monkeypatch.setattr('parkrun.records.all_parkruns_records', lambda: future)
@@ -27,7 +27,7 @@ def test_all_parkruns_records(course_records):
     assert len(df) >= len(helpers.PARKRUNS)
 
 
-async def test_top_parkruns(async_patch_df):
+async def test_top_parkruns(mock_parkrun_records):
     tables = await records.top_parkruns()
     assert isinstance(tables, list)
     assert len(tables) == 4
@@ -36,7 +36,7 @@ async def test_top_parkruns(async_patch_df):
         assert '*10 самых' in message
 
 
-async def test_top_records_count(tmpdir, async_patch_df):
+async def test_top_records_count(tmpdir, mock_parkrun_records):
     pic_path = tmpdir.join('top_records.png')
     pic = await records.top_records_count(pic_path)
     pic.close()
@@ -44,5 +44,5 @@ async def test_top_records_count(tmpdir, async_patch_df):
     print(pic_path)
 
 
-async def test_update_parkruns_list(async_patch_df):
+async def test_update_parkruns_list(mock_parkrun_records):
     await records.update_parkruns_list()

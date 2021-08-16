@@ -14,9 +14,16 @@ from parkrun.helpers import ParkrunSite
 PARKRUN = 'Yoshkar-Ola Alleya Zdorovya'
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def yoshka_latest_results():
     return asyncio.run(latest.parse_latest_results(PARKRUN))
+
+
+@pytest.fixture
+async def mock_yoshka_results(monkeypatch, yoshka_latest_results):
+    future = asyncio.Future()
+    future.set_result(yoshka_latest_results)
+    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
 
 
 def test_parse_latest_results(yoshka_latest_results):
@@ -35,10 +42,7 @@ async def test_parse_latest_results_fail(empty_page, monkeypatch):
     assert 'no_such_parkrun' in e.value.message
 
 
-async def test_make_latest_results_diagram(yoshka_latest_results, monkeypatch, tmpdir):
-    future = asyncio.Future()
-    future.set_result(yoshka_latest_results)
-    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
+async def test_make_latest_results_diagram(mock_yoshka_results, tmpdir):
     pic_path = tmpdir.join('latest_diag.png')
     pic_file = await latest.make_latest_results_diagram(PARKRUN, pic_path)
     pic_file.close()
@@ -46,16 +50,15 @@ async def test_make_latest_results_diagram(yoshka_latest_results, monkeypatch, t
     assert os.path.exists(pic_path)
 
 
-async def test_make_latest_results_diagram_personal(yoshka_latest_results, monkeypatch, tmpdir):
-    future = asyncio.Future()
-    future.set_result(yoshka_latest_results)
-    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
+async def test_make_latest_results_diagram_personal(mock_yoshka_results, yoshka_latest_results, tmpdir):
     pic_path = tmpdir.join('latest_diag_personal.png')
+    # Prepare athlete name for test
     df, _ = yoshka_latest_results
     df.dropna(thresh=3, inplace=True)
     df.reset_index(inplace=True)
     random_name = random.choice(df['Участник'].apply(lambda s: re.search(r'^([^\d]+)\d.*', s)[1]))
     print(random_name)
+    # Build diagram with athlete name
     pic_file = await latest.make_latest_results_diagram(
         PARKRUN, pic_path, random_name.split()[-1], random.randrange(800)
     )
@@ -64,19 +67,13 @@ async def test_make_latest_results_diagram_personal(yoshka_latest_results, monke
     assert os.path.exists(pic_path)
 
 
-async def test_make_latest_results_diagram_noperson(yoshka_latest_results, monkeypatch, tmpdir):
-    future = asyncio.Future()
-    future.set_result(yoshka_latest_results)
-    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
+async def test_make_latest_results_diagram_noperson(mock_yoshka_results, tmpdir):
     pic_path = tmpdir.join('latest_diag_noperson.png')
     with pytest.raises(AttributeError):
         await latest.make_latest_results_diagram(PARKRUN, pic_path, 'no_such_name_athelete', random.randrange(800))
 
 
-async def test_make_clubs_bar(yoshka_latest_results, monkeypatch, tmpdir):
-    future = asyncio.Future()
-    future.set_result(yoshka_latest_results)
-    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
+async def test_make_clubs_bar(mock_yoshka_results, tmpdir):
     pic_path = tmpdir.join('latest_clubs.png')
     pic_file = await latest.make_clubs_bar(PARKRUN, pic_path)
     pic_file.close()
@@ -84,10 +81,7 @@ async def test_make_clubs_bar(yoshka_latest_results, monkeypatch, tmpdir):
     assert os.path.exists(pic_path)
 
 
-async def test_review_table(yoshka_latest_results, monkeypatch):
-    future = asyncio.Future()
-    future.set_result(yoshka_latest_results)
-    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
+async def test_review_table(mock_yoshka_results):
     table = await latest.review_table(PARKRUN)
     print(table)
     assert isinstance(table, str)
