@@ -4,7 +4,6 @@ import os
 import time
 
 import pytest
-from aioresponses import aioresponses
 
 from bot_exceptions import ParsingException
 from parkrun import clubs, helpers
@@ -19,7 +18,7 @@ def club_table():
 
 
 @pytest.fixture
-async def async_club_table(monkeypatch, loop, club_table):
+async def async_club_table(monkeypatch, club_table):
     future = asyncio.Future()
     future.set_result(club_table)
     monkeypatch.setattr('parkrun.clubs.get_club_table', lambda *args: future)
@@ -48,12 +47,13 @@ async def test_check_club_as_id(club_id, expected_club_name):
     assert expected_club_name == club_name
 
 
-async def test_check_club_as_id_fail(empty_page):
+@pytest.mark.asyncio
+async def test_check_club_as_id_fail(empty_page, aresponses):
     club_id = 'failed_id'
-    with aioresponses() as mock_resp:
-        mock_resp.get(f'https://www.parkrun.ru/groups/{club_id}/', body=empty_page)
-        result = await clubs.check_club_as_id(club_id)
+    aresponses.add('www.parkrun.ru', f'/groups/{club_id}/', 'GET', aresponses.Response(text=empty_page))
+    result = await clubs.check_club_as_id(club_id)
     assert result is None
+    aresponses.assert_plan_strictly_followed()
 
 
 async def test_get_club_fans(async_club_table):
