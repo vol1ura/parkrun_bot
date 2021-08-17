@@ -5,6 +5,7 @@ from datetime import date, timedelta
 
 import aiohttp
 
+from app import logger
 from utils import redis
 
 PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
@@ -62,6 +63,7 @@ class ParkrunSite:
         content = await redis.get_value(self.__redis_key)
         content_date = content.get('date', None)
         today = date.today()
+        logger.info(f'Get [{self.__key}] with date={content_date}')
         if ParkrunSite._compare_dates(content_date, today):
             return content['html']
         if not url:
@@ -70,6 +72,7 @@ class ParkrunSite:
             async with session.get(url) as resp:
                 html = await resp.text()
         await redis.set_value(self.__redis_key, date=today.isoformat(), html=html)
+        logger.info(f'Page [{url}] was updated by date={today.isoformat()}')
         return html
 
     async def update_info(self, actual_date: str):
@@ -78,6 +81,7 @@ class ParkrunSite:
         page that will be assign by default in get_html().
         """
         await redis.set_value(self.__redis_key, date=actual_date)
+        logger.info(f'Information for [{self.__key}] was updated by date={actual_date}')
 
 
 def min_to_mmss(m) -> str:

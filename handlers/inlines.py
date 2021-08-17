@@ -80,7 +80,7 @@ async def query_competitions(inline_query: types.InlineQuery):
         date = time.gmtime(time.time())
         month, year = date.tm_mon, date.tm_year
         competitions = await news.get_competitions(month, year)
-        logger.info(str(len(competitions)))
+        logger.info(f'Competitions: {len(competitions)} search results for {month}-{year}.')
         if len(competitions) < 10:
             if month == 12:
                 month = 1
