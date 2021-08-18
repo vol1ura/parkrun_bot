@@ -1,7 +1,7 @@
 name: "Update list of parkruns and clubs"
 on:
   schedule:
-  - cron: "0 9 * * SUN"
+  - cron: "0 4 * * SUN"
 
 jobs:
   build:

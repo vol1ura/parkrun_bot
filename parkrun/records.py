@@ -48,7 +48,7 @@ async def top_records_count(pic: str):
     ax.grid(b=False, which='major', axis='y')
     ax.xaxis.set_major_locator(MaxNLocator(steps=[1, 2], integer=True))
     ax.xaxis.tick_top()
-    plt.title('Учасники с наибольшим количеством рекордов\nна различных паркранах', size=11, fontweight='bold')
+    plt.title('Участники с наибольшим количеством рекордов\nна различных паркранах', size=11, fontweight='bold')
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
