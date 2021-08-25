@@ -60,3 +60,13 @@ dates_to_try = [
 def test_date_comparison(content_date, request_date, result):
     h = helpers.ParkrunSite._compare_dates(content_date, date.fromisoformat(request_date))
     assert result == h
+
+
+def test_read_parkruns():
+    # TODO: write test
+    pass
+
+
+def test_read_clubs():
+    # TODO: write test
+    pass

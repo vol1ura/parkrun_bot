@@ -8,24 +8,6 @@ import aiohttp
 from app import logger
 from utils import redis
 
-PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
-CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
-
-PARKRUNS = []
-with open(PARKRUNS_FILE, 'r', newline='\n') as file:
-    for line in file:
-        PARKRUNS.append(line.strip())
-
-CLUBS = []
-with open(CLUBS_FILE, 'r', encoding='utf-8') as file:
-    fieldnames = ['id', 'name', 'participants', 'runs', 'link']
-    reader = csv.DictReader(file, fieldnames=fieldnames)
-    for rec in reader:
-        CLUBS.append(rec)
-
-CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2157',
-              'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov
-
 
 class ParkrunSite:
     __PARKRUN_HEADERS = [
@@ -87,3 +69,32 @@ class ParkrunSite:
 def min_to_mmss(m) -> str:
     mins = round(m) if abs(m - round(m)) < 0.0166665 else int(m)
     return f'{mins}:{round((m - mins) * 60):02d}'
+
+
+def read_parkruns(file: str) -> list:
+    parkruns = []
+    if os.path.exists(file):
+        with open(file, newline='\n') as fd:
+            for line in fd:
+                parkruns.append(line.strip())
+    return parkruns
+
+
+def read_clubs(file: str) -> list:
+    clubs = []
+    if os.path.exists(file):
+        with open(file, encoding='utf-8') as fd:
+            fieldnames = ['id', 'name', 'participants', 'runs', 'link']
+            reader = csv.DictReader(file, fieldnames=fieldnames)
+            for rec in reader:
+                clubs.append(rec)
+    return clubs
+
+
+PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
+PARKRUNS = read_parkruns(PARKRUNS_FILE)
+
+CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
+CLUBS = read_parkruns(CLUBS_FILE)
+CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2157',
+              'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov
