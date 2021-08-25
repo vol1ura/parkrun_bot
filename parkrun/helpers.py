@@ -83,9 +83,9 @@ def read_parkruns(file: str) -> list:
 def read_clubs(file: str) -> list:
     clubs = []
     if os.path.exists(file):
-        with open(file, encoding='utf-8') as fd:
+        with open(file, encoding='utf-8', newline='\n') as fd:
             fieldnames = ['id', 'name', 'participants', 'runs', 'link']
-            reader = csv.DictReader(file, fieldnames=fieldnames)
+            reader = csv.DictReader(fd, fieldnames=fieldnames)
             for rec in reader:
                 clubs.append(rec)
     return clubs
@@ -95,6 +95,6 @@ PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
 PARKRUNS = read_parkruns(PARKRUNS_FILE)
 
 CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
-CLUBS = read_parkruns(CLUBS_FILE)
+CLUBS = read_clubs(CLUBS_FILE)
 CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2157',
               'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov
