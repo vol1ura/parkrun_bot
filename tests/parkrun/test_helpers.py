@@ -62,11 +62,33 @@ def test_date_comparison(content_date, request_date, result):
     assert result == h
 
 
-def test_read_parkruns():
-    # TODO: write test
-    pass
+def test_read_parkruns(tmpdir):
+    file = tmpdir.join('all_parkruns.txt')
+    expected_values = ['test1', 'test2', 'test3']
+    file.write('\n'.join(expected_values))
+    actual_values = helpers.read_parkruns(file)
+    assert isinstance(actual_values, list)
+    assert expected_values == actual_values
 
 
-def test_read_clubs():
-    # TODO: write test
-    pass
+def test_read_parkruns_no_file():
+    actual_values = helpers.read_parkruns('no_such_file.txt')
+    assert isinstance(actual_values, list)
+    assert [] == actual_values
+
+
+def test_read_clubs(tmpdir):
+    file = tmpdir.join('top_clubs.csv')
+    file.write('1,2,3,4,5\na,b,c,d,e')
+    actual_values = helpers.read_clubs(file)
+    assert isinstance(actual_values, list)
+    assert len(actual_values) == 2
+    for item in actual_values:
+        assert isinstance(item, dict)
+        assert list(item.keys()) == ['id', 'name', 'participants', 'runs', 'link']
+
+
+def test_read_clubs_no_file():
+    actual_values = helpers.read_clubs('no_such_file.txt')
+    assert isinstance(actual_values, list)
+    assert [] == actual_values
