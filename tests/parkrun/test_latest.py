@@ -86,3 +86,12 @@ async def test_review_table(mock_yoshka_results):
     print(table)
     assert isinstance(table, str)
     assert f'*Паркран {PARKRUN}* состоялся' in table
+
+
+async def test_review_table_empty(monkeypatch, yoshka_latest_results):
+    future = asyncio.Future()
+    future.set_result((yoshka_latest_results[0][0:0], yoshka_latest_results[1]))
+    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
+    message = await latest.review_table(PARKRUN)
+    assert isinstance(message, str)
+    assert message == f'Паркран {PARKRUN} {yoshka_latest_results[1]} не состоялся.'
