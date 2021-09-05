@@ -1,6 +1,7 @@
 import re
 
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as path_effects
 import pandas as pd
 from matplotlib.colors import Normalize, PowerNorm
 from lxml.html import fromstring
@@ -100,18 +101,23 @@ async def make_clubs_bar(parkrun: str, pic: str):
     df = parsed_results[0].copy()
     df.dropna(thresh=4, inplace=True)
 
-    clubs = df['Клуб'].value_counts()
-    norm = PowerNorm(gamma=0.6)
-    colors = plt.cm.cool(norm(clubs.values))
     fig = plt.figure(figsize=(6, 6), dpi=200)
     ax = fig.add_subplot()
-    ax.grid(False, axis='x')
-    ax.grid(True, axis='y')
-    ax.yaxis.set_major_locator(MaxNLocator(steps=[1, 2, 4, 8], integer=True))
-    plt.xticks(rotation=80, size=8)
-    plt.bar(clubs.index, clubs.values, color=colors)
-    plt.title(f'Клубы на паркране {parkrun} {parsed_results[1]}', size=10, fontweight='bold')
-    plt.ylabel('Количество участников')
+    clubs = df['Клуб'].value_counts()
+    if clubs.empty:
+        text = fig.text(0.5, 0.5, 'Не было участников из\nзарегистрированных клубов',
+                        color='white', ha='center', va='center', size=22)
+        text.set_path_effects([path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()])
+    else:
+        norm = PowerNorm(gamma=0.6)
+        colors = plt.cm.cool(norm(clubs.values))
+        ax.grid(False, axis='x')
+        ax.grid(True, axis='y')
+        ax.yaxis.set_major_locator(MaxNLocator(steps=[1, 2, 4, 8], integer=True))
+        plt.xticks(rotation=80, size=8)
+        plt.bar(clubs.index, clubs.values, color=colors)
+        plt.title(f'Клубы на паркране {parkrun} {parsed_results[1]}', size=10, fontweight='bold')
+        plt.ylabel('Количество участников')
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
