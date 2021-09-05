@@ -33,6 +33,7 @@ Krasnoyarsk Naberezhnaya
 Krylatskoe
 Kurgan Central Park
 Kuzminki
+Lebediny Ray
 Lesopark Severny
 Lobnya Gorodskoy Park
 Magnitogorsk Ecopark
@@ -53,6 +54,8 @@ Novosibirsk naberezhnaya
 Obninsk
 Olimpiyskaya Derevnya
 Orsk Park Stroiteley
+Ostrov Yunost
+park 30-letiya Oktyabrya
 park 850-letiya Moskvy
 Park Guskova
 Park Kirova
