@@ -66,6 +66,10 @@ class ParkrunSite:
         logger.info(f'Information for [{self.__key}] was updated by date={actual_date}')
 
 
+def athlete_all_history_url(athlete_id):
+    return f'https://www.parkrun.org.uk/parkrunner/{athlete_id}/all/'
+
+
 def min_to_mmss(m) -> str:
     mins = round(m) if abs(m - round(m)) < 0.0166665 else int(m)
     return f'{mins}:{round((m - mins) * 60):02d}'

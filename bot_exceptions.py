@@ -16,6 +16,11 @@ class CallbackException(Exception):
 
 
 class NoCollationRuns(Exception):
+    """Exception raised if athletes have no runs for comparison.
+
+        Attributes:
+            message -- explanation of the error
+        """
     def __init__(self, message='У вас пока ещё не было совместных пробежек.'):
         self.message = message
         super().__init__(self.message)

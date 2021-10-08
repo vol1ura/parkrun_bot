@@ -31,6 +31,7 @@ def test_top_active_clubs_diagram(tmpdir):
 
 
 async def test_update_parkruns_clubs():
+    await clubs.update_parkruns_clubs()
     assert len([club for club in helpers.CLUBS if club['id'] == '24630']) == 1
     os.remove(helpers.CLUBS_FILE)
     await clubs.update_parkruns_clubs()

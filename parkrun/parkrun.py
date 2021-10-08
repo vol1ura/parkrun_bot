@@ -2,7 +2,7 @@ import aiohttp
 import pandas as pd
 from lxml.html import fromstring
 
-from parkrun.helpers import ParkrunSite
+from parkrun.helpers import ParkrunSite, athlete_all_history_url
 
 
 # TODO: добавить вывод предстоящих юбилейных паркранов
@@ -12,12 +12,12 @@ def anniversary_parkruns():
 
 def parse_personal_results(html_page: str):
     df = pd.read_html(html_page)[2]
-    df['m'] = df['Время'].transform(lambda t: sum(k * int(p) for k, p in zip([1 / 60, 1, 60], t.split(':')[::-1])))
+    df['m'] = df['Time'].transform(lambda t: sum(k * int(p) for k, p in zip([1 / 60, 1, 60], t.split(':')[::-1])))
     return df
 
 
 async def get_athlete_data(athlete_id):
-    athlete_url = f'https://www.parkrun.ru/results/athleteeventresultshistory?athleteNumber={athlete_id}&eventNumber=0'
+    athlete_url = athlete_all_history_url(athlete_id)
     async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
         async with session.get(athlete_url) as resp:
             html = await resp.text()

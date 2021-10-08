@@ -11,14 +11,14 @@ class PersonalResults:
     def __init__(self, athlete_name, athlete_page):
         self.__athlete_name = athlete_name
         self.__df = parkrun.parse_personal_results(athlete_page)
-        self.__df['Год'] = pd.to_datetime(self.__df['Дата parkrun'], dayfirst=True).dt.year
-        self.__df['Месяц'] = pd.to_datetime(self.__df['Дата parkrun'], dayfirst=True) \
+        self.__df['Год'] = pd.to_datetime(self.__df['Run Date'], dayfirst=True).dt.year
+        self.__df['Месяц'] = pd.to_datetime(self.__df['Run Date'], dayfirst=True) \
             .dt.month_name(locale='ru_RU.UTF-8').str.slice(stop=3)
         self.__months = ['Янв', 'Фев', 'Мар', 'Апр', 'Мая', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
 
     def history(self, pic: str):
         fig, ax = plt.subplots(figsize=(9, 6), dpi=150)
-        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Время', aggfunc=len, fill_value=0) \
+        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Time', aggfunc=len, fill_value=0) \
             .astype(int)
 
         for month in self.__months:
@@ -59,7 +59,7 @@ class PersonalResults:
     def tourism(self, pic: str):
         fig, ax = plt.subplots(figsize=(9, 6), dpi=150)
         # pivot df into long form and aggregate by fastest time
-        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Паркран', fill_value=0,
+        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Event', fill_value=0,
                                         aggfunc=lambda parkruns: len(np.unique(parkruns, return_counts=True)[1]))
         maxuniq = rundata.max().max()
 
@@ -82,8 +82,8 @@ class PersonalResults:
     def last_runs(self, pic: str):
         plt.figure(figsize=(7, 9), dpi=150)
         df_last = self.__df.head(10)[::-1].reset_index(drop=True)
-        ax = df_last.plot(x='Дата parkrun', y='m', lw=2, label='Результат')
-        xlabels = df_last['Дата parkrun']
+        ax = df_last.plot(x='Run Date', y='m', lw=2, label='Результат')
+        xlabels = df_last['Run Date']
         ax.set_xticks(xlabels.index)
         ax.set_xticklabels(xlabels, rotation=70)
         ax.minorticks_on()
@@ -102,7 +102,7 @@ class PersonalResults:
         return open(pic, 'rb')
 
     def wins_table(self):
-        pos_df = pd.crosstab(self.__df['Паркран'], self.__df['Место'], margins=True)
+        pos_df = pd.crosstab(self.__df['Event'], self.__df['Pos'], margins=True)
         columns = [1, 2, 3, 'All']
         for i in columns:
             if i not in pos_df.columns:

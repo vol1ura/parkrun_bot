@@ -10,7 +10,7 @@ AthletePersonalData = namedtuple('AthletePersonalData', 'id name url html')
 
 
 def get_athlete_data(athlete_id, athlete_name, athlete_key):
-    athlete_url = f'https://www.parkrun.ru/results/athleteeventresultshistory?athleteNumber={athlete_id}&eventNumber=0'
+    athlete_url = helpers.athlete_all_history_url(athlete_id)
     html = asyncio.run(helpers.ParkrunSite(athlete_key).get_html(athlete_url))
     return AthletePersonalData(athlete_id, athlete_name, athlete_url, html)
 

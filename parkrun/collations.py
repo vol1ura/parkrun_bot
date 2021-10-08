@@ -15,7 +15,7 @@ class CollationMaker:
         df1 = parkrun.parse_personal_results(athlete_page_1)
         df2 = parkrun.parse_personal_results(athlete_page_2)
 
-        self.__df = pd.merge(df1, df2, on=['Дата parkrun', 'Паркран'])
+        self.__df = pd.merge(df1, df2, on=['Run Date', 'Event'])
         self.__joint_races = len(self.__df)
         if not self.__joint_races:
             raise NoCollationRuns(athlete_name_2)
@@ -47,7 +47,7 @@ class CollationMaker:
                             textcoords='offset points',
                             ha='center', va='bottom', size=8, color=color, fontweight='bold')
 
-        xlabels = battle_df['Дата parkrun']
+        xlabels = battle_df['Run Date']
         x = xlabels.index
         ax.set_xticks(x)
         ax.set_xticklabels(xlabels, rotation=70)
@@ -56,8 +56,8 @@ class CollationMaker:
 
         rects = ax.bar(x, heights1 - heights0, 0.6, bottom=heights0,
                        edgecolor='black', color=self.__color())
-        label_bars(battle_df['Время_y'], battle_df['m_y'], rects, ~self.__wins, '#7f7f7f')
-        label_bars(battle_df['Время_x'], battle_df['m_x'], rects, self.__wins, 'black')
+        label_bars(battle_df['Time_y'], battle_df['m_y'], rects, ~self.__wins, '#7f7f7f')
+        label_bars(battle_df['Time_x'], battle_df['m_x'], rects, self.__wins, 'black')
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax.set_xlabel(f'Последние {len(battle_df)} паркранов', fontweight='bold')
@@ -101,7 +101,7 @@ class CollationMaker:
         result_message = f'*Последние {len(battle_df)} совместных забегов:*\n' \
                          '#     Дата     | *Время* | Время | Паркран\n'
         for i, row in battle_df.iterrows():
-            result_message += f"{i} {row['Дата parkrun']} | {row['Время_x']} | {row['Время_y']} | {row['Паркран']}\n"
+            result_message += f"{i} {row['Run Date']} | {row['Time_x']} | {row['Time_y']} | {row['Event']}\n"
         result_message += '---------------------------------------\n'
         result_message += f'*Всего совместных забегов*: {self.__joint_races}\n'
         result_message += f'*Счёт* {self.__name_1.split()[0]}:{self.__name_2.split()[0]} = {self.__score}\n'

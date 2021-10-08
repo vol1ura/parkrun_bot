@@ -44,7 +44,7 @@ async def invalid_query_id_handler(update, error):
     elif update.message:
         await bot.send_message(update.message.chat.id, message)
     else:
-        logger.warning(f'{update} update object was not processed')  # TODO: remove or change after testing
+        logger.warning(f'{update} update object was not processed')
     # We collect some info about an exception and write them to log
     error_msg = f"Bot started too long. Error: {error}"
     logger.error(error_msg)
