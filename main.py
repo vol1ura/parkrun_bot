@@ -18,7 +18,7 @@ async def setup_bot_commands(dispatcher: Dispatcher):
         types.BotCommand(command="/settings", description="Сделать настройки"),
         # types.BotCommand(command="/setclub", description="Установить клуб (по ID)"),
         # types.BotCommand(command="/setparkrun", description="Установить паркран"),
-        # types.BotCommand(command='/start', description='Показать клавиатуру')
+        types.BotCommand(command='/start', description='Показать клавиатуру | Перезапуск')
     ]
     await bot.set_my_commands(bot_commands)
 

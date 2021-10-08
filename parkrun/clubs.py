@@ -74,7 +74,7 @@ async def get_participants(club_id: str):
     message = add_relevance_notification(info_date)
     places = tree.xpath('//div[@class="floatleft"]/h2')
     results_tables = tree.xpath('//table[contains(@id, "results")]')
-    counts = [len(table.xpath('.//tr/td[4]//*[not(contains(text(), "Unattached"))]')) for table in results_tables]
+    counts = [len(table.xpath('.//tr/td[4]//a')) for table in results_tables]
     links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
     message += f'Паркраны, где побывали одноклубники {data.group(1)}:\n'
 
