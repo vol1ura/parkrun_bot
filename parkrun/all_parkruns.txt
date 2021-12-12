@@ -44,6 +44,7 @@ Meshchersky
 Mikhalkovo
 Mitino
 Moskovsky Park Pobedy
+Muromets
 Mytishchi Central Park
 Naberezhnaya Reki Velikoy
 Natashinsky
@@ -69,6 +70,7 @@ Pokrovskoe-Streshnevo
 Pur-Navolok
 Pushkin
 Ramenskoe Gorodskoy Park
+Rasskazovka
 Readovsky Park
 Rostov on Don
 Ryazan Central
