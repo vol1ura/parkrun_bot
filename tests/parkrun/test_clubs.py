@@ -103,4 +103,4 @@ async def test_get_club_table_fail():
     club_id, parkrun = '9999999', 'no_such_parkrun'
     with pytest.raises(ParsingException) as e:
         await clubs.get_club_table(parkrun, club_id)
-    assert e.value.message == f'Parsing club history page id={club_id} for {parkrun} is failed.'
+    assert e.value.message == f'Something strange happend on club id={club_id} history page for {parkrun}.'

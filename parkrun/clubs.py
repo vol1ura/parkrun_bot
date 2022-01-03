@@ -95,6 +95,8 @@ async def get_club_table(parkrun: str, club_id: str):
     async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
         async with session.get(f'https://www.parkrun.ru/{parkrun}/results/clubhistory/?clubNum={club_id}') as resp:
             html_club_results = await resp.text()
+            if 'Случилось странное' in html_club_results:
+                raise ParsingException(f'Something strange happend on club id={club_id} history page for {parkrun}.')
     try:
         data = pd.read_html(html_club_results)[0]
     except Exception:
