@@ -4,7 +4,8 @@
 
 # DEV DIR
 .idea/
-aienv/
+.vscode/
+env/
 
 # CACHES
 *__pycache__/
