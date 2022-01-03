@@ -11,7 +11,7 @@ from utils import redis
 
 class ParkrunSite:
     __PARKRUN_HEADERS = [
-        {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0"},
+        {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/85.0"},
         {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) "
                        "Chrome/83.0.4103.61 Safari/537.36"},
         {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -53,8 +53,10 @@ class ParkrunSite:
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.get(url) as resp:
                 html = await resp.text()
-        await redis.set_value(self.__redis_key, date=today.isoformat(), html=html)
-        logger.info(f'Page [{url}] was updated by date={today.isoformat()}')
+                is_ok = resp.ok
+        if is_ok:
+            await redis.set_value(self.__redis_key, date=today.isoformat(), html=html)
+            logger.info(f'Page [{url}] was updated by date={today.isoformat()}')
         return html
 
     async def update_info(self, actual_date: str):
