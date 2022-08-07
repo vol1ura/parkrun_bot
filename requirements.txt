@@ -6,7 +6,7 @@ fuzzywuzzy>=0.18.0
 geopy==2.1.0
 hiredis~=2.0.0
 inst-api~=0.3.0
-lxml~=4.6.3
+lxml~=4.9.1
 openpyxl~=3.0.7
 pycparser~=2.20
 python-dotenv>=0.17.0
