@@ -17,7 +17,7 @@ async def get_competitions(month, year):
         async with session.post('https://probeg.org/kalend/kalend.php', data=payload) as resp:
             html = await resp.text()
     tree = fromstring(html)
-    rows = tree.xpath('//table[@class="textU"]/tr')[1:]
+    rows = tree.xpath('//table//table[4]//tr')[1:20]
     competitions = []
     from_date = time.localtime(time.time())
     for row in rows:
@@ -30,8 +30,8 @@ async def get_competitions(month, year):
         if 'отменен' in where.lower() or 'Воронеж' in where or 'Рязань' in where or 'Смоленск' in where or \
                 'Костром' in where or 'Калуж' in where or 'Белгород' in where:
             continue
-        kontacts = cells[5].text_content()
-        if 'Скоблина' in kontacts or 'alleviate@yandex' in kontacts:  # pragma: no cover
+        contacts = cells[5].text_content()
+        if 'Скоблина' in contacts or 'alleviate@yandex' in contacts:  # pragma: no cover
             continue
         title = cells[0].text_content().strip()
         url = cells[0].xpath('.//b/a/@href')[0].strip()

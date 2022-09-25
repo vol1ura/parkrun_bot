@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 main = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 btn1 = KeyboardButton('🔧 настройки')
 btn2 = KeyboardButton('❓ справка')
-btn3 = KeyboardButton('🌳 паркран')
+btn3 = KeyboardButton('🌳 Sat 9am 5km')
 btn4 = KeyboardButton('📋 разное')
 main.row(btn3, btn4).add(btn1, btn2)
 
@@ -43,14 +43,14 @@ inline_parkrun.insert(InlineKeyboardButton('Ввести ParkrunID', callback_da
 inline_parkrun.insert(InlineKeyboardButton('Выбрать parkrun', switch_inline_query_current_chat='parkrun'))
 inline_parkrun.insert(InlineKeyboardButton("Выбрать клуб", switch_inline_query_current_chat='clubs'))
 
-inline_parkrun.insert(InlineKeyboardButton('Перейти на сайт parkrun.ru', url='https://parkrun.ru/'))
+inline_parkrun.insert(InlineKeyboardButton('Перейти на сайт s95.ru', url='https://s95.ru/'))
 
 
 # PERSONAL RESULTS inline keyboard layout
 inline_personal = InlineKeyboardMarkup(row_width=2)
 inline_personal.insert(InlineKeyboardButton('Моя история', callback_data='personal_history'))
 inline_personal.insert(InlineKeyboardButton('Мои личники', callback_data='personal_bests'))
-inline_personal.insert(InlineKeyboardButton('Паркран-туризм', callback_data='personal_tourism'))
+inline_personal.insert(InlineKeyboardButton('S95-туризм', callback_data='personal_tourism'))
 inline_personal.insert(InlineKeyboardButton('График 10 рез.', callback_data='personal_last'))
 inline_personal.insert(InlineKeyboardButton('Победы/участия', callback_data='personal_wins'))
 

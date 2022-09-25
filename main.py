@@ -5,7 +5,6 @@ from aiogram.utils import executor
 
 from config import *
 from app import bot, dp
-from parkrun import records, clubs
 import handlers  # important import!!!
 
 
@@ -15,9 +14,9 @@ async def setup_bot_commands(dispatcher: Dispatcher):
     """
     bot_commands = [
         types.BotCommand(command="/help", description="Справочное сообщение"),
+        types.BotCommand(command="/register", description="Зарегистрироваться"),
         types.BotCommand(command="/settings", description="Сделать настройки"),
-        # types.BotCommand(command="/setclub", description="Установить клуб (по ID)"),
-        # types.BotCommand(command="/setparkrun", description="Установить паркран"),
+        types.BotCommand(command="/setclub", description="Установить клуб"),
         types.BotCommand(command='/start', description='Показать клавиатуру | Перезапуск')
     ]
     await bot.set_my_commands(bot_commands)
@@ -27,8 +26,6 @@ async def setup_bot_commands(dispatcher: Dispatcher):
 async def on_startup(dispatcher: Dispatcher):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
-    await records.update_parkruns_list()
-    await clubs.update_parkruns_clubs()
     await setup_bot_commands(dispatcher)
 
 
@@ -41,7 +38,7 @@ async def on_shutdown(dispatcher: Dispatcher):
 
 
 if __name__ == "__main__":
-    if "HEROKU" in list(environ.keys()):
+    if "production" in list(environ.keys()):
         executor.start_webhook(
             dispatcher=dp,
             webhook_path=WEBHOOK_PATH,
