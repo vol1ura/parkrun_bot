@@ -1,10 +1,11 @@
-import random
 import aiohttp
+import random
 
-albums_id = ['wall', 256663165]  # id of best albums of this owner_id
+vk_album_owner_id = '-212432495'
+albums_id = ['wall', 285307254]  # id of the best albums for this owner_id
 
 
-def make_vk_api_url(token: str, method: str, owner_id='-121950041', album_id=None):
+def make_vk_api_url(token: str, method: str, owner_id=vk_album_owner_id, album_id=None):
     album_param = f'&album_id={album_id}' if album_id else ''
     return f'https://api.vk.com/method/{method}?owner_id={owner_id}{album_param}&access_token={token}&v=5.130'
 

@@ -7,7 +7,7 @@ from geopy import Nominatim
 
 from app import bot, logger, dp
 from handlers.helpers import handle_throttled_query
-from parkrun import latest
+from s95 import latest
 from utils import content, fucomp, search, vk, weather, redis
 
 
@@ -17,7 +17,7 @@ async def ask_weather(message: types.Message):
     match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
     if match:
         place = re.sub(r' в ', '', match.group(2)).strip()
-        app = Nominatim(user_agent="parkrun-bot")
+        app = Nominatim(user_agent="s95-bot")
         try:
             location = app.geocode(place).raw
         except AttributeError:
@@ -34,9 +34,9 @@ async def ask_weather(message: types.Message):
             await message.answer(air_info[1])
 
 
-@dp.message_handler(regexp=r'(?i)бот[, \w]+?(паркран\w?|parkrun)( \w+)( \d+)?$')
+@dp.message_handler(regexp=r'(?i)бот[, \w]+?s95( \w+)( \d+)?$')
 @dp.throttled(handle_throttled_query, rate=10)
-async def parkrun_personal_result(message: types.Message):
+async def s95_personal_result(message: types.Message):
     await types.ChatActions.upload_photo()
     user_id = message.from_user.id
     settings = await redis.get_value(user_id)
@@ -57,7 +57,7 @@ async def parkrun_personal_result(message: types.Message):
                             f'или  такого участника не было на выбранном вами паркране {parkrun_name}.')
 
 
-@dp.message_handler(regexp=r'(?i)бот,? (паркран|parkrun)')
+@dp.message_handler(regexp=r'(?i)бот,? (кузьминки|s95)')
 @dp.throttled(handle_throttled_query, rate=3)
 async def get_parkrun_picture(message: types.Message):
     token = getenv('VK_SERVICE_TOKEN')
@@ -74,8 +74,6 @@ async def simple_answers(message: types.Message):
     elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
         ans = [s.format(user) for s in content.greeting]
-    elif fucomp.bot_compare(message.text, fucomp.phrases_parkrun):
-        ans = content.phrases_about_parkrun
     elif 'погода' in message.text:
         bot_info = await bot.get_me()
         ans = ['Информацию о погоде можно получить через inline запрос: '
