@@ -1,17 +1,9 @@
-import aioredis
-from config import REDIS_URL
+from app import redis_connection
 
 
-async def get_value(key: str):
-    db = await aioredis.create_redis_pool(REDIS_URL)
-    value = await db.hgetall(key, encoding='utf-8')
-    db.close()
-    await db.wait_closed()
-    return value
+async def get_value(key):
+    return await redis_connection.hgetall(str(key), encoding='utf-8')
 
 
-async def set_value(key, **kwargs):
-    db = await aioredis.create_redis_pool(REDIS_URL)
-    await db.hmset_dict(key, **kwargs)
-    db.close()
-    await db.wait_closed()
+async def set_value(key, mapping):
+    await redis_connection.hmset(str(key), mapping)

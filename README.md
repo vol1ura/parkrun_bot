@@ -8,10 +8,18 @@
 
 Bot for S95 sport event system.
 
+## Development
+
 ### Configuration
 
 ```shell
 sudo -u postgres pg_restore -d s95_dev tmp/backup.tar --no-privileges --no-owner -U postgres
+```
+
+### Run Redis
+
+```shell
+docker run --name s95-redis --rm -p 6379:6379 redis redis-server --save 60 1 --loglevel debug
 ```
 
 ### Tests
@@ -19,4 +27,9 @@ sudo -u postgres pg_restore -d s95_dev tmp/backup.tar --no-privileges --no-owner
 ```shell
 pip install -r tests/requirements.txt
 pytest --cov-report=term-missing:skip-covered --cov=. tests/
+```
+
+For html report:
+```shell
+pytest --cov-report=html --cov=. tests/
 ```

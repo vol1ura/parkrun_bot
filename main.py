@@ -4,7 +4,7 @@ from aiogram import Dispatcher, types
 from aiogram.utils import executor
 
 from config import *
-from app import bot, dp
+from app import bot, dp, redis_connection
 import handlers  # important import!!!
 
 
@@ -34,6 +34,7 @@ async def on_shutdown(dispatcher: Dispatcher):
     print("Shutting down..")
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
+    await redis_connection.close()
     print("Bot down")
 
 

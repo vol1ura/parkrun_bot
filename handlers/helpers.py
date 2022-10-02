@@ -1,42 +1,32 @@
 import random
 
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from vedis import Vedis
 
-from app import logger
-from config import DB_FILE
-from parkrun import parkrun
+from app import logger, db_conn
 from utils import content
 
 
 class UserStates(StatesGroup):
-    ATHLETE_ID = State()
+    SEARCH_PARKRUN_CODE = State()
+    SAVE_WITH_PARKRUN_CODE = State()
+    ATHLETE_LAST_NAME = State()
+    ATHLETE_FIRST_NAME = State()
+    GENDER = State()
+    EMAIL = State()
+    VALIDATE_EMAIL = State()
+    PASSWORD = State()
     COMPARE_ID = State()
 
 
-async def add_db_athlete(athlete_id):
+async def fetch_athlete(athlete_id):
     if not athlete_id or not athlete_id.isdigit():
         return None
-    with Vedis(DB_FILE) as db:
-        try:
-            h = db.Hash(f'A{athlete_id}')
-            athlete_name = h['athlete'].decode() if h['athlete'] else None
-        except Exception as e:
-            athlete_name = None
-            logger.error(f'Access to DB failed. Athlete ID={athlete_id}. Error: {e}')
-    if not athlete_name:
-        athlete_name, athlete_page = await parkrun.get_athlete_data(athlete_id)
-        if not athlete_name:
-            return None
-        with Vedis(DB_FILE) as db:
-            try:
-                h = db.Hash(f'A{athlete_id}')
-                h['athlete'] = athlete_name
-                h['athlete_page'] = athlete_page
-            except Exception as e:
-                logger.error('Writing athlete to DB failed. '
-                             f'Athlete ID={athlete_id}, {athlete_name}. Error: {e}')
-    return athlete_name
+    parkrun_id = int(athlete_id)
+    conn = await db_conn()
+    athlete = await conn.fetchrow('SELECT * FROM athletes WHERE parkrun_code = $1', parkrun_id)
+    print(athlete)
+    if athlete:
+        return athlete
 
 
 async def handle_throttled_query(*args, **kwargs):

@@ -14,4 +14,17 @@ WEBHOOK_URL = f'{os.environ.get("HOST")}{WEBHOOK_PATH}'
 WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = int(os.environ.get('PORT', 5000))
 
-REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/1')
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+
+HOST = os.getenv('HOST')
+
+INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')
+INTERNAL_API_URL = os.getenv('INTERNAL_API_URL')
+
+# Mailer
+EMAIL_SENDER = os.getenv('EMAIL_SENDER')
+EMAIL_ADDRESS = os.getenv('EMAIL_ADDRESS')
+EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+SMTP_PORT = os.getenv('SMTP_PORT', 465)
+SMTP_SERVER = os.getenv('SMTP_SERVER')

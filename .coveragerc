@@ -1,7 +1,7 @@
 [run]
 omit =
     # tests/*
-    aienv/*
+    env/*
     config.py
     */__init__.py
 
