@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from parkrun import helpers
+from s95 import helpers
 
 
 min_to_try = ['17:00', '19:15', '23:30', '23:31', '24:58', '24:59', '25:01', '25:02', '18:45', '18:46', '59:59']

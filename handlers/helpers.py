@@ -18,15 +18,14 @@ class UserStates(StatesGroup):
     COMPARE_ID = State()
 
 
-async def fetch_athlete(athlete_id):
-    if not athlete_id or not athlete_id.isdigit():
-        return None
-    parkrun_id = int(athlete_id)
+async def find_athlete_by(field: str, value):
     conn = await db_conn()
-    athlete = await conn.fetchrow('SELECT * FROM athletes WHERE parkrun_code = $1', parkrun_id)
-    print(athlete)
-    if athlete:
-        return athlete
+    return await conn.fetchrow(f'SELECT * FROM athletes WHERE {field} = $1', value)
+
+
+async def find_user_by(field: str, value):
+    conn = await db_conn()
+    return await conn.fetchrow(f'SELECT * FROM users WHERE {field} = $1', value)
 
 
 async def handle_throttled_query(*args, **kwargs):

@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from parkrun.helpers import ParkrunSite, PARKRUNS_FILE
+from s95.helpers import ParkrunSite
 
 
 async def all_parkruns_records():
@@ -52,9 +52,3 @@ async def top_records_count(pic: str):
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
-
-
-async def update_parkruns_list():
-    data = await all_parkruns_records()
-    with open(PARKRUNS_FILE, 'w') as f:
-        f.write('\n'.join(data[data.columns[0]].values))

@@ -5,7 +5,7 @@ import time
 import pandas
 import pytest
 
-from parkrun import records, helpers
+from s95 import records, helpers
 
 
 @pytest.fixture(scope='module')
@@ -42,7 +42,3 @@ async def test_top_records_count(tmpdir, mock_parkrun_records):
     pic.close()
     assert os.path.exists(pic_path)
     print(pic_path)
-
-
-async def test_update_parkruns_list(mock_parkrun_records):
-    await records.update_parkruns_list()

@@ -10,57 +10,13 @@ import pandas as pd
 from lxml.html import fromstring
 
 from bot_exceptions import ParsingException
-from parkrun.helpers import ParkrunSite, CLUBS_FILE, CLUBS
+from s95.helpers import ParkrunSite
+from app import db_conn
 
 
-async def update_parkruns_clubs():
-    if os.path.exists(CLUBS_FILE) and os.path.getmtime(CLUBS_FILE) + 605000 > time.time():
-        return
-    html = await ParkrunSite('largestclubs').get_html()
-    tree = fromstring(html)
-    rows = tree.xpath('//*[@id="results"]/tbody/tr')
-    all_clubs = []
-    for row in rows:
-        cells = row.xpath('.//td')
-        id_url = cells[0].xpath('.//a/@href')[0]
-        site_cell = cells[4].xpath('.//a/@href')
-        link = site_cell[0] if site_cell else f'https://www.parkrun.ru/groups/{id_url}/'
-        all_clubs.append({
-            'id': id_url.replace('#featureClub=', ''),
-            'name': cells[0].text_content(),
-            'participants': cells[2].text_content(),
-            'runs': cells[3].text_content(),
-            'link': link
-        })
-    with open(CLUBS_FILE, 'w', encoding='utf-8') as f:
-        fieldnames = ['id', 'name', 'participants', 'runs', 'link']
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writerows(all_clubs)
-
-
-async def check_club_as_id(club_id: str):
-    club_name = next((c['name'] for c in CLUBS if c['id'] == club_id), None)
-    if club_name:
-        return club_name
-    async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
-        async with session.get(f'https://www.parkrun.ru/groups/{club_id}/') as resp:
-            html = await resp.text()
-    tree = fromstring(html)
-    notice = tree.xpath('//*[@id="content"]/div/p[@class="notice"]')
-    if notice:
-        return None
-    try:
-        club_name = tree.xpath('//*[@id="content"]/div/h1')[0].text_content()
-        CLUBS.append({
-            'id': club_id,
-            'name': club_name,
-            'participants': tree.xpath('//*[@id="content"]/div/p[2]')[0].text_content().split()[0],
-            'runs': tree.xpath('//*[@id="content"]/div/p[3]')[0].text_content().split()[-1],
-            'link': tree.xpath('//*[@id="content"]/div/ul/li[2]/a')[0].attrib['href']
-        })
-    except(KeyError, IndexError):
-        return None
-    return club_name
+async def find_club_by_id(club_id: int):
+    club = await db_conn.fetchrow('SELECT * FROM clubs WHERE id = $1', club_id)
+    return club.name if club else None
 
 
 async def get_participants(club_id: str):

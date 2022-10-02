@@ -6,7 +6,7 @@ import time
 import pytest
 
 from bot_exceptions import ParsingException
-from parkrun import clubs, helpers
+from s95 import clubs, helpers
 
 WR_in_Kuzminki = ('kuzminki', '23212')
 
@@ -30,29 +30,21 @@ def test_top_active_clubs_diagram(tmpdir):
     assert os.path.exists(pic_path)
 
 
-async def test_update_parkruns_clubs():
-    await clubs.update_parkruns_clubs()
-    assert len([club for club in helpers.CLUBS if club['id'] == '24630']) == 1
-    os.remove(helpers.CLUBS_FILE)
-    await clubs.update_parkruns_clubs()
-    await clubs.update_parkruns_clubs()
-
-
 clubs_to_try = [('23212', 'Wake&Run'), ('999999', None), ('21796', '21runners')]
 
 
 @pytest.mark.parametrize('club_id, expected_club_name', clubs_to_try)
-async def test_check_club_as_id(club_id, expected_club_name):
+async def test_find_club_by_id(club_id, expected_club_name):
     time.sleep(2)
-    club_name = await clubs.check_club_as_id(club_id)
+    club_name = await clubs.find_club_by_id(club_id)
     assert expected_club_name == club_name
 
 
 @pytest.mark.asyncio
-async def test_check_club_as_id_fail(empty_page, aresponses):
+async def test_find_club_by_id_fail(empty_page, aresponses):
     club_id = 'failed_id'
     aresponses.add('www.parkrun.ru', f'/groups/{club_id}/', 'GET', aresponses.Response(text=empty_page))
-    result = await clubs.check_club_as_id(club_id)
+    result = await clubs.find_club_by_id(club_id)
     assert result is None
     aresponses.assert_plan_strictly_followed()
 

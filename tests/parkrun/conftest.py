@@ -4,7 +4,7 @@ from collections import namedtuple
 
 import pytest
 
-from parkrun import helpers
+from s95 import helpers
 
 AthletePersonalData = namedtuple('AthletePersonalData', 'id name url html')
 

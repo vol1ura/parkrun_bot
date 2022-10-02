@@ -8,7 +8,7 @@ from lxml.html import fromstring
 from matplotlib.ticker import MaxNLocator
 
 from bot_exceptions import ParsingException
-from parkrun.helpers import ParkrunSite, min_to_mmss
+from s95.helpers import ParkrunSite, min_to_mmss
 
 
 async def parse_latest_results(parkrun: str):

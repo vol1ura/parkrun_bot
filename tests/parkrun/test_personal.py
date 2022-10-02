@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from parkrun.personal import PersonalResults
+from s95.personal import PersonalResults
 
 
 @pytest.fixture(scope='module')

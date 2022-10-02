@@ -8,8 +8,8 @@ import pandas
 import pytest
 
 from bot_exceptions import ParsingException
-from parkrun import latest
-from parkrun.helpers import ParkrunSite
+from s95 import latest
+from s95.helpers import ParkrunSite
 
 PARKRUN = 'Yoshkar-Ola Alleya Zdorovya'
 

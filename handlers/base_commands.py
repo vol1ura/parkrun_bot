@@ -1,10 +1,8 @@
-import random
-
 from aiogram import types
 
 import keyboards as kb
-from app import dp, bot
-from utils import content, fucomp
+from app import dp, db_conn
+from utils import content
 
 
 @dp.message_handler(commands='start')
@@ -17,30 +15,28 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(commands=['help', 'помощь'])
 @dp.throttled(rate=3)
 async def commands(message: types.Message):
+    await message.delete()
     await message.answer(content.help_message,
                          disable_notification=True, parse_mode='html', disable_web_page_preview=True)
-
-
-@dp.message_handler(commands=['admin', 'админ'])
-@dp.message_handler(lambda message: fucomp.bot_compare(message.text, fucomp.phrases_admin))
-@dp.throttled(rate=3)
-async def admin(message: types.Message):
-    if message.chat.type == 'private':  # private chat message
-        await message.reply('Здесь нет админов, это персональный чат.')
-    else:
-        group_admin = random.choice(await bot.get_chat_administrators(message.chat.id)).user
-        about_admin = f'\nАдмин @{group_admin.username} - {group_admin.first_name}  {group_admin.last_name}'
-        await message.answer(random.choice(content.phrases_about_admin) + about_admin)
 
 
 @dp.message_handler(regexp='🔧 настройки')
 @dp.message_handler(commands=['settings'])
 @dp.throttled(rate=2)
 async def process_command_settings(message: types.Message):
-    await message.answer('Установка параметров', reply_markup=kb.inline_parkrun)
+    await message.delete()
+    telegram_id = message.from_user.id
+    conn = await db_conn()
+    values = await conn.fetchrow('SELECT * FROM users WHERE telegram_id = $1', telegram_id)
+    await conn.close()
+    if values:
+        print(values)
+        await message.answer(values)
+    else:
+        await message.answer("Вы пока не зарегистрированы. Хотите зарегистрироваться? Нажимая кнопку 'Да, я согласен' вы принимаете правила участия и даёте согласие на обработку персональных данных.", reply_markup=kb.inline_agreement)
 
 
-@dp.message_handler(regexp='🌳 паркран')
+@dp.message_handler(regexp='🌳 Sat 9am 5km')
 @dp.message_handler(commands=['statistics'])
 @dp.throttled(rate=2)
 async def process_command_statistics(message: types.Message):
@@ -51,4 +47,4 @@ async def process_command_statistics(message: types.Message):
 @dp.message_handler(commands=['info'])
 @dp.throttled(rate=2)
 async def process_command_info(message: types.Message):
-    await message.answer('Кое-что ещё помимо паркранов:', reply_markup=kb.inline_info)
+    await message.answer('Кое-что ещё:', reply_markup=kb.inline_info)

@@ -4,10 +4,9 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 main = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 btn1 = KeyboardButton('🔧 настройки')
 btn2 = KeyboardButton('❓ справка')
-btn3 = KeyboardButton('🌳 Sat 9am 5km')
+# btn3 = KeyboardButton('🌳 Sat 9am 5km')
 btn4 = KeyboardButton('📋 разное')
-main.row(btn3, btn4).add(btn1, btn2)
-
+main.row(btn1).add(btn4, btn2)
 
 # STATISTICS inline keyboard layout
 inline_stat = InlineKeyboardMarkup(row_width=2)
@@ -30,20 +29,11 @@ info_btn1 = InlineKeyboardButton("Посмотреть погоду", switch_inl
 info_btn2 = InlineKeyboardButton("Загрязнение воздуха", switch_inline_query_current_chat='air')
 
 info_btn3 = InlineKeyboardButton('Новость из Instagram', switch_inline_query_current_chat='instagram')
-info_btn4 = InlineKeyboardButton('Telegram каналы про бег', callback_data='telegram')
 inline_info.row(info_btn1, info_btn2)
-inline_info.add(info_btn4, info_btn3)
+inline_info.add(info_btn3)
 
 
-# SETTINGS inline keyboard layout
-inline_parkrun = InlineKeyboardMarkup(row_width=2)
-inline_parkrun.insert(InlineKeyboardButton('Мои установки', callback_data='check_settings'))
-inline_parkrun.insert(InlineKeyboardButton('Ввести ParkrunID', callback_data='set_athlete'))
-
-inline_parkrun.insert(InlineKeyboardButton('Выбрать parkrun', switch_inline_query_current_chat='parkrun'))
-inline_parkrun.insert(InlineKeyboardButton("Выбрать клуб", switch_inline_query_current_chat='clubs'))
-
-inline_parkrun.insert(InlineKeyboardButton('Перейти на сайт s95.ru', url='https://s95.ru/'))
+open_s95_button = InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/')
 
 
 # PERSONAL RESULTS inline keyboard layout
@@ -61,3 +51,29 @@ inline_compare.add(InlineKeyboardButton('Баттл-таблица', callback_da
 inline_compare.insert(InlineKeyboardButton('Баттл-диаграмма', callback_data='battle_diagram'))
 inline_compare.insert(InlineKeyboardButton('Файл Excel', callback_data='excel_table'))
 inline_compare.insert(InlineKeyboardButton('Scatter', callback_data='battle_scatter'))
+
+# ATHLETE REGISTRATION
+accept_athlete = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+accept_athlete.add('Это я, привязать', 'Это не я')
+
+ask_for_new_athlete = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+ask_for_new_athlete.add('Всё верно, создать', 'Отмена')
+
+select_gender = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+select_gender.add('мужской', 'женский')
+
+inline_agreement = InlineKeyboardMarkup(row_width=2)
+inline_agreement.insert(InlineKeyboardButton('Да, я согласен', callback_data='start_registration'))
+inline_agreement.insert(InlineKeyboardButton('Нет, отмена', callback_data='cancel_registration'))
+
+inline_find_athlete_by_id = InlineKeyboardMarkup(row_width=2)
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести parkrun ID', callback_data='parkrun_code_search'))
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести 5 вёрст ID', callback_data='fiveverst_id_search'))
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести S95 ID', callback_data='s95_id_search'))
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести runpark ID', callback_data='runpark_id_search'))
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Не помню ID', callback_data='help_to_find_id'))
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Я новый участник', callback_data='create_new_athlete'))
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Отмена', callback_data='cancel_registration'))
+
+inline_open_s95 = InlineKeyboardMarkup()
+inline_open_s95.row(open_s95_button)

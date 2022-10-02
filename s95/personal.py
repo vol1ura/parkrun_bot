@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MultipleLocator, NullLocator
 
-from parkrun import parkrun
+from s95 import parkrun
 
 
 class PersonalResults:

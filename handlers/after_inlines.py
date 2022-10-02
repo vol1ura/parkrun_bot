@@ -4,7 +4,7 @@ import re
 from app import dp, bot, logger
 from handlers.helpers import handle_throttled_query
 from utils import content, instagram, redis
-from parkrun import clubs, latest, helpers
+from s95 import clubs, latest, helpers
 
 
 @dp.message_handler(regexp='⏳ Получение данных об участии...')
@@ -81,13 +81,13 @@ async def post_teammate_table(message):
         await message.answer(data, parse_mode='Markdown')
 
     elif 'выбранном клубе' in message.text:
-        club_rec = [club for club in helpers.CLUBS if club['id'] == club_id]
-        if club_rec:
-            info = f"""*Выбранный клуб*: {club_rec[0]['name']}.
-            *Зарегистрированных участников*: {club_rec[0]['participants']}.
-            *Ссылка на клуб в интернете*: {club_rec[0]['link']}.
-            *Ссылка на клуб на сайте parkrun.ru*: https://www.parkrun.com/profile/groups#id={club_rec[0]['id']}
-            Перейдите по последней ссылке и нажмите кнопку _Присоединиться_, 
+        club = []
+        if club:
+            info = f"""*Выбранный клуб*: {club['name']}.
+            *Зарегистрированных участников*: {club['participants']}.
+            *Ссылка на клуб в интернете*: {club['link']}.
+            *Ссылка на клуб на сайте s95.ru*: https://s95.ru/clubs/{club['id']}
+            Перейдите по последней ссылке и нажмите кнопку _Присоединиться_,
             чтобы установить клуб (вы должны быть залогинены)."""
             await message.answer(info, parse_mode='Markdown')
         else:

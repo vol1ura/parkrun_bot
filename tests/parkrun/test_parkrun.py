@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from parkrun import parkrun
+from s95 import parkrun
 
 
 @pytest.mark.asyncio

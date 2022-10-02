@@ -1,6 +1,6 @@
 import os
 
-from parkrun.collations import CollationMaker
+from s95.collations import CollationMaker
 
 
 def test_collation_maker_pics(athlete_data_1, athlete_data_2, tmpdir):

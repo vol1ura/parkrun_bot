@@ -24,8 +24,8 @@ class ParkrunSite:
     ]
 
     __PARKRUN_URL = {
-        'largestclubs': 'https://www.parkrun.ru/results/largestclubs/',
-        'courserecords': 'https://www.parkrun.ru/results/courserecords/'
+        'largestclubs': 'https://www.parkrun.com.au/results/largestclubs/',
+        'courserecords': 'https://www.parkrun.com.au/results/courserecords/'
     }
 
     def __init__(self, key=''):
@@ -68,8 +68,8 @@ class ParkrunSite:
         logger.info(f'Information for [{self.__key}] was updated by date={actual_date}')
 
 
-def athlete_all_history_url(athlete_id):
-    return f'https://www.parkrun.org.uk/parkrunner/{athlete_id}/all/'
+def is_parkrun_code(code) -> bool:
+    return (isinstance(code, int) or code.isdigit()) and 0 < int(code) < 770000000
 
 
 def min_to_mmss(m) -> str:
@@ -95,12 +95,3 @@ def read_clubs(file: str) -> list:
             for rec in reader:
                 clubs.append(rec)
     return clubs
-
-
-PARKRUNS_FILE = os.path.join(os.path.dirname(__file__), 'all_parkruns.txt')
-PARKRUNS = read_parkruns(PARKRUNS_FILE)
-
-CLUBS_FILE = os.path.join(os.path.dirname(__file__), 'all_clubs.csv')
-CLUBS = read_clubs(CLUBS_FILE)
-CLUBS.append({'id': '24630', 'name': 'ENGIRUNNERS', 'participants': '29', 'runs': '2157',
-              'link': 'https://instagram.com/engirunners'})  # NOTE: personal order for D.Petrov

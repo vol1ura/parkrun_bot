@@ -1,0 +1,46 @@
+version: '3.7'
+services:
+  bot:
+    build:
+      context: .
+    volumes:
+      - .:/usr/src
+      - ./deploy/.ssh:/root/.ssh
+    tmpfs:
+      - /usr/src/tmp/pids
+      - /usr/src/tmp/cache
+    tty: true
+    stdin_open: true
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+
+  db:
+    image: postgres:14.3-alpine
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./tmp:/tmp
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis:/data
+
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - '3003:8080'
+    environment:
+      ADMINER_DESIGN: mvt
+
+volumes:
+  postgres:
+  redis:

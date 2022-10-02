@@ -1,22 +1,14 @@
 from aiogram import types
-from vedis import Vedis
+from aiogram.dispatcher import FSMContext
 
 import keyboards as kb
 from app import dp, bot, logger
 from bot_exceptions import CallbackException
-from config import DB_FILE
-from handlers.helpers import UserStates, handle_throttled_query, add_db_athlete
-from parkrun import records, clubs
-from parkrun.collations import CollationMaker
-from parkrun.personal import PersonalResults
+from handlers.helpers import UserStates, handle_throttled_query, find_user_by
+from s95 import records, clubs
+from s95.collations import CollationMaker
+from s95.personal import PersonalResults
 from utils import content, redis
-
-
-@dp.callback_query_handler(lambda c: c.data == 'telegram')
-async def process_callback_telegram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(callback_query.from_user.id, content.telegram_channels,
-                           parse_mode='Markdown', disable_web_page_preview=True)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
@@ -87,17 +79,17 @@ async def get_compared_pages(user_id):
                                 'Нажмите кнопку Ввести ID участника.')
     if athlete_id_1 == athlete_id_2:
         raise CallbackException('Ваш parkrun ID не должен совпадать с parkrun ID, выбранного участника.')
-    athlete_name_1 = await add_db_athlete(athlete_id_1)
-    athlete_name_2 = await add_db_athlete(athlete_id_2)
-    with Vedis(DB_FILE) as db:
-        try:
-            h = db.Hash(f'A{athlete_id_1}')
-            athlete_page_1 = h['athlete_page'].decode()
-            h = db.Hash(f'A{athlete_id_2}')
-            athlete_page_2 = h['athlete_page'].decode()
-        except Exception as e:
-            logger.error(e)
-            raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
+    athlete_name_1 = await find_user_by('id', athlete_id_1)
+    athlete_name_2 = await find_user_by('id', athlete_id_2)
+    # with Vedis(DB_FILE) as db:
+    #     try:
+    #         h = db.Hash(f'A{athlete_id_1}')
+    #         athlete_page_1 = h['athlete_page'].decode()
+    #         h = db.Hash(f'A{athlete_id_2}')
+    #         athlete_page_2 = h['athlete_page'].decode()
+    #     except Exception as e:
+    #         logger.error(e)
+    #         raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
     return athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2
 
 
@@ -107,15 +99,15 @@ async def get_personal_page(user_id):
     if not athlete_id:
         raise CallbackException('Вы не ввели свой parkrun ID.\n'
                                 'Перейдите в настройки и нажмите кнопку Выбрать участника')
-    athlete_name = await add_db_athlete(athlete_id)
-    with Vedis(DB_FILE) as db:
-        try:
-            h = db.Hash(f'A{athlete_id}')
-            athlete_page = h['athlete_page'].decode()
-        except Exception as e:
-            logger.error(e)
-            raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
-    return athlete_name, athlete_page
+    athlete_name = await find_user_by('id', athlete_id)
+    # with Vedis(DB_FILE) as db:
+    #     try:
+    #         h = db.Hash(f'A{athlete_id}')
+    #         athlete_page = h['athlete_page'].decode()
+    #     except Exception as e:
+    #         logger.error(e)
+    #         raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
+    # return athlete_name, athlete_page
 
 
 @dp.callback_query_handler(lambda c: c.data == 'battle_diagram')
@@ -214,3 +206,42 @@ async def process_personal_wins_table(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     page = await get_personal_page(user_id)
     await bot.send_message(callback_query.from_user.id, PersonalResults(*page).wins_table(), parse_mode='Markdown')
+
+
+@dp.callback_query_handler(lambda c: c.data == 'link_athlete')
+@dp.throttled(handle_throttled_query, rate=2)
+async def process_athlete_linking(callback_query: types.CallbackQuery, state: FSMContext):
+    print(callback_query)
+    await bot.answer_callback_query(callback_query.id)
+    current_state = await state.get_state()
+    if current_state == UserStates.SAVE_WITH_PARKRUN_CODE:
+        print(current_state)
+
+    telegram_id = callback_query.from_user.id
+    print(telegram_id)
+    await bot.send_message(callback_query.from_user.id, 'Вы зарегистрированы', parse_mode='Markdown')
+
+
+@dp.callback_query_handler(lambda c: c.data == 'help_to_find_id')
+async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FSMContext):
+    if await state.get_state():
+        await state.reset_state()
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await bot.send_message(callback_query.from_user.id, content.help_to_find_id,
+    parse_mode='Markdown', reply_markup=kb.inline_open_s95)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'cancel_registration')
+async def process_cancel_registration(callback_query: types.CallbackQuery, state: FSMContext):
+    if await state.get_state():
+        await state.reset_state()
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await bot.send_message(callback_query.from_user.id, 'Наберите /help, чтобы посмотреть доступные команды', reply_markup=kb.main)
+
+@dp.callback_query_handler(lambda c: c.data == 'start_registration')
+async def process_start_registration(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await bot.send_message(callback_query.from_user.id, 'Если вы когда-либо уже участвовали в наших мероприятиях или паркране, то у вас уже есть персональный штрих-код с ID участника. Выберите свой вариант.', reply_markup=kb.inline_find_athlete_by_id)

@@ -5,7 +5,7 @@ from aiogram import types
 
 from app import logger, bot, dp
 from utils import content, weather, news
-from parkrun import helpers, records
+from s95 import helpers, records
 
 
 @dp.inline_handler(lambda query: 'parkrun' in query.query or 'паркран' in query.query)
@@ -176,22 +176,5 @@ async def query_latestparkrun(inline_query: types.InlineQuery):
             thumb_url='https://raw.githubusercontent.com/vol1ura/wr-tg-bot/master/static/pics/3.jpg',
             thumb_width=48, thumb_height=48)
         await bot.answer_inline_query(inline_query.id, [m1, m2, m3], cache_time=0)
-    except Exception as e:
-        logger.error(e)
-
-
-@dp.inline_handler(lambda query: 'instagram' in query.query)
-async def display_instagram_menu(inline_query: types.InlineQuery):
-    offset = int(inline_query.offset) if inline_query.offset else 0
-    try:
-        quotes = content.instagram_profiles[offset:]
-        m_next_offset = str(offset + 15) if len(quotes) >= 15 else None
-        inst_menu = [types.InlineQueryResultArticle(
-            id=f'{k + offset}', title=f'@{p}',
-            input_message_content=types.InputTextMessageContent(f"Достаю последний пост из @{p}. Подождите...")
-        )
-            for k, p in enumerate(quotes[:15])]
-        await bot.answer_inline_query(inline_query.id, inst_menu,
-                                      next_offset=m_next_offset if m_next_offset else '', cache_time=300000)
     except Exception as e:
         logger.error(e)

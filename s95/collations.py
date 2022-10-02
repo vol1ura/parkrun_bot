@@ -4,7 +4,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.ticker import MultipleLocator
 
-from parkrun import helpers, parkrun
+from s95 import helpers, parkrun
 from bot_exceptions import NoCollationRuns
 
 
