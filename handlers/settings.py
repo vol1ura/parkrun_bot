@@ -2,9 +2,10 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 import keyboards as kb
-from app import bot, dp, db_conn
+
+from app import bot, dp
 from handlers.helpers import UserStates
-from utils import content, redis
+from utils import content
 
 
 @dp.message_handler(commands='reset', state='*')
@@ -14,7 +15,7 @@ async def process_command_reset(message: types.Message, state: FSMContext):
 	if current_state is None:
 		return
 	await state.reset_state()
-	await message.reply('Запрос отменён')
+	await message.reply('Запрос отменён', reply_markup=kb.main)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')

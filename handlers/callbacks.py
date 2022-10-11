@@ -2,6 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 import keyboards as kb
+
 from app import dp, bot, logger
 from bot_exceptions import CallbackException
 from handlers.helpers import UserStates, handle_throttled_query, find_user_by
@@ -229,7 +230,7 @@ async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FS
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await bot.send_message(callback_query.from_user.id, content.help_to_find_id,
-    parse_mode='Markdown', reply_markup=kb.inline_open_s95)
+                           parse_mode='Markdown', reply_markup=kb.inline_open_s95)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'cancel_registration')
@@ -239,6 +240,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await bot.send_message(callback_query.from_user.id, 'Наберите /help, чтобы посмотреть доступные команды', reply_markup=kb.main)
+
 
 @dp.callback_query_handler(lambda c: c.data == 'start_registration')
 async def process_start_registration(callback_query: types.CallbackQuery):

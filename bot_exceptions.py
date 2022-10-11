@@ -4,6 +4,7 @@ class ParsingException(Exception):
         Attributes:
             message -- explanation of the error
         """
+
     def __init__(self, message="Page parsing failed"):
         self.message = message
         super().__init__(self.message)
@@ -21,6 +22,7 @@ class NoCollationRuns(Exception):
         Attributes:
             message -- explanation of the error
         """
+
     def __init__(self, message='У вас пока ещё не было совместных пробежек.'):
         self.message = message
         super().__init__(self.message)

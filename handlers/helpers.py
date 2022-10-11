@@ -15,7 +15,7 @@ class UserStates(StatesGroup):
     EMAIL = State()
     VALIDATE_EMAIL = State()
     PASSWORD = State()
-    COMPARE_ID = State()
+    COMPARE_ID = State() # TODO: remove me
 
 
 async def find_athlete_by(field: str, value):
