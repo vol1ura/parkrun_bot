@@ -15,7 +15,7 @@ def test_content_with_lists(phrases):
 
 
 phrases_to_try = [
-    content.help_message, content.telegram_channels, content.start_message, content.no_parkrun_message,
+    content.help_message, content.start_message, content.no_parkrun_message,
     content.no_club_message, content.no_athlete_message, content.success_athlete_set, content.success_parkrun_set,
     content.success_club_set, content.settings_save_failed
 ]

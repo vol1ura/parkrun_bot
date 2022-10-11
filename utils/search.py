@@ -33,16 +33,16 @@ async def google(phrase):
     return [re.sub(r'[.!?] [\w ]+$', '.', res8.strip(), re.MULTILINE)]
 
 
-async def bashim(phrase):
-    search_phrase = re.sub(r'(?i)\bбот\b|\.|,|!|\?', '', phrase).strip()
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'https://bash.im/search?text={search_phrase}') as resp:
-            html = await resp.text()
-    tree = fromstring(html)
-    cites = tree.xpath('//article/div/div')
-    if cites:
-        for cite in cites:
-            cite = re.split(r'[\w. ]+?:', re.sub(r'\n', '', cite.text_content()))
-            [cite.remove(s) for s in list(cite) if s == '']
-            print(f'"{cite[0].strip()}",')
-    return ''
+# async def bashim(phrase):
+#     search_phrase = re.sub(r'(?i)\bбот\b|\.|,|!|\?', '', phrase).strip()
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(f'https://bash.im/search?text={search_phrase}') as resp:
+#             html = await resp.text()
+#     tree = fromstring(html)
+#     cites = tree.xpath('//article/div/div')
+#     if cites:
+#         for cite in cites:
+#             cite = re.split(r'[\w. ]+?:', re.sub(r'\n', '', cite.text_content()))
+#             [cite.remove(s) for s in list(cite) if s == '']
+#             print(f'"{cite[0].strip()}",')
+#     return ''

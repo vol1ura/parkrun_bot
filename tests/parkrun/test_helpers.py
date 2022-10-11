@@ -22,18 +22,18 @@ def test_min_to_mmss(mmss):
     assert helpers.min_to_mmss(mins + 10**(-8)) == mmss
 
 
-def test_clubs_dict():
-    assert isinstance(helpers.CLUBS, list)
-    assert len(helpers.CLUBS) > 0
-    assert 'ENGIRUNNERS' in list(map(lambda v: v['name'], helpers.CLUBS))
-    for club in helpers.CLUBS:
-        isinstance(club, dict)
-        assert all(map(lambda key: key in club, ['id', 'name', 'participants', 'runs', 'link']))
+# def test_clubs_dict():
+#     assert isinstance(helpers.CLUBS, list)
+#     assert len(helpers.CLUBS) > 0
+#     assert 'ENGIRUNNERS' in list(map(lambda v: v['name'], helpers.CLUBS))
+#     for club in helpers.CLUBS:
+#         isinstance(club, dict)
+#         assert all(map(lambda key: key in club, ['id', 'name', 'participants', 'runs', 'link']))
 
 
-def test_parkruns_list():
-    assert isinstance(helpers.PARKRUNS, list)
-    assert len(helpers.PARKRUNS) > 0
+# def test_parkruns_list():
+#     assert isinstance(helpers.PARKRUNS, list)
+#     assert len(helpers.PARKRUNS) > 0
 
 
 def test_parkrun_site():

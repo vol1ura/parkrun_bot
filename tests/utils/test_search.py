@@ -10,7 +10,7 @@ async def test_google():
     assert not re.match(r'^бот', message[0], re.I)
 
 
-async def test_bashim():
-    message = await search.bashim('короновирус')
-    print(message)
-    assert isinstance(message, str)
+# async def test_bashim():
+#     message = await search.bashim('короновирус')
+#     print(message)
+#     assert isinstance(message, str)
