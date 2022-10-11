@@ -10,35 +10,38 @@ import keyboards as kb
 
 from app import dp, bot
 from handlers.helpers import UserStates, find_athlete_by, find_user_by
-from s95.helpers import is_parkrun_code
+from s95.athlete_code import AthleteCode
 from utils import redis, content, mailer
 
 
-@dp.message_handler(lambda message: not is_parkrun_code(message.text), state=UserStates.SEARCH_PARKRUN_CODE)
+@dp.message_handler(lambda message: not AthleteCode(message.text).is_valid, state=UserStates.SEARCH_ATHLETE_CODE)
 async def process_age_invalid(message: types.Message):
     return await message.reply("Введите свой parkrun ID (только цифры, без буквы А в начале). Либо /reset для отмены.")
 
 
-@dp.message_handler(state=UserStates.SEARCH_PARKRUN_CODE)
+@dp.message_handler(state=UserStates.SEARCH_ATHLETE_CODE)
 async def process_user_enter_parkrun_code(message: types.Message, state: FSMContext):
     await UserStates.next()
-    parkrun_code = int(message.text)
-    await state.update_data(parkrun_code=parkrun_code)
-    athlete = await find_athlete_by('parkrun_code', parkrun_code)
+    athlete_code = AthleteCode(message.text)
+    if athlete_code.key == 's95':
+        await state.update_data(parkrun_code=None)
+    else:
+        await state.update_data(**{athlete_code.key: athlete_code.value})
+    athlete = await find_athlete_by(athlete_code.key, athlete_code.value)
     if athlete:
         if athlete["user_id"]:
             await state.finish()
             return await message.answer('Участник с этим parkrun ID уже зарегистрирован и привязан.')
         async with state.proxy() as data:
-            data["athlete_id"] = athlete["id"]
-            data["first_name"], data["last_name"] = athlete["name"].split(' ', 1)
+            data['athlete_id'] = athlete['id']
+            data['first_name'], data["last_name"] = athlete['name'].split(' ', 1)
         await message.answer(
-            content.found_athlete_info.format(athlete_id=athlete["id"], name=athlete["name"]),
+            content.found_athlete_info.format(athlete_id=athlete['id'], name=athlete['name']),
             reply_markup=kb.accept_athlete,
-            parse_mode="html"
+            parse_mode='html'
         )
     else:
-        await message.reply(content.parkrun_code_check.format(parkrun_code=parkrun_code),
+        await message.reply(content.athlete_code_check(athlete_code),
                             reply_markup=kb.ask_for_new_athlete, parse_mode="html", disable_web_page_preview=True)
 
 
@@ -124,15 +127,14 @@ async def process_get_email(message: types.Message, state: FSMContext):
         # Если участник не привязан, то делаем привязку
         await state.update_data(user_id=user['id'])
         await message.answer('Пользователь с таким адресом уже зарегистрирован. Теперь необходимо сделать привязку участника.')
-    else:
-        await UserStates.next()
+    await UserStates.next()
     async with state.proxy() as data:
-        data["email"] = message.text
+        data["email"] = email
         data["attempt"] = 0
         data["sent_at"] = int(time.time())
         data["pin"] = randint(100, 999)
         confirmation_mailer = mailer.EmailConfirmation(data['pin'])
-        confirmation_mailer.send(data["email"], f'{data["first_name"]} {data["last_name"]}')
+        confirmation_mailer.send(email, f'{data["first_name"]} {data["last_name"]}')
     await message.reply("Введите проверочный код, который был выслан на эту почту (если нет письма, подождите немного или проверьте спам).")
 
 
@@ -156,7 +158,13 @@ async def process_email_validation(message: types.Message, state: FSMContext):
             return await message.answer('Придумайте и введите пароль (должен состоять из латинских букв, содержать хотя бы одну заглавную букву, одну строчную, один спецсимвол, одну цифру и быть не короче 6 символов).')
 
         # привязать участника к юзеру
-        payload = { 'user_id': data['user_id'] }
+        payload = {
+            'user_id': data['user_id'],
+            'user': {
+                'telegram_id': message.from_user.id,
+                'telegram_user': message.from_user.username
+            }
+        }
         if 'athlete_id' in data:
             payload['athlete_id'] = data['athlete_id']
         else:

@@ -68,10 +68,6 @@ class ParkrunSite:
         logger.info(f'Information for [{self.__key}] was updated by date={actual_date}')
 
 
-def is_parkrun_code(code) -> bool:
-    return (isinstance(code, int) or code.isdigit()) and 0 < int(code) < 770000000
-
-
 def min_to_mmss(m) -> str:
     mins = round(m) if abs(m - round(m)) < 0.0166665 else int(m)
     return f'{mins}:{round((m - mins) * 60):02d}'

@@ -241,7 +241,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
     await bot.send_message(callback_query.from_user.id, 'Наберите /help, чтобы посмотреть доступные команды', reply_markup=kb.main)
 
 @dp.callback_query_handler(lambda c: c.data == 'start_registration')
-async def process_start_registration(callback_query: types.CallbackQuery, state: FSMContext):
+async def process_start_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    await bot.send_message(callback_query.from_user.id, 'Если вы когда-либо уже участвовали в наших мероприятиях или паркране, то у вас уже есть персональный штрих-код с ID участника. Выберите свой вариант.', reply_markup=kb.inline_find_athlete_by_id)
+    await bot.send_message(callback_query.from_user.id, 'Если вы когда-либо уже участвовали в наших мероприятиях, паркранах, забегах 5 вёрст или RunPark, то у вас уже есть персональный штрих-код с ID участника.', reply_markup=kb.inline_find_athlete_by_id)

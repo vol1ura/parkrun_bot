@@ -7,7 +7,7 @@ from utils import content
 
 
 class UserStates(StatesGroup):
-    SEARCH_PARKRUN_CODE = State()
+    SEARCH_ATHLETE_CODE = State()
     SAVE_WITH_PARKRUN_CODE = State()
     ATHLETE_LAST_NAME = State()
     ATHLETE_FIRST_NAME = State()

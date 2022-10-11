@@ -42,6 +42,7 @@ async def process_command_settings(message: types.Message):
 @dp.message_handler(commands=['statistics'])
 @dp.throttled(rate=2)
 async def process_command_statistics(message: types.Message):
+    await message.delete()
     await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_stat)
 
 
@@ -49,4 +50,5 @@ async def process_command_statistics(message: types.Message):
 @dp.message_handler(commands=['info'])
 @dp.throttled(rate=2)
 async def process_command_info(message: types.Message):
+    await message.delete()
     await message.answer('Кое-что ещё:', reply_markup=kb.inline_info)

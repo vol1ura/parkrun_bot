@@ -67,10 +67,7 @@ inline_agreement.insert(InlineKeyboardButton('Да, я согласен', callba
 inline_agreement.insert(InlineKeyboardButton('Нет, отмена', callback_data='cancel_registration'))
 
 inline_find_athlete_by_id = InlineKeyboardMarkup(row_width=2)
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести parkrun ID', callback_data='parkrun_code_search'))
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести 5 вёрст ID', callback_data='fiveverst_id_search'))
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести S95 ID', callback_data='s95_id_search'))
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести runpark ID', callback_data='runpark_id_search'))
+inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести ID', callback_data='athlete_code_search'))
 inline_find_athlete_by_id.insert(InlineKeyboardButton('Не помню ID', callback_data='help_to_find_id'))
 inline_find_athlete_by_id.insert(InlineKeyboardButton('Я новый участник', callback_data='create_new_athlete'))
 inline_find_athlete_by_id.insert(InlineKeyboardButton('Отмена', callback_data='cancel_registration'))
