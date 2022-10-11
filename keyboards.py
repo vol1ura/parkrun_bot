@@ -77,3 +77,6 @@ inline_find_athlete_by_id.insert(InlineKeyboardButton('Отмена', callback_d
 
 inline_open_s95 = InlineKeyboardMarkup()
 inline_open_s95.row(open_s95_button)
+
+confirm_existed_email = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+confirm_existed_email.add('Да, это мой адрес', 'Отмена')

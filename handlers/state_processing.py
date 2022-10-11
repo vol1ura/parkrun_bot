@@ -112,10 +112,20 @@ async def process_gender(message: types.Message, state: FSMContext):
 @dp.message_handler(state=UserStates.EMAIL, regexp=r'\A[a-zA-Z0-9.!#$%&*+/=?^_{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\Z')
 @dp.throttled(rate=15)
 async def process_get_email(message: types.Message, state: FSMContext):
-    if await find_user_by('email', message.text):
-        await state.finish()
-        return await message.reply('Пользователь с таким адресом уже зарегистрирован. Если e-mail принадлежит вам, на сайте s95.ru можно восстановить пароль. Регистрация окончена.')
-    await UserStates.next()
+    email = message.text
+    user = await find_user_by('email', email)
+    if user:
+        # проверить, что у юзера с этой почтой не привязан участник
+        if await find_athlete_by('user_id', user['id']):
+            # Если у юзера уже есть участника, то заканчиваем регистрацию
+            await state.finish()
+            # Залогировать эту ситуацию
+            return await message.reply('Пользователь с таким адресом уже привязан. Регистрация окончена. Данные об этой ситуации направлены администраторам.')
+        # Если участник не привязан, то делаем привязку
+        await state.update_data(user_id=user['id'])
+        await message.answer('Пользователь с таким адресом уже зарегистрирован. Теперь необходимо сделать привязку участника.')
+    else:
+        await UserStates.next()
     async with state.proxy() as data:
         data["email"] = message.text
         data["attempt"] = 0
@@ -141,8 +151,42 @@ async def process_email_validation(message: types.Message, state: FSMContext):
         data["attempt"] += 1
         if not message.text.isdigit() or data["pin"] != int(message.text.strip()):
             return await message.reply(f'Неверный код. Попробуйте ввести ещё раз. Это {data["attempt"]} попытка из 3.')
-    await UserStates.next()
-    await message.answer('Придумайте и введите пароль (должен состоять из латинских букв, содержать хотя бы одну заглавную букву, одну строчную, один спецсимвол, одну цифру и быть не короче 6 символов).')
+        if 'user_id' not in data:
+            await UserStates.next()
+            return await message.answer('Придумайте и введите пароль (должен состоять из латинских букв, содержать хотя бы одну заглавную букву, одну строчную, один спецсимвол, одну цифру и быть не короче 6 символов).')
+
+        # привязать участника к юзеру
+        payload = { 'user_id': data['user_id'] }
+        if 'athlete_id' in data:
+            payload['athlete_id'] = data['athlete_id']
+        else:
+            payload['athlete'] = {
+                'name': f'{data["first_name"]} {data["last_name"]}',
+                'male': data['male'],
+                'parkrun_code': data['parkrun_code'] if 'parkrun_code' in data else None,
+                'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None
+            }
+        headers = {
+            'Authorization': INTERNAL_API_KEY,
+            'Accept': 'application/json'
+        }
+        try:
+            async with aiohttp.ClientSession(headers=headers) as session:
+                async with session.put(f'{INTERNAL_API_URL}/user.json', json=payload) as resp:
+                    data = await resp.json()
+                    if resp.ok:
+                        await state.finish()
+                        await message.answer(data['message'], reply_markup=kb.main)
+                    else:
+                        if 'user' in data['errors']:
+                            await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
+                        if 'athlete' in data['errors']:
+                            await message.answer('Ошибки в данных участника: ' + ', '.join(data['errors']['athlete']))
+                        await message.answer('Давайте попробуем ещё раз - введите код. Либо отмените регистрацию командой /reset.')
+        except:
+            await message.answer('Что-то пошло не так. Давайте попробуем ещё раз - введите код. Либо отмените регистрацию командой /reset.')
+        finally:
+            await message.delete()
 
 
 @dp.message_handler(state=UserStates.PASSWORD, regexp=r'\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\sa-zA-Z\d]).{6,}\Z')
@@ -187,8 +231,8 @@ async def process_email_validation(message: types.Message, state: FSMContext):
     except:
         await message.answer('Что-то пошло не так. Давайте попробуем ещё раз - введите пароль. Либо отмените регистрацию командой /reset.')
     finally:
-        await message.answer('Введённый пароль стёрт в целях безопасности.')
         await message.delete()
+        await message.answer('Введённый пароль стёрт в целях безопасности.')
 
 
 @dp.message_handler(state=UserStates.PASSWORD)

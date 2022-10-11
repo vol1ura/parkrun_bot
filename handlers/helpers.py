@@ -20,12 +20,16 @@ class UserStates(StatesGroup):
 
 async def find_athlete_by(field: str, value):
     conn = await db_conn()
-    return await conn.fetchrow(f'SELECT * FROM athletes WHERE {field} = $1', value)
+    athlete = await conn.fetchrow(f'SELECT * FROM athletes WHERE {field} = $1', value)
+    await conn.close()
+    return athlete
 
 
 async def find_user_by(field: str, value):
     conn = await db_conn()
-    return await conn.fetchrow(f'SELECT * FROM users WHERE {field} = $1', value)
+    user = await conn.fetchrow(f'SELECT * FROM users WHERE {field} = $1', value)
+    await conn.close()
+    return user
 
 
 async def handle_throttled_query(*args, **kwargs):

@@ -1,7 +1,9 @@
 from aiogram import types
 
 import keyboards as kb
-from app import dp, db_conn
+
+from app import dp
+from handlers.helpers import find_athlete_by, find_user_by
 from utils import content
 
 
@@ -26,14 +28,14 @@ async def commands(message: types.Message):
 async def process_command_settings(message: types.Message):
     await message.delete()
     telegram_id = message.from_user.id
-    conn = await db_conn()
-    values = await conn.fetchrow('SELECT * FROM users WHERE telegram_id = $1', telegram_id)
-    await conn.close()
-    if values:
-        print(values)
-        await message.answer(values)
-    else:
-        await message.answer("Вы пока не зарегистрированы. Хотите зарегистрироваться? Нажимая кнопку 'Да, я согласен' вы принимаете правила участия и даёте согласие на обработку персональных данных.", reply_markup=kb.inline_agreement)
+    user = await find_user_by('telegram_id', telegram_id)
+    if not user:
+        return await message.answer("Вы пока не зарегистрированы. Хотите зарегистрироваться? Нажимая кнопку 'Да, я согласен' вы принимаете правила участия и даёте согласие на обработку персональных данных.", reply_markup=kb.inline_agreement)
+
+    athlete = await find_athlete_by('user_id', user['id'])
+    if not athlete:
+        return await message.answer('Вы зарегистрированы, но участник почему-то не привязан или не создан.')
+    await message.answer(f'Вы зарегистрированы. Ссылка на ваш профиль: https://s95.ru/athletes/{athlete["id"]}')
 
 
 @dp.message_handler(regexp='🌳 Sat 9am 5km')
