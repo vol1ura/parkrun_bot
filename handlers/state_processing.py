@@ -9,7 +9,7 @@ from random import randint
 import keyboards as kb
 
 from app import dp, bot
-from handlers.helpers import UserStates, find_athlete_by, find_user_by
+from handlers.helpers import UserStates, find_athlete_by, find_user_by, find_user_by_email
 from s95.athlete_code import AthleteCode
 from utils import redis, content, mailer
 
@@ -115,8 +115,8 @@ async def process_gender(message: types.Message, state: FSMContext):
 @dp.message_handler(state=UserStates.EMAIL, regexp=r'\A[a-zA-Z0-9.!#$%&*+/=?^_{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\Z')
 @dp.throttled(rate=15)
 async def process_get_email(message: types.Message, state: FSMContext):
-    email = message.text
-    user = await find_user_by('email', email)
+    email = message.text.lower()
+    user = await find_user_by_email(email)
     if user:
         # проверить, что у юзера с этой почтой не привязан участник
         if await find_athlete_by('user_id', user['id']):

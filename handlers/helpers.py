@@ -32,6 +32,13 @@ async def find_user_by(field: str, value):
     return user
 
 
+async def find_user_by_email(email: str):
+    conn = await db_conn()
+    user = await conn.fetchrow(f'SELECT * FROM users WHERE email ILIKE $1', email)
+    await conn.close()
+    return user
+
+
 async def handle_throttled_query(*args, **kwargs):
     # kwargs will be updated with parameters given to .throttled (rate, key, user_id, chat_id)
     logger.warning(f'Message was throttled with {kwargs}')
