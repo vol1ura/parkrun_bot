@@ -209,18 +209,13 @@ async def process_personal_wins_table(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, PersonalResults(*page).wins_table(), parse_mode='Markdown')
 
 
-@dp.callback_query_handler(lambda c: c.data == 'link_athlete')
-@dp.throttled(handle_throttled_query, rate=2)
-async def process_athlete_linking(callback_query: types.CallbackQuery, state: FSMContext):
-    print(callback_query)
-    await bot.answer_callback_query(callback_query.id)
-    current_state = await state.get_state()
-    if current_state == UserStates.SAVE_WITH_PARKRUN_CODE:
-        print(current_state)
-
-    telegram_id = callback_query.from_user.id
-    print(telegram_id)
-    await bot.send_message(callback_query.from_user.id, 'Вы зарегистрированы', parse_mode='Markdown')
+@dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')
+@dp.throttled(rate=5)
+async def process_athlete_code_search(callback_query: types.CallbackQuery):
+	await bot.answer_callback_query(callback_query.id)
+	await UserStates.SEARCH_ATHLETE_CODE.set()
+	await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+	await bot.send_message(callback_query.from_user.id, content.athlete_code_search, parse_mode='Markdown')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'help_to_find_id')
@@ -247,3 +242,11 @@ async def process_start_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await bot.send_message(callback_query.from_user.id, 'Если вы когда-либо уже участвовали в наших мероприятиях, паркранах, забегах 5 вёрст или RunPark, то у вас уже есть персональный штрих-код с ID участника.', reply_markup=kb.inline_find_athlete_by_id)
+
+
+@dp.callback_query_handler(lambda c: c.data == 'create_new_athlete')
+async def process_new_athlete_registration(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await UserStates.ATHLETE_LAST_NAME.set()
+    await bot.send_message(callback_query.from_user.id, 'Введите пожалуйста свою *Фамилию*', reply_markup=types.ReplyKeyboardRemove(), parse_mode='Markdown')

@@ -5,8 +5,8 @@ main = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 btn1 = KeyboardButton('🔧 настройки')
 btn2 = KeyboardButton('❓ справка')
 # btn3 = KeyboardButton('🌳 Sat 9am 5km')
-btn4 = KeyboardButton('📋 разное')
-main.row(btn1).add(btn4, btn2)
+# btn4 = KeyboardButton('📋 разное')
+main.add(btn1, btn2)
 
 # STATISTICS inline keyboard layout
 inline_stat = InlineKeyboardMarkup(row_width=2)
@@ -28,9 +28,7 @@ inline_info.insert(InlineKeyboardButton("Ближайшие старты", switc
 info_btn1 = InlineKeyboardButton("Посмотреть погоду", switch_inline_query_current_chat='weather')
 info_btn2 = InlineKeyboardButton("Загрязнение воздуха", switch_inline_query_current_chat='air')
 
-info_btn3 = InlineKeyboardButton('Новость из Instagram', switch_inline_query_current_chat='instagram')
 inline_info.row(info_btn1, info_btn2)
-inline_info.add(info_btn3)
 
 
 open_s95_button = InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/')

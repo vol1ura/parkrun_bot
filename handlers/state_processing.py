@@ -76,7 +76,7 @@ async def process_get_athlete_last_name(message: types.Message, state: FSMContex
 
 @dp.message_handler(state=UserStates.ATHLETE_LAST_NAME)
 async def process_repeat_last_name(message: types.Message):
-    await message.answer("Введите свою фамилию. Допустимы только буквы и дефис.", reply_markup=types.ReplyKeyboardRemove())
+    await message.answer('Введите свою фамилию. Допустимы только буквы и дефис.', reply_markup=types.ReplyKeyboardRemove())
 
 
 # Сохраняем Имя
@@ -85,30 +85,29 @@ async def process_repeat_last_name(message: types.Message):
 async def process_get_athlete_first_name(message: types.Message, state: FSMContext):
     await UserStates.next()
     await state.update_data(first_name=message.text)
-    await message.answer("Укажите свой пол", reply_markup=kb.select_gender)
+    await message.answer('Укажите свой пол', reply_markup=kb.select_gender)
 
 
 @dp.message_handler(state=UserStates.ATHLETE_FIRST_NAME)
 async def process_repeat_first_name(message: types.Message):
-    await message.answer("Введите своё имя. Допустимы только буквы.")
+    await message.answer('Введите своё имя. Допустимы только буквы.')
 
 
 # Запрашиваем Пол ещё раз
-@dp.message_handler(lambda message: message.text not in ["мужской", "женский"], state=UserStates.GENDER)
+@dp.message_handler(lambda message: message.text.strip().lower() not in ['мужской', 'женский'], state=UserStates.GENDER)
 async def process_gender_invalid(message: types.Message):
-    await message.reply("Пол определяется по Y хромосоме (у женщин её нет). Выберете на клавиатуре свой пол.", reply_markup=kb.select_gender)
+    await message.reply('Пол определяется по Y хромосоме (у женщин её нет). Выберете на клавиатуре свой пол.', reply_markup=kb.select_gender)
 
 
 # Сохраняем Пол
 # Просим Почту
 @dp.message_handler(state=UserStates.GENDER)
 async def process_gender(message: types.Message, state: FSMContext):
-    await state.update_data(male=(message.text == "мужской"))
+    await state.update_data(male=(message.text.strip().lower() == "мужской"))
     await UserStates.next()
     async with state.proxy() as data:
         print(data)
     await message.answer(content.ask_email, reply_markup=types.ReplyKeyboardRemove())
-    # Запрашиваем другие айди?
 
 
 # Почту для подтверждения
@@ -120,7 +119,6 @@ async def process_get_email(message: types.Message, state: FSMContext):
     if user:
         # проверить, что у юзера с этой почтой не привязан участник
         if await find_athlete_by('user_id', user['id']):
-            # Если у юзера уже есть участника, то заканчиваем регистрацию
             await state.finish()
             # Залогировать эту ситуацию
             return await message.reply('Пользователь с таким адресом уже привязан. Регистрация окончена. Данные об этой ситуации направлены администраторам.')

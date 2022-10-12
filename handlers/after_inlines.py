@@ -3,7 +3,7 @@ import re
 
 from app import dp, bot, logger
 from handlers.helpers import handle_throttled_query
-from utils import content, instagram, redis
+from utils import content, redis
 from s95 import clubs, latest, helpers
 
 
@@ -95,13 +95,13 @@ async def post_teammate_table(message):
     await bot.delete_message(message.chat.id, message.message_id)
 
 
-@dp.message_handler(regexp=r'Достаю последний пост из @[\w.]+ Подождите\.{3}')
-@dp.throttled(handle_throttled_query, rate=20)
-async def get_instagram_post(message):
-    await bot.send_chat_action(message.chat.id, 'typing')
-    login = os.environ.get('IG_USERNAME')
-    password = os.environ.get('IG_PASSWORD')
-    user = re.search(r'из @([\w.]+)\. Подождите\.', message.text)[1]
-    ig_post = instagram.get_last_post(login, password, user)
-    await bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
-    await bot.delete_message(message.chat.id, message.message_id)
+# @dp.message_handler(regexp=r'Достаю последний пост из @[\w.]+ Подождите\.{3}')
+# @dp.throttled(handle_throttled_query, rate=20)
+# async def get_instagram_post(message):
+#     await bot.send_chat_action(message.chat.id, 'typing')
+#     login = os.environ.get('IG_USERNAME')
+#     password = os.environ.get('IG_PASSWORD')
+#     user = re.search(r'из @([\w.]+)\. Подождите\.', message.text)[1]
+#     ig_post = instagram.get_last_post(login, password, user)
+#     await bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
+#     await bot.delete_message(message.chat.id, message.message_id)

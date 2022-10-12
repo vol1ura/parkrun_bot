@@ -2,9 +2,9 @@ import pytest as pytest
 
 from utils import fucomp
 
-test_phrases = ['бот, покажи статью о беге', 'Бот, какая погода в Москве?']
+test_phrases = ['Бот, какая погода в Москве?']
 
-phrases_to_try = [fucomp.phrases_instagram, fucomp.phrases_weather]
+phrases_to_try = [fucomp.phrases_weather]
 
 
 @pytest.mark.parametrize('phrase_set', phrases_to_try)
