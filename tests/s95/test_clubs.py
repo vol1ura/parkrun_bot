@@ -1,12 +1,12 @@
 import asyncio
 import datetime
-import os
+# import os
 import time
 
 import pytest
 
-from bot_exceptions import ParsingException
-from s95 import clubs, helpers
+# from bot_exceptions import ParsingException
+from s95 import clubs
 
 WR_in_Kuzminki = ('kuzminki', '23212')
 

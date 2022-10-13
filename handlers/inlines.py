@@ -5,7 +5,7 @@ from aiogram import types
 
 from app import logger, bot, dp
 from utils import content, weather, news
-from s95 import helpers, records
+# from s95 import helpers, records
 
 
 # @dp.inline_handler(lambda query: 'parkrun' in query.query or 'паркран' in query.query)

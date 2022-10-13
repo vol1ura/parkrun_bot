@@ -3,21 +3,22 @@ from os import environ
 from aiogram import Dispatcher, types
 from aiogram.utils import executor
 
-from config import *
-from app import bot, dp, redis_connection
+import config
 import handlers  # important import!!!
 
+from app import bot, dp, redis_connection
 
-async def setup_bot_commands(dispatcher: Dispatcher):
+
+async def setup_bot_commands(_: Dispatcher):
     """
     Here we setup bot commands to make them visible in Telegram UI
     """
     bot_commands = [
-        types.BotCommand(command="/help", description="Справочное сообщение"),
-        types.BotCommand(command="/register", description="Зарегистрироваться"),
-        types.BotCommand(command="/settings", description="Сделать настройки"),
-        types.BotCommand(command="/setclub", description="Установить клуб"),
-        types.BotCommand(command="/start", description="Показать клавиатуру | Перезапуск")
+        types.BotCommand(command='/help', description='Справочное сообщение'),
+        # types.BotCommand(command='/register', description='Зарегистрироваться'),
+        types.BotCommand(command='/settings', description='Сделать настройки'),
+        # types.BotCommand(command='/setclub', description='Установить клуб'),
+        types.BotCommand(command='/start', description='Показать клавиатуру | Перезапуск')
     ]
     await bot.set_my_commands(bot_commands)
 
@@ -25,29 +26,30 @@ async def setup_bot_commands(dispatcher: Dispatcher):
 # Run after startup
 async def on_startup(dispatcher: Dispatcher):
     await bot.delete_webhook()
-    await bot.set_webhook(WEBHOOK_URL)
+    await bot.set_webhook(config.WEBHOOK_URL)
     await setup_bot_commands(dispatcher)
 
 
 # Run before shutdown
 async def on_shutdown(dispatcher: Dispatcher):
-    print("Shutting down..")
+    print('Shutting down..')
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
     await redis_connection.close()
-    print("Bot down")
+    print('Bot down')
 
 
-if __name__ == "__main__":
-    if "production" in list(environ.keys()):
+if __name__ == '__main__':
+    if 'production' in list(environ.keys()):
         executor.start_webhook(
             dispatcher=dp,
-            webhook_path=WEBHOOK_PATH,
+            webhook_path=config.WEBHOOK_PATH,
             on_startup=on_startup,
             on_shutdown=on_shutdown,
             skip_updates=True,
-            host=WEBAPP_HOST,
-            port=WEBAPP_PORT
+            host=config.WEBAPP_HOST,
+            port=config.WEBAPP_PORT
         )
     else:
+        handlers.print_info()
         executor.start_polling(dp)

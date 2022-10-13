@@ -1,10 +1,9 @@
 import os
-import re
 
 from app import dp, bot, logger
 from handlers.helpers import handle_throttled_query
 from utils import content, redis
-from s95 import clubs, latest, helpers
+from s95 import clubs, latest
 
 
 @dp.message_handler(regexp='⏳ Получение данных об участии...')

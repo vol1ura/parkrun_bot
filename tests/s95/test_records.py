@@ -1,11 +1,11 @@
 import asyncio
-import os
+# import os
 import time
 
-import pandas
+# import pandas
 import pytest
 
-from s95 import records, helpers
+from s95 import records
 
 
 @pytest.fixture(scope='module')

@@ -15,7 +15,7 @@ class UserStates(StatesGroup):
     EMAIL = State()
     VALIDATE_EMAIL = State()
     PASSWORD = State()
-    COMPARE_ID = State() # TODO: remove me
+    COMPARE_ID = State()  # TODO: remove me
 
 
 async def find_athlete_by(field: str, value):
@@ -34,7 +34,7 @@ async def find_user_by(field: str, value):
 
 async def find_user_by_email(email: str):
     conn = await db_conn()
-    user = await conn.fetchrow(f'SELECT * FROM users WHERE email ILIKE $1', email)
+    user = await conn.fetchrow('SELECT * FROM users WHERE email ILIKE $1', email)
     await conn.close()
     return user
 

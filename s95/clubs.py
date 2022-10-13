@@ -1,7 +1,7 @@
-import csv
-import os
+# import csv
+# import os
 import re
-import time
+# import time
 from datetime import date, timedelta
 
 import aiohttp
@@ -95,7 +95,7 @@ async def get_parkrun_club_top_results(parkrun: str, club_id: str):
 
 
 def top_active_clubs_diagram(pic: str):
-    df = pd.DataFrame(CLUBS)
+    df = pd.DataFrame()
     df['runs'] = df['runs'].apply(int)
     df = df.sort_values(by=['runs'], ascending=False).head(10)
     clubs = df['name']

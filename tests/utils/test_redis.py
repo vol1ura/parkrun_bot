@@ -1,4 +1,4 @@
-from utils import redis
+# from utils import redis
 
 
 # async def test_redis():

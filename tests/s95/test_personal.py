@@ -1,13 +1,13 @@
-import os
+# import os
 
-import pytest
+# import pytest
 
-from s95.personal import PersonalResults
+# from s95.personal import PersonalResults
 
 
-@pytest.fixture(scope='module')
-def personal_results(athlete_data_1):
-    return PersonalResults(athlete_data_1.name, athlete_data_1.html)
+# @pytest.fixture(scope='module')
+# def personal_results(athlete_data_1):
+#     return PersonalResults(athlete_data_1.name, athlete_data_1.html)
 
 
 # def test_history(personal_results, tmpdir):

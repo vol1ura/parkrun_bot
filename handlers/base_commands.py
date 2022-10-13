@@ -30,7 +30,7 @@ async def process_command_settings(message: types.Message):
     telegram_id = message.from_user.id
     user = await find_user_by('telegram_id', telegram_id)
     if not user:
-        return await message.answer("Вы пока не зарегистрированы. Хотите зарегистрироваться? Нажимая кнопку *Да, я согласен* вы [https://s95.ru](принимаете правила участия) и даёте [https://s95.ru](согласие на обработку персональных данных).", reply_markup=kb.inline_agreement, parse_mode='Markdown')
+        return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
 
     athlete = await find_athlete_by('user_id', user['id'])
     if not athlete:

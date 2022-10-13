@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 import keyboards as kb
 
-from app import dp, bot, logger
+from app import dp, bot
 from bot_exceptions import CallbackException
 from handlers.helpers import UserStates, handle_throttled_query, find_user_by
 from s95 import records, clubs
@@ -91,7 +91,7 @@ async def get_compared_pages(user_id):
     #     except Exception as e:
     #         logger.error(e)
     #         raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
-    return athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2
+    return athlete_name_1, athlete_name_2
 
 
 async def get_personal_page(user_id):
@@ -100,7 +100,8 @@ async def get_personal_page(user_id):
     if not athlete_id:
         raise CallbackException('Вы не ввели свой parkrun ID.\n'
                                 'Перейдите в настройки и нажмите кнопку Выбрать участника')
-    athlete_name = await find_user_by('id', athlete_id)
+    athlete = await find_user_by('id', athlete_id)
+    return athlete
     # with Vedis(DB_FILE) as db:
     #     try:
     #         h = db.Hash(f'A{athlete_id}')
@@ -212,10 +213,10 @@ async def process_personal_wins_table(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')
 @dp.throttled(rate=5)
 async def process_athlete_code_search(callback_query: types.CallbackQuery):
-	await bot.answer_callback_query(callback_query.id)
-	await UserStates.SEARCH_ATHLETE_CODE.set()
-	await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-	await bot.send_message(callback_query.from_user.id, content.athlete_code_search, parse_mode='Markdown')
+    await bot.answer_callback_query(callback_query.id)
+    await UserStates.SEARCH_ATHLETE_CODE.set()
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await bot.send_message(callback_query.from_user.id, content.athlete_code_search, parse_mode='Markdown')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'help_to_find_id')
@@ -234,14 +235,22 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
         await state.reset_state()
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    await bot.send_message(callback_query.from_user.id, 'Наберите /help, чтобы посмотреть доступные команды', reply_markup=kb.main)
+    await bot.send_message(
+        callback_query.from_user.id,
+        'Наберите /help, чтобы посмотреть доступные команды',
+        reply_markup=kb.main
+    )
 
 
 @dp.callback_query_handler(lambda c: c.data == 'start_registration')
 async def process_start_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    await bot.send_message(callback_query.from_user.id, 'Если вы когда-либо уже участвовали в наших мероприятиях, паркранах, забегах 5 вёрст или RunPark, то у вас уже есть персональный штрих-код с ID участника.', reply_markup=kb.inline_find_athlete_by_id)
+    await bot.send_message(
+        callback_query.from_user.id,
+        content.you_already_have_id,
+        reply_markup=kb.inline_find_athlete_by_id
+    )
 
 
 @dp.callback_query_handler(lambda c: c.data == 'create_new_athlete')
@@ -249,4 +258,9 @@ async def process_new_athlete_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await UserStates.ATHLETE_LAST_NAME.set()
-    await bot.send_message(callback_query.from_user.id, 'Введите пожалуйста свою *Фамилию*', reply_markup=types.ReplyKeyboardRemove(), parse_mode='Markdown')
+    await bot.send_message(
+        callback_query.from_user.id,
+        'Введите пожалуйста свою *Фамилию*',
+        reply_markup=types.ReplyKeyboardRemove(),
+        parse_mode='Markdown'
+    )

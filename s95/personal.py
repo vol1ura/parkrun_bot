@@ -4,20 +4,24 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MultipleLocator, NullLocator
 
-from s95 import parkrun
+from handlers.helpers import find_athlete_by
 
 
 class PersonalResults:
-    def __init__(self, athlete_name, athlete_page):
-        self.__athlete_name = athlete_name
-        self.__df = parkrun.parse_personal_results(athlete_page)
-        self.__df['Год'] = pd.to_datetime(self.__df['Run Date'], dayfirst=True).dt.year
-        self.__df['Месяц'] = pd.to_datetime(self.__df['Run Date'], dayfirst=True) \
-            .dt.month_name(locale='ru_RU.UTF-8').str.slice(stop=3)
+    def __init__(self, telegram_id):
+        self.__telegram_id = telegram_id
+
+    async def _fetch_results(self):
+        athlete = await find_athlete_by('telegram_id', self.__telegram_id)
+        self.__athlete_name = athlete['name']
+        self.__df = 'write SQL query to fetch data'  # TODO: database request
+        df_dates = pd.to_datetime(self.__df['Run Date'], dayfirst=True)
+        self.__df['Год'] = df_dates.dt.year
+        self.__df['Месяц'] = df_dates.dt.month_name(locale='ru_RU.UTF-8').str.slice(stop=3)
         self.__months = ['Янв', 'Фев', 'Мар', 'Апр', 'Мая', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
 
     def history(self, pic: str):
-        fig, ax = plt.subplots(figsize=(9, 6), dpi=150)
+        _, ax = plt.subplots(figsize=(9, 6), dpi=150)
         rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Time', aggfunc=len, fill_value=0) \
             .astype(int)
 
@@ -38,7 +42,7 @@ class PersonalResults:
         return open(pic, 'rb')
 
     def personal_bests(self, pic: str):
-        fig, ax = plt.subplots(figsize=(9, 6), dpi=150)
+        _, ax = plt.subplots(figsize=(9, 6), dpi=150)
 
         # pivot df into long form and aggregate by fastest time
         rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='m',
@@ -57,7 +61,7 @@ class PersonalResults:
         return open(pic, 'rb')
 
     def tourism(self, pic: str):
-        fig, ax = plt.subplots(figsize=(9, 6), dpi=150)
+        _, ax = plt.subplots(figsize=(9, 6), dpi=150)
         # pivot df into long form and aggregate by fastest time
         rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Event', fill_value=0,
                                         aggfunc=lambda parkruns: len(np.unique(parkruns, return_counts=True)[1]))

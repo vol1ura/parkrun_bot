@@ -5,7 +5,7 @@ import re
 import urllib.parse
 
 import aiohttp
-from lxml.html import fromstring
+# from lxml.html import fromstring
 
 
 async def google(phrase):

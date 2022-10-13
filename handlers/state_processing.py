@@ -96,7 +96,7 @@ async def process_repeat_first_name(message: types.Message):
 # Запрашиваем Пол ещё раз
 @dp.message_handler(lambda message: message.text.strip().lower() not in ['мужской', 'женский'], state=UserStates.GENDER)
 async def process_gender_invalid(message: types.Message):
-    await message.reply('Пол определяется по Y хромосоме (у женщин её нет). Выберете на клавиатуре свой пол.', reply_markup=kb.select_gender)
+    await message.reply(content.define_yourself_gender, reply_markup=kb.select_gender)
 
 
 # Сохраняем Пол
@@ -121,7 +121,7 @@ async def process_get_email(message: types.Message, state: FSMContext):
         if await find_athlete_by('user_id', user['id']):
             await state.finish()
             # Залогировать эту ситуацию
-            return await message.reply('Пользователь с таким адресом уже привязан. Регистрация окончена. Данные об этой ситуации направлены администраторам.')
+            return await message.reply(content.athlete_already_linked)
         # Если участник не привязан, то делаем привязку
         await state.update_data(user_id=user['id'])
         await message.answer('Пользователь с таким адресом уже зарегистрирован. Теперь необходимо сделать привязку участника.')
@@ -133,7 +133,7 @@ async def process_get_email(message: types.Message, state: FSMContext):
         data["pin"] = randint(100, 999)
         confirmation_mailer = mailer.EmailConfirmation(data['pin'])
         confirmation_mailer.send(email, f'{data["first_name"]} {data["last_name"]}')
-    await message.reply("Введите проверочный код, который был выслан на эту почту (если нет письма, подождите немного или проверьте спам).")
+    await message.reply(content.input_pin_code)
 
 
 @dp.message_handler(state=UserStates.EMAIL)
@@ -147,13 +147,13 @@ async def process_email_validation(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         if not data["sent_at"] or data["sent_at"] + 30 * 60 < time.time() or data.get("attempt", 3) >= 3:
             await UserStates.previous()
-            return await message.reply("Лимит времени или попыток подтверждения email исчерпан. Попробуйте ввести e-mail ещё раз или используйте другой адрес.")
+            return await message.reply(content.pin_code_expired)
         data["attempt"] += 1
         if not message.text.isdigit() or data["pin"] != int(message.text.strip()):
             return await message.reply(f'Неверный код. Попробуйте ввести ещё раз. Это {data["attempt"]} попытка из 3.')
         if 'user_id' not in data:
             await UserStates.next()
-            return await message.answer('Придумайте и введите пароль (должен состоять из латинских букв, содержать хотя бы одну заглавную букву, одну строчную, один спецсимвол, одну цифру и быть не короче 6 символов).')
+            return await message.answer(content.input_password)
 
         # привязать участника к юзеру
         payload = {
@@ -188,15 +188,15 @@ async def process_email_validation(message: types.Message, state: FSMContext):
                             await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
                         if 'athlete' in data['errors']:
                             await message.answer('Ошибки в данных участника: ' + ', '.join(data['errors']['athlete']))
-                        await message.answer('Давайте попробуем ещё раз - введите код. Либо отмените регистрацию командой /reset.')
-        except:
-            await message.answer('Что-то пошло не так. Давайте попробуем ещё раз - введите код. Либо отмените регистрацию командой /reset.')
+                        await message.answer(content.try_pin_code)
+        except Exception:
+            await message.answer(content.try_pin_code)
         finally:
             await message.delete()
 
 
 @dp.message_handler(state=UserStates.PASSWORD, regexp=r'\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\sa-zA-Z\d]).{6,}\Z')
-async def process_email_validation(message: types.Message, state: FSMContext):
+async def process_password_validation(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         payload = {
             'user': {
@@ -233,18 +233,18 @@ async def process_email_validation(message: types.Message, state: FSMContext):
                         await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
                     if 'athlete' in data['errors']:
                         await message.answer('Ошибки в данных участника: ' + ', '.join(data['errors']['athlete']))
-                    await message.answer('Давайте попробуем ещё раз - введите пароль. Либо отмените регистрацию командой /reset.')
-    except:
-        await message.answer('Что-то пошло не так. Давайте попробуем ещё раз - введите пароль. Либо отмените регистрацию командой /reset.')
+                    await message.answer(content.try_password)
+    except Exception:
+        await message.answer(content.try_password)
     finally:
         await message.delete()
-        await message.answer('Введённый пароль стёрт в целях безопасности.')
+        await message.answer(content.password_erased)
 
 
 @dp.message_handler(state=UserStates.PASSWORD)
-async def process_email_validation(message: types.Message):
-    await message.answer('Пароль не удовлетворяет требованиям: должен состоять из латинских букв, содержать хотя бы одну заглавную букву, одну строчную, один спецсимвол, одну цифру и быть не короче 6 символов.')
-    await message.answer('Введённый пароль стёрт в целях безопасности. Придумайте пароль.')
+async def process_invalid_password(message: types.Message):
+    await message.answer(content.invalid_password)
+    await message.answer(f'{content.password_erased} Придумайте пароль.')
     await message.delete()
 
 

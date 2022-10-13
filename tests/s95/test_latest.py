@@ -1,10 +1,10 @@
 import asyncio
-import random
-import re
-from datetime import datetime
-import os
+# import random
+# import re
+# from datetime import datetime
+# import os
 
-import pandas
+# import pandas
 import pytest
 
 from bot_exceptions import ParsingException
