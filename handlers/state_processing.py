@@ -14,15 +14,12 @@ from s95.athlete_code import AthleteCode
 from utils import redis, content, mailer
 
 
-@dp.message_handler(lambda message: not AthleteCode(message.text).is_valid, state=UserStates.SEARCH_ATHLETE_CODE)
-async def process_age_invalid(message: types.Message):
-    return await message.reply("Введите свой parkrun ID (только цифры, без буквы А в начале). Либо /reset для отмены.")
-
-
 @dp.message_handler(state=UserStates.SEARCH_ATHLETE_CODE)
 async def process_user_enter_parkrun_code(message: types.Message, state: FSMContext):
-    await UserStates.next()
     athlete_code = AthleteCode(message.text)
+    if not athlete_code.is_valid:
+        return await message.reply('Введите свой parkrun ID (только цифры, без буквы А в начале). Либо /reset для отмены.')
+    await UserStates.next()
     if athlete_code.key == 's95':
         await state.update_data(parkrun_code=None)
     else:
