@@ -5,7 +5,9 @@
 .idea/
 .vscode/
 env/
-deploy/
+deploy/*
+!deploy/s95-bot.service.example
+!deploy/requirements.txt
 
 # CACHES
 *__pycache__/

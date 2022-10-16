@@ -1,0 +1,16 @@
+[Unit]
+Description=Telegram S95 Bot
+After=network.target
+
+[Service]
+User=<deploy user>
+Group=<deploy user>
+Type=simple
+WorkingDirectory=/home/<bot directory>/current
+ExecStart=/home/<bot directory>/current/env/bin/python main.py
+KillMode=process
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

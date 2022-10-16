@@ -3,7 +3,7 @@ import pytest
 from . import MockTelegram, TOKEN
 
 
-@pytest.fixture(name='bot')
+@pytest.fixture(name='fake_bot')
 async def bot_fixture(monkeypatch):
     """ Bot fixture """
     monkeypatch.setenv('API_BOT_TOKEN', TOKEN)
@@ -14,7 +14,7 @@ async def bot_fixture(monkeypatch):
     await _bot.close()
 
 
-async def test_setup_bot_commands(bot):
+async def test_setup_bot_commands(fake_bot, loop):
     """ setup_bot_commands method test """
     from app import dp
     from main import setup_bot_commands
@@ -22,7 +22,7 @@ async def test_setup_bot_commands(bot):
         await setup_bot_commands(dp)
 
 
-async def test_on_shutdown(bot):
+async def test_on_shutdown(fake_bot, loop):
     """ on_shutdown method test """
     from app import dp
     from main import on_shutdown
