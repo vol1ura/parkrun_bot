@@ -4,7 +4,7 @@
 # DEV DIR
 .idea/
 .vscode/
-env/
+?env/
 deploy/*
 !deploy/s95-bot.service.example
 !deploy/requirements.txt
