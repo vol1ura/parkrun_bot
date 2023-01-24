@@ -175,7 +175,7 @@ async def process_email_validation(message: types.Message, state: FSMContext):
         }
         try:
             async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.put(f'{INTERNAL_API_URL}/user.json', json=payload) as resp:
+                async with session.put(f'{INTERNAL_API_URL}/user', json=payload) as resp:
                     data = await resp.json()
                     if resp.ok:
                         await state.finish()
@@ -220,7 +220,7 @@ async def process_password_validation(message: types.Message, state: FSMContext)
     }
     try:
         async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.post(f'{INTERNAL_API_URL}/user.json', json=payload) as resp:
+            async with session.post(f'{INTERNAL_API_URL}/user', json=payload) as resp:
                 data = await resp.json()
                 if resp.ok:
                     await state.finish()
