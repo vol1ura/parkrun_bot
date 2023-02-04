@@ -3,6 +3,7 @@ import random
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from app import logger, db_conn
+from s95.athlete_code import AthleteCode
 from utils import content
 
 
@@ -34,9 +35,14 @@ async def find_user_by(field: str, value):
 
 async def find_user_by_email(email: str):
     conn = await db_conn()
-    user = await conn.fetchrow('SELECT * FROM users WHERE email ILIKE $1', email)
+    user = await conn.fetchrow('SELECT * FROM users WHERE lover(email) = $1', email.lower())
     await conn.close()
     return user
+
+
+def athlete_code(athlete):
+    return athlete["parkrun_code"] or athlete["fiveverst_code"] or athlete["parkzhrun_code"] \
+        or athlete["id"] + AthleteCode.SAT_5AM_9KM_BORDER
 
 
 async def handle_throttled_query(*args, **kwargs):

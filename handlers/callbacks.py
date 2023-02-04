@@ -235,10 +235,11 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
         await state.reset_state()
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    kbd = await kb.main(callback_query.from_user.id)
     await bot.send_message(
         callback_query.from_user.id,
         'Наберите /help, чтобы посмотреть доступные команды',
-        reply_markup=kb.main
+        reply_markup=kbd
     )
 
 

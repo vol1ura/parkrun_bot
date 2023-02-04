@@ -13,7 +13,7 @@ Bot for S95 sport event system.
 ### Configuration
 
 ```shell
-sudo -u postgres pg_restore -d s95_dev tmp/backup.tar --no-privileges --no-owner -U postgres
+sudo -u postgres pg_restore -d s95_dev deploy/backup.tar --no-privileges --no-owner -U postgres
 ```
 
 ### Run Redis

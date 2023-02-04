@@ -1,9 +1,13 @@
+import asyncio
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup
 import keyboards
 
 
-def test_main_kb():
-    main_kb = keyboards.main
+async def test_main_kb(monkeypatch):
+    future = asyncio.Future()
+    future.set_result(None)
+    monkeypatch.setattr('handlers.helpers.find_user_by', lambda *args: future)
+    main_kb = await keyboards.main(1)
     assert isinstance(main_kb, ReplyKeyboardMarkup)
     print([main_kb.values['keyboard']])
 

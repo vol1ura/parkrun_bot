@@ -7,6 +7,8 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
+PRODUCTION_ENV = os.getenv('PRODUCTION')
+
 TOKEN_BOT = os.getenv('API_BOT_TOKEN', '123456:123456test')
 
 WEBHOOK_PATH = f'/webhook/{os.getenv("WEBHOOK")}'
@@ -24,6 +26,8 @@ HOST = os.getenv('HOST')
 
 INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')
 INTERNAL_API_URL = os.getenv('INTERNAL_API_URL')
+
+ROLLBAR_TOKEN = os.getenv('ROLLBAR_TOKEN')
 
 # Mailer
 EMAIL_SENDER = os.getenv('EMAIL_SENDER')

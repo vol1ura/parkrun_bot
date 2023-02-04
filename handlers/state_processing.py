@@ -3,7 +3,7 @@ import time
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from config import INTERNAL_API_KEY, INTERNAL_API_URL
+from config import INTERNAL_API_URL
 from random import randint
 
 import keyboards as kb
@@ -59,7 +59,8 @@ async def process_ask_athlete_last_name(message: types.Message):
 @dp.message_handler(state=UserStates.SAVE_WITH_PARKRUN_CODE)
 async def process_cancel_parkrun_code(message: types.Message, state: FSMContext):
     await state.finish()
-    await message.reply("Запрос отменён. Попробуйте снова.", reply_markup=kb.main)
+    kbd = await kb.main(message.from_user.id)
+    await message.reply("Запрос отменён. Попробуйте снова.", reply_markup=kbd)
 
 
 # Получаем Фамилию
@@ -170,12 +171,13 @@ async def process_email_validation(message: types.Message, state: FSMContext):
                 'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None
             }
         try:
-            async with aiohttp.ClientSession(headers={ 'Accept': 'application/json' }) as session:
+            async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
                 async with session.put(f'{INTERNAL_API_URL}/user', json=payload) as resp:
                     data = await resp.json()
                     if resp.ok:
                         await state.finish()
-                        await message.answer(data['message'], reply_markup=kb.main)
+                        kbd = await kb.main(message.from_user.id)
+                        await message.answer(data['message'], reply_markup=kbd)
                     else:
                         if 'user' in data['errors']:
                             await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
@@ -211,12 +213,13 @@ async def process_password_validation(message: types.Message, state: FSMContext)
                 'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None
             }
     try:
-        async with aiohttp.ClientSession(headers={ 'Accept': 'application/json' }) as session:
+        async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
             async with session.post(f'{INTERNAL_API_URL}/user', json=payload) as resp:
                 data = await resp.json()
                 if resp.ok:
                     await state.finish()
-                    await message.answer(data['message'], reply_markup=kb.main)
+                    kbd = await kb.main(message.from_user.id)
+                    await message.answer(data['message'], reply_markup=kbd)
                 else:
                     if 'user' in data['errors']:
                         await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))

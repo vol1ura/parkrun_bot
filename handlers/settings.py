@@ -13,4 +13,5 @@ async def process_command_reset(message: types.Message, state: FSMContext):
     if current_state is None:
         return
     await state.reset_state()
-    await message.reply('Запрос отменён', reply_markup=kb.main)
+    kbd = await kb.main(message.from_user.id)
+    await message.reply('Запрос отменён', reply_markup=kbd)

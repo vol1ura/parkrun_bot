@@ -1,12 +1,21 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 
-# MAIN bot keyboard layout
-main = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-btn1 = KeyboardButton('🔧 настройки')
-btn2 = KeyboardButton('❓ справка')
+from handlers.helpers import find_user_by
+
 # btn3 = KeyboardButton('🌳 Sat 9am 5km')
 # btn4 = KeyboardButton('📋 разное')
-main.add(btn1, btn2)
+
+
+async def main(telegram_id: int) -> ReplyKeyboardMarkup:
+    """MAIN bot keyboard layout"""
+    kbd = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    user = await find_user_by('telegram_id', telegram_id)
+    btn_title = 'ℹ️ штрих-код' if user else '🔧 настройки'
+    btn1 = KeyboardButton(btn_title)
+    btn2 = KeyboardButton('❓ справка')
+    kbd.add(btn1, btn2)
+    return kbd
+
 
 # STATISTICS inline keyboard layout
 inline_stat = InlineKeyboardMarkup(row_width=2)
