@@ -35,7 +35,7 @@ async def find_user_by(field: str, value):
 
 async def find_user_by_email(email: str):
     conn = await db_conn()
-    user = await conn.fetchrow('SELECT * FROM users WHERE lover(email) = $1', email.lower())
+    user = await conn.fetchrow('SELECT * FROM users WHERE LOWER(email) = $1', email.lower())
     await conn.close()
     return user
 
