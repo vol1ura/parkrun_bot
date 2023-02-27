@@ -6,6 +6,7 @@ class AthleteCode:
     def __init__(self, code) -> None:
         self.__code = code
 
+    @property
     def is_valid(self) -> bool:
         return (isinstance(self.__code, int) or self.__code.isdigit()) and self._int_val > 0
 
