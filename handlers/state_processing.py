@@ -18,7 +18,7 @@ from utils import redis, content, mailer
 async def process_user_enter_parkrun_code(message: types.Message, state: FSMContext):
     athlete_code = AthleteCode(message.text)
     if not athlete_code.is_valid:
-        return await message.reply('Введите свой parkrun ID (только цифры, без буквы А в начале). Либо /reset для отмены.')
+        return await message.reply('Введите свой номер ID (только цифры, без буквы А в начале). Либо /reset для отмены.')
     await UserStates.next()
     if athlete_code.key == 's95':
         await state.update_data(parkrun_code=None)
@@ -28,7 +28,7 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
     if athlete:
         if athlete["user_id"]:
             await state.finish()
-            return await message.answer('Участник с этим parkrun ID уже зарегистрирован и привязан.')
+            return await message.answer('Участник с этим ID уже зарегистрирован и привязан.')
         async with state.proxy() as data:
             data['athlete_id'] = athlete['id']
             data['first_name'], data["last_name"] = athlete['name'].split(' ', 1)
@@ -103,8 +103,6 @@ async def process_gender_invalid(message: types.Message):
 async def process_gender(message: types.Message, state: FSMContext):
     await state.update_data(male=(message.text.strip().lower() == "мужской"))
     await UserStates.next()
-    async with state.proxy() as data:
-        print(data)
     await message.answer(content.ask_email, reply_markup=types.ReplyKeyboardRemove())
 
 
@@ -143,7 +141,7 @@ async def process_repeat_email(message: types.Message):
 @dp.throttled(rate=5)
 async def process_email_validation(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        if not data["sent_at"] or data["sent_at"] + 30 * 60 < time.time() or data.get("attempt", 3) >= 3:
+        if not data.get("sent_at") or data["sent_at"] + 30 * 60 < time.time() or data.get("attempt", 3) >= 3:
             await UserStates.previous()
             return await message.reply(content.pin_code_expired)
         data["attempt"] += 1
