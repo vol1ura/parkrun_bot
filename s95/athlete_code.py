@@ -13,7 +13,7 @@ class AthleteCode:
 
     @property
     def value(self) -> int:
-        if self.key == 's95':
+        if self.key == 'id':
             return self._int_val - self.SAT_5AM_9KM_BORDER
         return self._int_val
 
@@ -27,7 +27,7 @@ class AthleteCode:
             return 'fiveverst_code'
         if self._is_parkzhrun_code:
             return 'parkzhrun_code'
-        return 's95'
+        return 'id'
 
     @property
     def url(self) -> str:
