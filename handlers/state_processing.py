@@ -68,7 +68,7 @@ async def process_cancel_parkrun_code(message: types.Message, state: FSMContext)
 @dp.message_handler(state=UserStates.ATHLETE_LAST_NAME, regexp=r'(?i)\A[a-zа-яё]{2,}(-[a-zа-яё]{2,})?\Z')
 async def process_get_athlete_last_name(message: types.Message, state: FSMContext):
     await UserStates.next()
-    await state.update_data(last_name=message.text)
+    await state.update_data(last_name=message.text.upper())
     await message.answer("Введите своё имя")
 
 
