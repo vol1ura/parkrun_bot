@@ -234,8 +234,10 @@ async def process_password_validation(message: types.Message, state: FSMContext)
 @dp.message_handler(state=UserStates.PASSWORD)
 async def process_invalid_password(message: types.Message):
     await message.answer(content.invalid_password)
-    await message.answer(f'{content.password_erased} Придумайте пароль.')
-    await message.delete()
+    try:
+        await message.delete()
+    finally:
+        await  message.answer(f'{content.password_erased} Придумайте пароль.')
 
 
 @dp.message_handler(state=UserStates.COMPARE_ID)
