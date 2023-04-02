@@ -20,7 +20,7 @@ async def main(telegram_id: int) -> ReplyKeyboardMarkup:
 # STATISTICS inline keyboard layout
 inline_stat = InlineKeyboardMarkup(row_width=2)
 inline_stat.insert(InlineKeyboardButton('Личные результаты', callback_data='personal_results'))
-inline_stat.insert(InlineKeyboardButton('Сравнение результатов', callback_data='compare_results'))
+# inline_stat.insert(InlineKeyboardButton('Сравнение результатов', callback_data='compare_results'))
 inline_stat.row(InlineKeyboardButton('Последний паркран', switch_inline_query_current_chat='latestresults'))
 
 inline_stat.row(InlineKeyboardButton('Одноклубники', switch_inline_query_current_chat='teammates'))
@@ -53,7 +53,6 @@ inline_personal.insert(InlineKeyboardButton('Победы/участия', callb
 
 # COMPARATION of personal results
 inline_compare = InlineKeyboardMarkup(row_width=2)
-inline_compare.row(InlineKeyboardButton('Ввести ID участника', callback_data='enter_compare_id'))
 inline_compare.add(InlineKeyboardButton('Баттл-таблица', callback_data='battle_table'))
 inline_compare.insert(InlineKeyboardButton('Баттл-диаграмма', callback_data='battle_diagram'))
 inline_compare.insert(InlineKeyboardButton('Файл Excel', callback_data='excel_table'))

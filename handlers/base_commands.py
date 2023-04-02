@@ -52,10 +52,6 @@ async def process_command_barcode(message: types.Message):
     athlete = await find_athlete_by('user_id', user['id'])
     if not athlete:
         return await message.answer('Вы зарегистрированы, но участник почему-то не привязан или не создан.')
-    # await message.answer(
-    #     f'Вы зарегистрированы. Ссылка на ваш профиль: https://s95.ru/athletes/{athlete["id"]}',
-    #     disable_web_page_preview=True
-    # )
     with barcode.generate(athlete_code(athlete)) as pic:
         await bot.send_photo(message.chat.id, pic, caption=athlete["name"])
 

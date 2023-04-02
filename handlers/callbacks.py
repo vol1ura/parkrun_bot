@@ -51,21 +51,10 @@ async def process_personal_results(callback_query: types.CallbackQuery):
     await bot.send_message(
         callback_query.from_user.id,
         '*Представление ваших результатов.*\n'
-        'Здесь можно сделать визуализацию ваших результатов за всю историю участия в Parkrun.\n'
-        'Предварительно необходимо установить свой паркран ID (через меню *настройки*).',
-        reply_markup=kb.inline_personal, parse_mode='Markdown')
-
-
-@dp.callback_query_handler(lambda c: c.data == 'enter_compare_id')
-@dp.throttled(handle_throttled_query, rate=8)
-async def process_enter_compare_id(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(
-        callback_query.from_user.id,
-        'Введите parkrunID участника - это те *цифры*, что написаны на штрих-кодах (*без буквы*). '
-        'Это число можно также посмотреть на сайте parkrun.ru на страничке участника '
-        'в адресной строке браузера (_athleteNumber_).', parse_mode='Markdown')
-    await UserStates.COMPARE_ID.set()
+        'Здесь можно сделать визуализацию ваших результатов за всю историю участия в забегах S95.',
+        reply_markup=kb.inline_personal, 
+        parse_mode='Markdown'
+    )
 
 
 async def get_compared_pages(user_id):

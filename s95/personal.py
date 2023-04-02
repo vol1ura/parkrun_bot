@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MultipleLocator, NullLocator
 
-from handlers.helpers import find_athlete_by
+from handlers.helpers import find_user_by
 
 
 class PersonalResults:
@@ -12,7 +12,7 @@ class PersonalResults:
         self.__telegram_id = telegram_id
 
     async def _fetch_results(self):
-        athlete = await find_athlete_by('telegram_id', self.__telegram_id)
+        athlete = await find_user_by('telegram_id', self.__telegram_id)
         self.__athlete_name = athlete['name']
         self.__df = 'write SQL query to fetch data'  # TODO: database request
         df_dates = pd.to_datetime(self.__df['Run Date'], dayfirst=True)
