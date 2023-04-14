@@ -8,7 +8,7 @@ from handlers.helpers import find_user_by
 
 async def main(telegram_id: int) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
-    kbd = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    kbd = ReplyKeyboardMarkup(resize_keyboard=True)
     user = await find_user_by('telegram_id', telegram_id)
     btn_title = 'ℹ️ штрих-код' if user else '🔧 настройки'
     btn1 = KeyboardButton(btn_title)
