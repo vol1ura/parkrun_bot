@@ -176,6 +176,7 @@ async def process_email_validation(message: types.Message, state: FSMContext):
                         await state.finish()
                         kbd = await kb.main(message.from_user.id)
                         await message.answer(data['message'], reply_markup=kbd)
+                        await message.answer(content.subscription_suggestion)
                     else:
                         if 'user' in data['errors']:
                             await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
@@ -218,6 +219,7 @@ async def process_password_validation(message: types.Message, state: FSMContext)
                     await state.finish()
                     kbd = await kb.main(message.from_user.id)
                     await message.answer(data['message'], reply_markup=kbd)
+                    await message.answer(content.subscription_suggestion)
                 else:
                     if 'user' in data['errors']:
                         await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
