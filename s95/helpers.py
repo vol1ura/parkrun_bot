@@ -6,7 +6,6 @@ from datetime import date, timedelta
 import aiohttp
 
 from app import logger
-from utils import redis
 
 
 class ParkrunSite:
@@ -42,7 +41,7 @@ class ParkrunSite:
         return date1 >= date_sun
 
     async def get_html(self, url=None):
-        content = await redis.get_value(self.__redis_key)
+        content = None # await redis.get_value(self.__redis_key)
         content_date = content.get('date', None)
         today = date.today()
         logger.info(f'Get [{self.__key}] with date={content_date}')
@@ -55,7 +54,7 @@ class ParkrunSite:
                 html = await resp.text()
                 is_ok = resp.ok
         if is_ok:
-            await redis.set_value(self.__redis_key, date=today.isoformat(), html=html)
+            # await redis.set_value(self.__redis_key, date=today.isoformat(), html=html)
             logger.info(f'Page [{url}] was updated by date={today.isoformat()}')
         return html
 
@@ -64,7 +63,7 @@ class ParkrunSite:
         Method to set actual date of content. It is used to rewrite date of access to requested
         page that will be assign by default in get_html().
         """
-        await redis.set_value(self.__redis_key, date=actual_date)
+        # await redis.set_value(self.__redis_key, date=actual_date)
         logger.info(f'Information for [{self.__key}] was updated by date={actual_date}')
 
 

@@ -1,6 +1,5 @@
 import asyncpg
 import logging
-import redis.asyncio as redis
 import rollbar
 
 from aiogram import Bot
@@ -17,13 +16,6 @@ logger = logging.getLogger(__name__)
 
 if config.PRODUCTION_ENV:
     rollbar.init(config.ROLLBAR_TOKEN, 'production')
-
-redis_connection = redis.Redis(
-    host=config.REDIS_HOST,
-    port=config.REDIS_PORT,
-    db=1,
-    decode_responses=True
-)
 
 
 async def db_conn():

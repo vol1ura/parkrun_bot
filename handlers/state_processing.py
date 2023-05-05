@@ -8,10 +8,10 @@ from random import randint
 
 import keyboards as kb
 
-from app import dp, bot
-from handlers.helpers import UserStates, find_athlete_by, find_user_by, find_user_by_email
+from app import dp
+from handlers.helpers import UserStates, find_athlete_by, find_user_by_email
 from s95.athlete_code import AthleteCode
-from utils import redis, content, mailer
+from utils import content, mailer
 
 
 @dp.message_handler(state=UserStates.SEARCH_ATHLETE_CODE)

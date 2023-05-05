@@ -15,7 +15,6 @@ services:
       - '5000:5000'
     depends_on:
       - db
-      - redis
     env_file:
       - .env
 
@@ -28,11 +27,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
 
-  redis:
-    image: redis:alpine
-    volumes:
-      - redis:/data
-
   adminer:
     image: adminer:latest
     restart: unless-stopped
@@ -43,4 +37,3 @@ services:
 
 volumes:
   postgres:
-  redis:

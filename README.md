@@ -16,12 +16,6 @@ Bot for S95 sport event system.
 sudo -u postgres pg_restore -d s95_dev deploy/backup.tar --no-privileges --no-owner -U postgres
 ```
 
-### Run Redis
-
-```shell
-docker run --name s95-redis --rm -p 6379:6379 redis redis-server --save 60 1 --loglevel debug
-```
-
 ### Tests
 
 ```shell

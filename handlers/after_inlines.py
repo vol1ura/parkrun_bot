@@ -2,7 +2,7 @@ import os
 
 from app import dp, bot, logger
 from handlers.helpers import handle_throttled_query
-from utils import content, redis
+from utils import content
 from s95 import clubs, latest
 
 
@@ -11,7 +11,7 @@ from s95 import clubs, latest
 async def latestparkruns_club_participation(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
-    user_settings = await redis.get_value(user_id)
+    user_settings = None # await redis.get_value(user_id)
     club_id = user_settings.get('cl_id', None)
     if not club_id:
         await message.answer(content.no_club_message)
@@ -26,7 +26,7 @@ async def latestparkruns_club_participation(message):
 async def post_latestparkrun_diagrams(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
-    user_settings = await redis.get_value(user_id)
+    user_settings = None # await redis.get_value(user_id)
     parkrun_name = user_settings.get('pr', None)
     if not parkrun_name:
         return await message.answer(content.no_parkrun_message)
@@ -57,7 +57,7 @@ async def post_latestparkrun_diagrams(message):
 async def post_teammate_table(message):
     await bot.send_chat_action(message.chat.id, 'typing')
     user_id = message.from_user.id
-    user_settings = await redis.get_value(user_id)
+    user_settings = None # await redis.get_value(user_id)
     parkrun_name = user_settings.get('pr', None)
     club_id = user_settings.get('cl_id', None)
     if not club_id:
@@ -92,15 +92,3 @@ async def post_teammate_table(message):
         else:
             await message.answer('Информация о вашем клубе не найдена. Проверьте настройки.')
     await bot.delete_message(message.chat.id, message.message_id)
-
-
-# @dp.message_handler(regexp=r'Достаю последний пост из @[\w.]+ Подождите\.{3}')
-# @dp.throttled(handle_throttled_query, rate=20)
-# async def get_instagram_post(message):
-#     await bot.send_chat_action(message.chat.id, 'typing')
-#     login = os.environ.get('IG_USERNAME')
-#     password = os.environ.get('IG_PASSWORD')
-#     user = re.search(r'из @([\w.]+)\. Подождите\.', message.text)[1]
-#     ig_post = instagram.get_last_post(login, password, user)
-#     await bot.send_photo(message.chat.id, *ig_post, disable_notification=True)
-#     await bot.delete_message(message.chat.id, message.message_id)

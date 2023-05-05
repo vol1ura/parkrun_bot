@@ -8,7 +8,7 @@ from geopy import Nominatim
 from app import bot, logger, dp
 from handlers.helpers import handle_throttled_query
 from s95 import latest
-from utils import content, fucomp, search, vk, weather, redis
+from utils import content, fucomp, search, vk, weather
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -39,7 +39,7 @@ async def ask_weather(message: types.Message):
 async def s95_personal_result(message: types.Message):
     await types.ChatActions.upload_photo()
     user_id = message.from_user.id
-    settings = await redis.get_value(user_id)
+    settings = None # await redis.get_value(user_id)
     parkrun_name = settings.get('pr', None)
     if not parkrun_name:
         return await message.reply(content.no_parkrun_message)

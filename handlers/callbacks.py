@@ -9,7 +9,7 @@ from handlers.helpers import UserStates, handle_throttled_query, find_user_by
 from s95 import records, clubs
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
-from utils import content, redis
+from utils import content
 
 
 @dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
@@ -58,7 +58,7 @@ async def process_personal_results(callback_query: types.CallbackQuery):
 
 
 async def get_compared_pages(user_id):
-    settings = await redis.get_value(user_id)
+    settings = None # await redis.get_value(user_id)
     athlete_id_1 = settings.get('id', None)
     athlete_id_2 = settings.get('compare_id', None)
     if not athlete_id_1:
@@ -84,7 +84,7 @@ async def get_compared_pages(user_id):
 
 
 async def get_personal_page(user_id):
-    settings = await redis.get_value(user_id)
+    settings = None # await redis.get_value(user_id)
     athlete_id = settings.get('id', None)
     if not athlete_id:
         raise CallbackException('Вы не ввели свой parkrun ID.\n'

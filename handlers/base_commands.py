@@ -20,12 +20,17 @@ async def send_welcome(message: types.Message):
 @dp.throttled(rate=3)
 async def commands(message: types.Message):
     await message.delete()
-    await message.answer(content.help_message,
-                         disable_notification=True, parse_mode='html', disable_web_page_preview=True)
+    await message.answer(
+        content.help_message,
+        disable_notification=True, 
+        parse_mode='Markdown', 
+        disable_web_page_preview=True,
+        reply_markup=await kb.main(message.from_user.id)
+    )
 
 
-@dp.message_handler(regexp='🔧 настройки')
-@dp.message_handler(commands=['settings'])
+@dp.message_handler(regexp='⚙️ зарегистрироваться')
+@dp.message_handler(commands=['register'])
 @dp.throttled(rate=2)
 async def process_command_settings(message: types.Message):
     await message.delete()
@@ -41,6 +46,7 @@ async def process_command_settings(message: types.Message):
 
 
 @dp.message_handler(regexp='ℹ️ штрих-код')
+@dp.message_handler(commands=['barcode'])
 @dp.throttled(rate=3)
 async def process_command_barcode(message: types.Message):
     await message.delete()

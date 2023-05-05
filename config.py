@@ -19,9 +19,6 @@ WEBAPP_PORT = int(os.environ.get('PORT', 5000))
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_PORT = os.getenv('REDIS_PORT', 6379)
-
 HOST = os.getenv('HOST')
 
 INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')

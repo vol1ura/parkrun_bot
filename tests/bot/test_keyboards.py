@@ -1,12 +1,24 @@
 import asyncio
+import pytest
+
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup
+
 import keyboards
+from handlers import helpers
 
 
+# @pytest.mark.asyncio
+# async def test_my_test_class(thing):
+#     # the patched function can be awaited..
+#     main_kb = await keyboards.main(1)
+#     assert isinstance(main_kb, ReplyKeyboardMarkup)
+
+
+@pytest.mark.asyncio
 async def test_main_kb(monkeypatch):
     future = asyncio.Future()
     future.set_result(None)
-    monkeypatch.setattr('handlers.helpers.find_user_by', lambda *args: future)
+    monkeypatch.setattr(helpers, 'find_user_by', lambda *args: future)
     main_kb = await keyboards.main(1)
     assert isinstance(main_kb, ReplyKeyboardMarkup)
     print([main_kb.values['keyboard']])

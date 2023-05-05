@@ -6,7 +6,7 @@ from aiogram.utils import executor
 import config
 import handlers  # important import!!!
 
-from app import bot, dp, redis_connection
+from app import bot, dp
 
 
 async def setup_bot_commands(_: Dispatcher):
@@ -14,11 +14,10 @@ async def setup_bot_commands(_: Dispatcher):
     Here we setup bot commands to make them visible in Telegram UI
     """
     bot_commands = [
+        types.BotCommand(command='/start', description='Показать клавиатуру | Перезапуск'),
+        types.BotCommand(command='/barcode', description='Штрих-код'),
         types.BotCommand(command='/help', description='Справочное сообщение'),
-        # types.BotCommand(command='/register', description='Зарегистрироваться'),
-        types.BotCommand(command='/settings', description='Сделать настройки'),
-        # types.BotCommand(command='/setclub', description='Установить клуб'),
-        types.BotCommand(command='/start', description='Показать клавиатуру | Перезапуск')
+        types.BotCommand(command='/register', description='Зарегистрироваться в S95')
     ]
     await bot.set_my_commands(bot_commands)
 
@@ -35,7 +34,6 @@ async def on_shutdown(dispatcher: Dispatcher):
     print('Shutting down..')
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
-    await redis_connection.close()
     print('Bot down')
 
 
