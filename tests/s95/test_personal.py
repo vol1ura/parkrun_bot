@@ -37,4 +37,4 @@
 # def test_wins_table(personal_results):
 #     table = personal_results.wins_table()
 #     assert isinstance(table, str)
-#     assert 'Паркран/Место' in table
+#     assert 'Забег/Место' in table

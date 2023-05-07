@@ -6,7 +6,7 @@ import keyboards as kb
 from app import dp, bot
 from bot_exceptions import CallbackException
 from handlers.helpers import UserStates, handle_throttled_query, find_user_by
-from s95 import records, clubs
+from s95 import latest, records, clubs
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
 from utils import content
@@ -145,15 +145,23 @@ async def process_excel_table(callback_query: types.CallbackQuery):
                             caption='Сравнительная таблица для анализа в Excel')
 
 
+@dp.callback_query_handler(lambda c: c.data == 'last_activity_diagram')
+@dp.throttled(handle_throttled_query, rate=10)
+async def process_last_activity_diagram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    telegram_id = callback_query.from_user.id
+    pic = await latest.make_latest_results_diagram(telegram_id, 'gen_png/results.png')
+    await bot.send_photo(telegram_id, pic, caption='Распределение результатов на вашем последнем забеге.')
+    pic.close()
+
+
 @dp.callback_query_handler(lambda c: c.data == 'personal_history')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     telegram_id = callback_query.from_user.id
-    # page = await get_personal_page(telegram_id)
     pic = await PersonalResults(telegram_id).history('gen_png/participate.png')
-    await bot.send_photo(telegram_id, pic, caption='Трактовка: равномерность и интенсивность цвета показывает '
-                                               'регулярность участия в паркранах.')
+    await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
     pic.close()
 
 
@@ -163,7 +171,7 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     telegram_id = callback_query.from_user.id
     pic = await PersonalResults(telegram_id).personal_bests('gen_png/pb.png')
-    await bot.send_photo(telegram_id, pic, caption='Трактовка: по цвету можно понять, когда у вас были лучшие результаты.')
+    await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
     pic.close()
 
 
@@ -173,8 +181,7 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
     telegram_id = callback_query.from_user.id
     pic = await PersonalResults(telegram_id).tourism('gen_png/tourism.png')
-    await bot.send_photo(telegram_id, pic, caption='Трактовка: по цвету можно понять, когда и как часто вы '
-                                               'посещали разные паркраны.')
+    await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
     pic.close()
 
 

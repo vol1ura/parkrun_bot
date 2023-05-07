@@ -23,8 +23,8 @@ class PersonalResults:
     async def history(self, pic: str):
         await self._fetch_results()
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
-        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Time', aggfunc=len, fill_value=0) \
-            .astype(int)
+        rundata = \
+            self.__df.pivot_table(index='Месяц', columns='Год', values='Time', aggfunc=len, fill_value=0).astype(int)
 
         for month in self.__months:
             if month not in rundata.index.values:
@@ -37,7 +37,7 @@ class PersonalResults:
 
         sns.heatmap(rundata, linewidths=0.4, cmap='Greens',
                     cbar_kws={"ticks": ticks, "boundaries": boundaries, 'label': 'Паркранов в месяц'})
-        ax.set_title(f'{self.__athlete_name}: история участия в паркранах', fontweight='bold')
+        ax.set_title(f'{self.__athlete_name}: история участия в S95', fontweight='bold')
         plt.tight_layout()
         plt.savefig(pic)
         return open(pic, 'rb')
@@ -90,11 +90,12 @@ class PersonalResults:
         await self._fetch_results()
         plt.figure(figsize=(7, 9), dpi=150)
         df_last = self.__df.head(10)[::-1].reset_index(drop=True)
+        df_last['Run Date'] = pd.to_datetime(df_last['Run Date'])
         ax = df_last.plot(x='Run Date', y='m', lw=2, label='Результат')
-        xlabels = df_last['Run Date']
-        ax.set_xticks(xlabels.index)
-        ax.set_xticklabels(xlabels, rotation=70)
-        ax.minorticks_on()
+        # xlabels = df_last['Run Date']
+        # ax.set_xticks(xlabels.index)
+        # ax.set_xticklabels(xlabels, rotation=70)
+        # ax.minorticks_on()
         ax.grid(which='major', axis='x', lw=0.5)
         ax.grid(which='major', axis='y', lw=1)
         ax.grid(which='minor', axis='y', lw=0.5, ls=':')
@@ -102,9 +103,9 @@ class PersonalResults:
         ax.yaxis.set_minor_locator(MultipleLocator(1 / 6))
         ax.yaxis.tick_right()
         ax.xaxis.set_minor_locator(NullLocator())
-        plt.xlabel('Дата паркрана')
+        plt.xlabel('Дата забега')
         plt.ylabel('Минуты')
-        plt.title('10 забегов parkrun', fontweight='bold')
+        plt.title('10 забегов S95', fontweight='bold')
         plt.tight_layout()
         plt.savefig(pic)
         return open(pic, 'rb')
@@ -121,7 +122,7 @@ class PersonalResults:
         pos_df.drop('All', axis=0, inplace=True)
         pos_df = pos_df.append(total)
         separator = '-------------+-----+-----+-----+----'
-        rows = ['```', 'Паркран/Место|  1  |  2  |  3  | ∑ ', separator]
+        rows = ['```', 'Забег/Место|  1  |  2  |  3  | ∑ ', separator]
         for row in pos_df.itertuples():
             rows.append(f'{row[0][:12]:<12} | {row[1]:3d} | {row[2]:3d} | {row[3]:3d} | {row[4]:3d}')
         rows += [separator, rows.pop().replace('All  ', 'Итого'), '```']

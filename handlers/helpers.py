@@ -49,6 +49,7 @@ async def user_results(telegram_id):
         INNER JOIN athletes ON athletes.id = results.athlete_id
         INNER JOIN users ON users.id = athletes.user_id
         WHERE users.telegram_id = $1
+        ORDER BY activities.date DESC
     """
     data = await conn.fetch(query, telegram_id)
     df = pd.DataFrame(data, columns=['Pos', 'Time', 'Run Date', 'Event'])

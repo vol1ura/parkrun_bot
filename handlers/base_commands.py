@@ -38,7 +38,6 @@ async def process_command_settings(message: types.Message):
     user = await find_user_by('telegram_id', telegram_id)
     if not user:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
-
     athlete = await find_athlete_by('user_id', user['id'])
     if not athlete:
         return await message.answer('Вы зарегистрированы, но участник почему-то не привязан или не создан.')
@@ -62,12 +61,11 @@ async def process_command_barcode(message: types.Message):
         await bot.send_photo(message.chat.id, pic, caption=athlete["name"])
 
 
-@dp.message_handler(regexp='🌳 Sat 9am 5km')
 @dp.message_handler(commands=['statistics'])
 @dp.throttled(rate=2)
 async def process_command_statistics(message: types.Message):
     await message.delete()
-    await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_stat)
+    await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_personal)
 
 
 @dp.message_handler(regexp='📋 разное')

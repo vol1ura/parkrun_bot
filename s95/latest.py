@@ -13,23 +13,23 @@ from s95.helpers import min_to_mmss, time_conv
 
 async def parse_latest_results(telegram_id: int):
     conn = await db_conn()
-    query = f"""SELECT "activities"."id", "activities"."date", "events"."name", "athletes"."id" AS "athlete_id" FROM "activities"
-        INNER JOIN "events" ON "events"."id" = "activities"."event_id"
-        INNER JOIN "results" ON "results"."activity_id" = "activities"."id"
-        INNER JOIN "athletes" ON "athletes"."id" = "results"."athlete_id"
-        INNER JOIN "users" ON "users"."id" = "athletes"."user_id"
-        WHERE "users"."telegram_id" = $1 AND "activities"."published" = TRUE
-        ORDER BY "activities"."date" DESC
+    query = f"""SELECT activities.id, activities.date, events.name, athletes.id AS athlete_id FROM activities
+        INNER JOIN events ON events.id = activities.event_id
+        INNER JOIN results ON results.activity_id = activities.id
+        INNER JOIN athletes ON athletes.id = results.athlete_id
+        INNER JOIN users ON users.id = athletes.user_id
+        WHERE users.telegram_id = $1 AND activities.published = TRUE
+        ORDER BY activities.date DESC
         LIMIT 1
     """
     last_activity = await conn.fetchrow(query, telegram_id)
     if last_activity is None:
         return
-    query = """SELECT "position", "total_time", "athlete_id", "athletes"."name", "clubs"."name" FROM "results"
-        LEFT OUTER JOIN "athletes" ON "athletes"."id" = "results"."athlete_id"
-        LEFT OUTER JOIN "clubs" ON "clubs"."id" = "athletes"."club_id"
-        WHERE "results"."activity_id" = $1
-        ORDER BY "results"."position" ASC
+    query = """SELECT position, total_time, athlete_id, athletes.name, clubs.name FROM results
+        LEFT OUTER JOIN athletes ON athletes.id = results.athlete_id
+        LEFT OUTER JOIN clubs ON clubs.id = athletes.club_id
+        WHERE results.activity_id = $1
+        ORDER BY results.position ASC
     """
     data = await conn.fetch(query, last_activity['id'])
     await conn.close()
@@ -110,7 +110,7 @@ async def make_clubs_bar(telegram_id: int, pic: str):
         ax.yaxis.set_major_locator(MaxNLocator(steps=[1, 2, 4, 8], integer=True))
         plt.xticks(rotation=80, size=8)
         plt.bar(clubs.index, clubs.values, color=colors)
-        plt.title(f'Клубы на паркране {event_name} {activity_date}', size=10, fontweight='bold')
+        plt.title(f'Клубы на забеге {event_name} {activity_date}', size=10, fontweight='bold')
         plt.ylabel('Количество участников')
     plt.tight_layout()
     plt.savefig(pic)
