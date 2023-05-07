@@ -34,27 +34,22 @@ async def ask_weather(message: types.Message):
             await message.answer(air_info[1])
 
 
-@dp.message_handler(regexp=r'(?i)бот[, \w]+?s95( \w+)( \d+)?$')
+@dp.message_handler(regexp=r'(?i)бот[, \w]+?диаграмма( \d+)?$')
 @dp.throttled(handle_throttled_query, rate=10)
 async def s95_personal_result(message: types.Message):
     await types.ChatActions.upload_photo()
-    user_id = message.from_user.id
-    settings = None # await redis.get_value(user_id)
-    parkrun_name = settings.get('pr', None)
-    if not parkrun_name:
-        return await message.reply(content.no_parkrun_message)
+    telegram_id = message.from_user.id
     try:
         turn = re.search(r'\d+$', message.text)
         turn = int(turn[0]) % 360 if turn else 0
-        person = re.sub(r'.*(паркран\w?|parkrun) ', '', message.text)
-        person = re.sub(r'\d', '', person).strip()
-        pic = await latest.make_latest_results_diagram(parkrun_name, 'gen_png/results.png', person, turn)
+        pic = await latest.make_latest_results_diagram(telegram_id, 'gen_png/results.png', turn)
         await bot.send_photo(message.chat.id, pic)
+        if turn == 0:
+            await message.answer(content.how_to_rotate_labels, disable_notification=True)
         pic.close()
     except Exception as e:
         logger.warning(f'Attempt to generate personal diagram failed. Query: {message.text}. Error: {e}')
-        await message.reply('Что-то пошло не так. Возможно, вы неправильно ввели имя '
-                            f'или  такого участника не было на выбранном вами паркране {parkrun_name}.')
+        await message.reply('Что-то пошло не так.')
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (кузьминки|s95)')

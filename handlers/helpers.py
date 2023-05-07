@@ -1,9 +1,11 @@
 import random
 
 from aiogram.dispatcher.filters.state import StatesGroup, State
+import pandas as pd
 
 from app import logger, db_conn
 from s95.athlete_code import AthleteCode
+from s95.helpers import time_conv
 from utils import content
 
 
@@ -37,6 +39,22 @@ async def find_user_by_email(email: str):
     user = await conn.fetchrow('SELECT * FROM users WHERE LOWER(email) = $1', email.lower())
     await conn.close()
     return user
+
+
+async def user_results(telegram_id):
+    conn = await db_conn()
+    query = f"""SELECT results.position, results.total_time, activities.date, events.name FROM results
+        INNER JOIN activities ON activities.id = results.activity_id
+        INNER JOIN events ON events.id = activities.event_id
+        INNER JOIN athletes ON athletes.id = results.athlete_id
+        INNER JOIN users ON users.id = athletes.user_id
+        WHERE users.telegram_id = $1
+    """
+    data = await conn.fetch(query, telegram_id)
+    df = pd.DataFrame(data, columns=['Pos', 'Time', 'Run Date', 'Event'])
+    df['m'] = df['Time'].apply(lambda t: time_conv(t))
+    await conn.close()
+    return df
 
 
 def athlete_code(athlete):

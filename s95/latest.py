@@ -3,39 +3,44 @@ import re
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import pandas as pd
+
 from matplotlib.colors import Normalize, PowerNorm
-from lxml.html import fromstring
 from matplotlib.ticker import MaxNLocator
 
-from bot_exceptions import ParsingException
-from s95.helpers import ParkrunSite, min_to_mmss
+from app import db_conn
+from s95.helpers import min_to_mmss, time_conv
 
 
-async def parse_latest_results(parkrun: str):
-    pr = re.sub('[- ]', '', parkrun)
-    url = f'https://www.parkrun.ru/{pr}/results/latestresults/'
-    parkrun_site = ParkrunSite(f'latestresults_{pr}')
-    html = await parkrun_site.get_html(url)
-    tree = fromstring(html)
-    try:
-        df = pd.read_html(html)[0]
-        parkrun_date = tree.xpath('//span[@class="format-date"]/text()')[0]
-        parkrun_iso_date = '-'.join(parkrun_date.split('/')[::-1])
-    except Exception:
-        raise ParsingException(f'Parsing latest results page for {parkrun} if failed.')
-    await parkrun_site.update_info(parkrun_iso_date)
-    return df, parkrun_date
+async def parse_latest_results(telegram_id: int):
+    conn = await db_conn()
+    query = f"""SELECT "activities"."id", "activities"."date", "events"."name", "athletes"."id" AS "athlete_id" FROM "activities"
+        INNER JOIN "events" ON "events"."id" = "activities"."event_id"
+        INNER JOIN "results" ON "results"."activity_id" = "activities"."id"
+        INNER JOIN "athletes" ON "athletes"."id" = "results"."athlete_id"
+        INNER JOIN "users" ON "users"."id" = "athletes"."user_id"
+        WHERE "users"."telegram_id" = $1 AND "activities"."published" = TRUE
+        ORDER BY "activities"."date" DESC
+        LIMIT 1
+    """
+    last_activity = await conn.fetchrow(query, telegram_id)
+    if last_activity is None:
+        return
+    query = """SELECT "position", "total_time", "athlete_id", "athletes"."name", "clubs"."name" FROM "results"
+        LEFT OUTER JOIN "athletes" ON "athletes"."id" = "results"."athlete_id"
+        LEFT OUTER JOIN "clubs" ON "clubs"."id" = "athletes"."club_id"
+        WHERE "results"."activity_id" = $1
+        ORDER BY "results"."position" ASC
+    """
+    data = await conn.fetch(query, last_activity['id'])
+    await conn.close()
+    df = pd.DataFrame(data, columns=['Pos', 'Время', 'athlete_id', 'Участник', 'Клуб'])
+    df['Время'] = df['Время'].apply(lambda t: time_conv(t))
+    return df, last_activity['date'], last_activity['name'], last_activity['athlete_id']
 
 
-async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0):
-    parsed_results = await parse_latest_results(parkrun)
-    df = parsed_results[0].copy()
+async def make_latest_results_diagram(telegram_id: int, pic: str, turn=0):
+    df, activity_date, event_name, athlete_id = await parse_latest_results(telegram_id)
     number_runners = len(df)
-    df.dropna(thresh=4, inplace=True)
-    df['Время'] = df['Время'].dropna() \
-        .transform(lambda s: re.search(r'^(\d:)?\d\d:\d\d', s)[0]) \
-        .transform(lambda mmss: sum(x * float(t) for x, t in zip([1 / 60, 1, 60], mmss.split(':')[::-1])))
-
     plt.figure(figsize=(5.5, 4), dpi=300)
     ax = df['Время'].hist(bins=32)
     ptchs = ax.patches
@@ -45,16 +50,9 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
 
     norm = Normalize(0, med)
 
-    if name:
-        personal_res = df[df['Участник'].str.contains(name.upper())].reset_index(drop=True)
-        if personal_res.empty:
-            raise AttributeError
-        personal_name = re.search(r'([^\d]+)\d.*', personal_res["Участник"][0])[1]
-        personal_name = ' '.join(n.capitalize() for n in personal_name.split())
-        personal_time = personal_res['Время'][0]
-    else:
-        personal_time = 0
-        personal_name = ''
+    personal_res = df.loc[df['athlete_id'] == athlete_id].reset_index(drop=True)
+    personal_name = personal_res["Участник"][0]
+    personal_time = personal_res['Время'][0]
 
     for ptch in ptchs:
         ptch_x = ptch.get_x()
@@ -80,27 +78,23 @@ async def make_latest_results_diagram(parkrun: str, pic: str, name=None, turn=0)
     ax.annotate(f'Всего\nучастников {number_runners}', (lst_time - 0.6, lst_y_mark + 0.1), rotation=90, va='bottom')
     plt.plot([lst_time, lst_time], [0, lst_y_mark], 'r')
 
-    if name and personal_time:
-        ax.annotate(f'{personal_name}\n{int(personal_time)}:{(personal_time - int(personal_time)) * 60:02.0f}',
-                    (personal_time - 0.5, personal_y_mark + 0.2),
-                    rotation=turn, color='red', size=12, fontweight='bold')
-        plt.plot([personal_time, personal_time], [0, personal_y_mark], 'r')
+    ax.annotate(f'{personal_name}\n{int(personal_time)}:{(personal_time - int(personal_time)) * 60:02.0f}',
+                (personal_time - 0.5, personal_y_mark + 0.2),
+                rotation=turn, color='red', size=12, fontweight='bold')
+    plt.plot([personal_time, personal_time], [0, personal_y_mark], 'r')
 
     ax.xaxis.set_major_locator(MaxNLocator(steps=[2, 4, 5], integer=True))
     ax.yaxis.set_major_locator(MaxNLocator(steps=[1, 2], integer=True))
     ax.set_xlabel("Результаты участников (минуты)")
     ax.set_ylabel("Результатов в диапазоне")
-    plt.title(f'Результаты паркрана {parkrun} {parsed_results[1]}', size=10, fontweight='bold')
+    plt.title(f'Результаты забега {event_name} {activity_date}', size=10, fontweight='bold')
     plt.tight_layout()
     plt.savefig(pic)
     return open(pic, 'rb')
 
 
-async def make_clubs_bar(parkrun: str, pic: str):
-    parsed_results = await parse_latest_results(parkrun)
-    df = parsed_results[0].copy()
-    df.dropna(thresh=4, inplace=True)
-
+async def make_clubs_bar(telegram_id: int, pic: str):
+    df, activity_date, event_name, _ = await parse_latest_results(telegram_id)
     fig = plt.figure(figsize=(6, 6), dpi=200)
     ax = fig.add_subplot()
     clubs = df['Клуб'].value_counts()
@@ -116,7 +110,7 @@ async def make_clubs_bar(parkrun: str, pic: str):
         ax.yaxis.set_major_locator(MaxNLocator(steps=[1, 2, 4, 8], integer=True))
         plt.xticks(rotation=80, size=8)
         plt.bar(clubs.index, clubs.values, color=colors)
-        plt.title(f'Клубы на паркране {parkrun} {parsed_results[1]}', size=10, fontweight='bold')
+        plt.title(f'Клубы на паркране {event_name} {activity_date}', size=10, fontweight='bold')
         plt.ylabel('Количество участников')
     plt.tight_layout()
     plt.savefig(pic)
@@ -157,3 +151,17 @@ async def review_table(parkrun: str):
     for _, row in df[df['Позиция м/ж'] < 4].iterrows():
         report += f"{row['Позиция м/ж']:>2} | {row['Участник']:<18} | {row['Время']}\n"
     return report + '```'
+
+
+if __name__ == '__main__':
+    from dotenv import load_dotenv
+    import asyncio
+    import os
+
+    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
+    if os.path.exists(dotenv_path):
+        load_dotenv(dotenv_path)
+
+    loop = asyncio.get_event_loop()
+    df = loop.run_until_complete(make_latest_results_diagram(444495414, 'test.png', 30))
+    print(df)

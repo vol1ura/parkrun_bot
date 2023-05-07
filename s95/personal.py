@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.ticker import MultipleLocator, NullLocator
 
-from handlers.helpers import find_user_by
+from handlers.helpers import find_user_by, user_results
 
 
 class PersonalResults:
@@ -12,15 +12,16 @@ class PersonalResults:
         self.__telegram_id = telegram_id
 
     async def _fetch_results(self):
-        athlete = await find_user_by('telegram_id', self.__telegram_id)
-        self.__athlete_name = athlete['name']
-        self.__df = 'write SQL query to fetch data'  # TODO: database request
-        df_dates = pd.to_datetime(self.__df['Run Date'], dayfirst=True)
+        user = await find_user_by('telegram_id', self.__telegram_id)
+        self.__athlete_name = f'{user["first_name"]} {user["last_name"]}'
+        self.__df = await user_results(self.__telegram_id)
+        df_dates = pd.to_datetime(self.__df['Run Date'])
         self.__df['Год'] = df_dates.dt.year
         self.__df['Месяц'] = df_dates.dt.month_name(locale='ru_RU.UTF-8').str.slice(stop=3)
         self.__months = ['Янв', 'Фев', 'Мар', 'Апр', 'Мая', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
 
-    def history(self, pic: str):
+    async def history(self, pic: str):
+        await self._fetch_results()
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
         rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Time', aggfunc=len, fill_value=0) \
             .astype(int)
@@ -41,7 +42,8 @@ class PersonalResults:
         plt.savefig(pic)
         return open(pic, 'rb')
 
-    def personal_bests(self, pic: str):
+    async def personal_bests(self, pic: str):
+        await self._fetch_results()
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
 
         # pivot df into long form and aggregate by fastest time
@@ -60,7 +62,8 @@ class PersonalResults:
         plt.savefig(pic)
         return open(pic, 'rb')
 
-    def tourism(self, pic: str):
+    async def tourism(self, pic: str):
+        await self._fetch_results()
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
         # pivot df into long form and aggregate by fastest time
         rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Event', fill_value=0,
@@ -83,7 +86,8 @@ class PersonalResults:
         plt.savefig(pic)
         return open(pic, 'rb')
 
-    def last_runs(self, pic: str):
+    async def last_runs(self, pic: str):
+        await self._fetch_results()
         plt.figure(figsize=(7, 9), dpi=150)
         df_last = self.__df.head(10)[::-1].reset_index(drop=True)
         ax = df_last.plot(x='Run Date', y='m', lw=2, label='Результат')
@@ -105,7 +109,8 @@ class PersonalResults:
         plt.savefig(pic)
         return open(pic, 'rb')
 
-    def wins_table(self):
+    async def wins_table(self):
+        await self._fetch_results()
         pos_df = pd.crosstab(self.__df['Event'], self.__df['Pos'], margins=True)
         columns = [1, 2, 3, 'All']
         for i in columns:

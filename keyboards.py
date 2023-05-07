@@ -23,11 +23,11 @@ inline_stat.insert(InlineKeyboardButton('Личные результаты', cal
 # inline_stat.insert(InlineKeyboardButton('Сравнение результатов', callback_data='compare_results'))
 inline_stat.row(InlineKeyboardButton('Последний паркран', switch_inline_query_current_chat='latestresults'))
 
-inline_stat.row(InlineKeyboardButton('Одноклубники', switch_inline_query_current_chat='teammates'))
-inline_stat.insert(InlineKeyboardButton('Top10 клубов', callback_data='top_active_clubs'))
+# inline_stat.row(InlineKeyboardButton('Одноклубники', switch_inline_query_current_chat='teammates'))
+# inline_stat.insert(InlineKeyboardButton('Top10 клубов', callback_data='top_active_clubs'))
 
-inline_stat.insert(InlineKeyboardButton('Рекорды', switch_inline_query_current_chat='records'))
-inline_stat.insert(InlineKeyboardButton('Рекордсмены', callback_data='most_records_parkruns'))
+# inline_stat.insert(InlineKeyboardButton('Рекорды', switch_inline_query_current_chat='records'))
+# inline_stat.insert(InlineKeyboardButton('Рекордсмены', callback_data='most_records_parkruns'))
 
 
 # INFORMATION keyboard layout with additional information

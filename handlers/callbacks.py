@@ -47,6 +47,7 @@ async def process_compare_results(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_results')
 @dp.throttled(rate=2)
 async def process_personal_results(callback_query: types.CallbackQuery):
+    await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
@@ -148,10 +149,10 @@ async def process_excel_table(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
-    user_id = callback_query.from_user.id
-    page = await get_personal_page(user_id)
-    pic = PersonalResults(*page).history('gen_png/participate.png')
-    await bot.send_photo(user_id, pic, caption='Трактовка: равномерность и интенсивность цвета показывает '
+    telegram_id = callback_query.from_user.id
+    # page = await get_personal_page(telegram_id)
+    pic = await PersonalResults(telegram_id).history('gen_png/participate.png')
+    await bot.send_photo(telegram_id, pic, caption='Трактовка: равномерность и интенсивность цвета показывает '
                                                'регулярность участия в паркранах.')
     pic.close()
 
@@ -160,10 +161,9 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
-    user_id = callback_query.from_user.id
-    page = await get_personal_page(user_id)
-    pic = PersonalResults(*page).personal_bests('gen_png/pb.png')
-    await bot.send_photo(user_id, pic, caption='Трактовка: по цвету можно понять, когда у вас были лучшие результаты.')
+    telegram_id = callback_query.from_user.id
+    pic = await PersonalResults(telegram_id).personal_bests('gen_png/pb.png')
+    await bot.send_photo(telegram_id, pic, caption='Трактовка: по цвету можно понять, когда у вас были лучшие результаты.')
     pic.close()
 
 
@@ -171,10 +171,9 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
-    user_id = callback_query.from_user.id
-    page = await get_personal_page(user_id)
-    pic = PersonalResults(*page).tourism('gen_png/tourism.png')
-    await bot.send_photo(user_id, pic, caption='Трактовка: по цвету можно понять, когда и как часто вы '
+    telegram_id = callback_query.from_user.id
+    pic = await PersonalResults(telegram_id).tourism('gen_png/tourism.png')
+    await bot.send_photo(telegram_id, pic, caption='Трактовка: по цвету можно понять, когда и как часто вы '
                                                'посещали разные паркраны.')
     pic.close()
 
@@ -183,10 +182,9 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
-    user_id = callback_query.from_user.id
-    page = await get_personal_page(user_id)
-    pic = PersonalResults(*page).last_runs('gen_png/last_runs.png')
-    await bot.send_photo(user_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
+    telegram_id = callback_query.from_user.id
+    pic = await PersonalResults(telegram_id).last_runs('gen_png/last_runs.png')
+    await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
     pic.close()
 
 
@@ -194,9 +192,9 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_wins_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
-    user_id = callback_query.from_user.id
-    page = await get_personal_page(user_id)
-    await bot.send_message(callback_query.from_user.id, PersonalResults(*page).wins_table(), parse_mode='Markdown')
+    telegram_id = callback_query.from_user.id
+    table = await PersonalResults(telegram_id).wins_table()
+    await bot.send_message(callback_query.from_user.id, table, parse_mode='Markdown')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')
