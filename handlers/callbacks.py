@@ -84,28 +84,10 @@ async def get_compared_pages(user_id):
     return athlete_name_1, athlete_name_2
 
 
-async def get_personal_page(user_id):
-    settings = None # await redis.get_value(user_id)
-    athlete_id = settings.get('id', None)
-    if not athlete_id:
-        raise CallbackException('Вы не ввели свой parkrun ID.\n'
-                                'Перейдите в настройки и нажмите кнопку Выбрать участника')
-    athlete = await find_user_by('id', athlete_id)
-    return athlete
-    # with Vedis(DB_FILE) as db:
-    #     try:
-    #         h = db.Hash(f'A{athlete_id}')
-    #         athlete_page = h['athlete_page'].decode()
-    #     except Exception as e:
-    #         logger.error(e)
-    #         raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
-    # return athlete_name, athlete_page
-
-
 @dp.callback_query_handler(lambda c: c.data == 'battle_diagram')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_battle_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     pic = CollationMaker(*pages).bars('gen_png/battle.png')
@@ -120,8 +102,7 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     pic = CollationMaker(*pages).scatter('gen_png/scatter.png')
-    await bot.send_photo(user_id, pic, caption='Трактовка: каждая точка - совместный забег, чем ближе точки к '
-                                               'левому нижнему углу и красной линией, тем  больше соперничество.')
+    await bot.send_photo(user_id, pic, caption=content.battle_scatter_caption)
     pic.close()
 
 
@@ -148,17 +129,17 @@ async def process_excel_table(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'last_activity_diagram')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_last_activity_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     telegram_id = callback_query.from_user.id
     pic = await latest.make_latest_results_diagram(telegram_id, 'gen_png/results.png')
-    await bot.send_photo(telegram_id, pic, caption='Распределение результатов на вашем последнем забеге.')
+    await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
     pic.close()
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_history')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     telegram_id = callback_query.from_user.id
     pic = await PersonalResults(telegram_id).history('gen_png/participate.png')
     await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
@@ -168,7 +149,7 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_bests')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     telegram_id = callback_query.from_user.id
     pic = await PersonalResults(telegram_id).personal_bests('gen_png/pb.png')
     await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
@@ -178,7 +159,7 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_tourism')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     telegram_id = callback_query.from_user.id
     pic = await PersonalResults(telegram_id).tourism('gen_png/tourism.png')
     await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
@@ -188,7 +169,7 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_last')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Строю диаграмму. Подождите...')
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     telegram_id = callback_query.from_user.id
     pic = await PersonalResults(telegram_id).last_runs('gen_png/last_runs.png')
     await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')

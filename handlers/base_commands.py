@@ -8,7 +8,7 @@ from utils import content
 from utils import barcode
 
 
-@dp.message_handler(commands='start')
+@dp.message_handler(commands=['start'])
 @dp.throttled(rate=5)
 async def send_welcome(message: types.Message):
     kbd = await kb.main(message.from_user.id)
@@ -16,7 +16,7 @@ async def send_welcome(message: types.Message):
 
 
 @dp.message_handler(regexp='❓ справка')
-@dp.message_handler(commands=['help', 'помощь'])
+@dp.message_handler(commands=['help'])
 @dp.throttled(rate=3)
 async def commands(message: types.Message):
     await message.delete()
@@ -24,7 +24,6 @@ async def commands(message: types.Message):
         content.help_message,
         disable_notification=True, 
         parse_mode='Markdown', 
-        disable_web_page_preview=True,
         reply_markup=await kb.main(message.from_user.id)
     )
 
@@ -40,7 +39,7 @@ async def process_command_settings(message: types.Message):
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
     athlete = await find_athlete_by('user_id', user['id'])
     if not athlete:
-        return await message.answer('Вы зарегистрированы, но участник почему-то не привязан или не создан.')
+        return await message.answer(content.user_without_athlete)
     await message.answer(f'Вы зарегистрированы. Ссылка на ваш профиль: https://s95.ru/athletes/{athlete["id"]}')
 
 
