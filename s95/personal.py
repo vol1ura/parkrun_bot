@@ -92,10 +92,10 @@ class PersonalResults:
         df_last = self.__df.head(10)[::-1].reset_index(drop=True)
         df_last['Run Date'] = pd.to_datetime(df_last['Run Date'])
         ax = df_last.plot(x='Run Date', y='m', lw=2, label='Результат')
-        # xlabels = df_last['Run Date']
-        # ax.set_xticks(xlabels.index)
-        # ax.set_xticklabels(xlabels, rotation=70)
-        # ax.minorticks_on()
+        xlabels = df_last['Run Date']
+        ax.set_xticks(xlabels)
+        ax.set_xticklabels(xlabels.dt.strftime('%d.%m.%Y'), rotation=70)
+        ax.minorticks_on()
         ax.grid(which='major', axis='x', lw=0.5)
         ax.grid(which='major', axis='y', lw=1)
         ax.grid(which='minor', axis='y', lw=0.5, ls=':')
