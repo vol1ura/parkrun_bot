@@ -12,10 +12,10 @@ PRODUCTION_ENV = os.getenv('PRODUCTION')
 TOKEN_BOT = os.getenv('API_BOT_TOKEN', '123456:123456test')
 
 WEBHOOK_PATH = f'/webhook/{os.getenv("WEBHOOK")}'
-WEBHOOK_URL = f'{os.environ.get("HOST")}{WEBHOOK_PATH}'
+WEBHOOK_URL = f'{os.getenv("HOST")}{WEBHOOK_PATH}'
 
 WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = int(os.environ.get('PORT', 5000))
+WEBAPP_PORT = int(os.getenv('PORT', 5000))
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
