@@ -189,7 +189,7 @@ async def process_email_validation(message: types.Message, state: FSMContext):
             await message.delete()
 
 
-@dp.message_handler(state=UserStates.PASSWORD, regexp=r'\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\sa-zA-Z\d]).{6,}\Z')
+@dp.message_handler(state=UserStates.PASSWORD, regexp=r'\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}\Z')
 async def process_password_validation(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         payload = {
