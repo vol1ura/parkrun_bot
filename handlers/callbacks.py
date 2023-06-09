@@ -129,51 +129,66 @@ async def process_excel_table(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'last_activity_diagram')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_last_activity_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
-    telegram_id = callback_query.from_user.id
-    pic = await latest.make_latest_results_diagram(telegram_id, 'gen_png/results.png')
-    await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
-    pic.close()
+    try:
+        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+        telegram_id = callback_query.from_user.id
+        pic = await latest.make_latest_results_diagram(telegram_id, 'gen_png/results.png')
+        await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
+        pic.close()
+    except Exception:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_history')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
-    telegram_id = callback_query.from_user.id
-    pic = await PersonalResults(telegram_id).history('gen_png/participate.png')
-    await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
-    pic.close()
+    try:
+        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+        telegram_id = callback_query.from_user.id
+        pic = await PersonalResults(telegram_id).history('gen_png/participate.png')
+        await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
+        pic.close()
+    except Exception:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_bests')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
-    telegram_id = callback_query.from_user.id
-    pic = await PersonalResults(telegram_id).personal_bests('gen_png/pb.png')
-    await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
-    pic.close()
+    try:
+        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+        telegram_id = callback_query.from_user.id
+        pic = await PersonalResults(telegram_id).personal_bests('gen_png/pb.png')
+        await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
+        pic.close()
+    except Exception:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_tourism')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
-    telegram_id = callback_query.from_user.id
-    pic = await PersonalResults(telegram_id).tourism('gen_png/tourism.png')
-    await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
-    pic.close()
+    try:
+        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+        telegram_id = callback_query.from_user.id
+        pic = await PersonalResults(telegram_id).tourism('gen_png/tourism.png')
+        await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
+        pic.close()
+    except Exception:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_last')
 @dp.throttled(handle_throttled_query, rate=10)
 async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
-    telegram_id = callback_query.from_user.id
-    pic = await PersonalResults(telegram_id).last_runs('gen_png/last_runs.png')
-    await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
-    pic.close()
+    try:
+        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+        telegram_id = callback_query.from_user.id
+        pic = await PersonalResults(telegram_id).last_runs('gen_png/last_runs.png')
+        await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
+        pic.close()
+    except Exception:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_wins')
@@ -213,7 +228,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
     kbd = await kb.main(callback_query.from_user.id)
     await bot.send_message(
         callback_query.from_user.id,
-        'Наберите /help, чтобы посмотреть доступные команды',
+        'Все команды доступны через левое нижнее меню',
         reply_markup=kbd
     )
 
