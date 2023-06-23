@@ -9,7 +9,7 @@ from random import randint
 import keyboards as kb
 
 from app import dp
-from handlers.helpers import ClubStates, UserStates, find_athlete_by, find_user_by_email, update_home_event
+from handlers.helpers import HomeEventStates, UserStates, find_athlete_by, find_user_by_email, update_home_event
 from s95.athlete_code import AthleteCode
 from utils import content, mailer
 
@@ -242,8 +242,8 @@ async def process_invalid_password(message: types.Message):
         await  message.answer(f'{content.password_erased} Придумайте пароль.')
 
 
-@dp.message_handler(state=ClubStates.INPUT_CLUB_ID, regexp=r'\A\d+\Z')
-async def process_input_club_id(message: types.Message, state: FSMContext):
+@dp.message_handler(state=HomeEventStates.INPUT_EVENT_ID, regexp=r'\A\d+\Z')
+async def process_input_event_id(message: types.Message, state: FSMContext):
     result = await update_home_event(message.from_user.id, int(message.text))
     if not result:
         return await message.answer('Введён некорректный номер. Попробуйте ещё раз. Либо /reset для отмены')
@@ -254,6 +254,6 @@ async def process_input_club_id(message: types.Message, state: FSMContext):
         await state.finish()
 
 
-@dp.message_handler(state=ClubStates.INPUT_CLUB_ID)
+@dp.message_handler(state=HomeEventStates.INPUT_EVENT_ID)
 async def process_incorrect_input_club_id(message: types.Message):
     await message.answer('Введите число из приведённого выше списка. Либо /reset для отмены')

@@ -8,6 +8,7 @@ from s95.athlete_code import AthleteCode
 from s95.helpers import time_conv
 from utils import content
 
+FRIENDS_EVENT_ID = 4
 
 class UserStates(StatesGroup):
     SEARCH_ATHLETE_CODE = State()
@@ -19,8 +20,8 @@ class UserStates(StatesGroup):
     VALIDATE_EMAIL = State()
     PASSWORD = State()
 
-class ClubStates(StatesGroup):
-    INPUT_CLUB_ID = State()
+class HomeEventStates(StatesGroup):
+    INPUT_EVENT_ID = State()
 
 async def find_athlete_by(field: str, value):
     conn = await db_conn()
@@ -70,7 +71,7 @@ async def update_home_event(telegram_id: int, event_id: int) -> bool:
     if not event:
         return False
     athlete = await find_home_event(telegram_id)
-    result = await conn.execute('UPDATE athletes SET event_id=$2 WHERE id=$1', athlete['id'], event_id)
+    result = await conn.execute('UPDATE athletes SET event_id = $2 WHERE id = $1', athlete['id'], event_id)
     return True if result.endswith('1') else False
 
 
@@ -83,13 +84,13 @@ async def find_user_by_email(email: str):
 
 async def events():
     conn = await db_conn()
-    events_list = await conn.fetch('SELECT * FROM events WHERE id != 4 ORDER BY id')
+    events_list = await conn.fetch('SELECT * FROM events WHERE id != $1 ORDER BY id', FRIENDS_EVENT_ID)
     await conn.close()
     return events_list
 
 
 async def find_event_by_id(event_id: int):
-    if event_id == 4:
+    if event_id == FRIENDS_EVENT_ID:
         return
     conn = await db_conn()
     event = await conn.fetchrow('SELECT * FROM events WHERE id = $1', event_id)

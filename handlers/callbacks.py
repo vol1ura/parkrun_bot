@@ -5,7 +5,7 @@ import keyboards as kb
 
 from app import dp, bot
 from bot_exceptions import CallbackException
-from handlers.helpers import ClubStates, UserStates, events, handle_throttled_query, find_user_by
+from handlers.helpers import HomeEventStates, UserStates, events, handle_throttled_query, find_user_by
 from s95 import latest, records, clubs
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
@@ -285,4 +285,4 @@ async def process_set_home_event_ask(callback_query: types.CallbackQuery):
     for event in events_list:
         message += f'\n*{event["id"]}* - {event["name"]}'
     await bot.send_message(callback_query.from_user.id, message, parse_mode='Markdown')
-    await ClubStates.INPUT_CLUB_ID.set()
+    await HomeEventStates.INPUT_EVENT_ID.set()
