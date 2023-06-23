@@ -16,7 +16,9 @@ async def setup_bot_commands(_: Dispatcher):
         types.BotCommand(command='/register', description='Зарегистрироваться в S95'),
         types.BotCommand(command='/statistics', description='Персональная статистика'),
         types.BotCommand(command='/help', description='Краткая справка'),
-        types.BotCommand(command='/start', description='Перезапуск')
+        types.BotCommand(command='/home', description='Установить домашний забег'),
+        types.BotCommand(command='/start', description='Перезапуск'),
+        types.BotCommand(command='/reset', description='Отмена действия')
     ]
     await bot.set_my_commands(bot_commands)
 

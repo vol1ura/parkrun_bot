@@ -3,7 +3,7 @@ from aiogram import types
 import keyboards as kb
 
 from app import dp, bot
-from handlers.helpers import find_athlete_by, find_user_by, athlete_code
+from handlers.helpers import find_athlete_by, find_club, find_home_event, find_user_by, athlete_code
 from utils import content
 from utils import barcode
 
@@ -73,3 +73,27 @@ async def process_command_statistics(message: types.Message):
 async def process_command_info(message: types.Message):
     await message.delete()
     await message.answer('Кое-что ещё:', reply_markup=kb.inline_info)
+
+
+# @dp.message_handler(commands=['club'])
+# @dp.throttled(rate=2)
+# async def process_command_club(message: types.Message):
+#     await message.delete()
+#     club = await find_club(message.from_user.id)
+#     if not club:
+#         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
+#     if not club['club_id']:
+#         return await message.answer('Клуб не установлен. Хотите установить?', reply_markup=kb.confirm_set_club)
+#     await message.answer(f'Ваш клуб: {club["club_name"]}. Хотите сменить?', reply_markup=kb.confirm_set_club)
+
+
+@dp.message_handler(commands=['home'])
+@dp.throttled(rate=2)
+async def process_command_home(message: types.Message):
+    await message.delete()
+    event = await find_home_event(message.from_user.id)
+    if not event:
+        return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
+    if not event['event_id']:
+        return await message.answer('Домашний забег не установлен. Хотите установить?', reply_markup=kb.confirm_set_home_event)
+    await message.answer(f'Ваш домашний забег: {event["event_name"]}. Хотите сменить?', reply_markup=kb.confirm_set_home_event)

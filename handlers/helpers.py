@@ -19,6 +19,8 @@ class UserStates(StatesGroup):
     VALIDATE_EMAIL = State()
     PASSWORD = State()
 
+class ClubStates(StatesGroup):
+    INPUT_CLUB_ID = State()
 
 async def find_athlete_by(field: str, value):
     conn = await db_conn()
@@ -34,11 +36,65 @@ async def find_user_by(field: str, value):
     return user
 
 
+async def find_club(telegram_id):
+    conn = await db_conn()
+    club = await conn.fetchrow(
+        f"""SELECT athletes.*, clubs.name as club_name
+        FROM athletes
+        LEFT JOIN clubs ON athletes.club_id = clubs.id
+        INNER JOIN users ON users.id = athletes.user_id
+        WHERE users.telegram_id = $1""",
+        telegram_id
+    )
+    await conn.close()
+    return club
+
+
+async def find_home_event(telegram_id):
+    conn = await db_conn()
+    event = await conn.fetchrow(
+        f"""SELECT athletes.*, events.name as event_name
+        FROM athletes
+        INNER JOIN users ON users.id = athletes.user_id
+        LEFT JOIN events ON athletes.event_id = events.id
+        WHERE users.telegram_id = $1""",
+        telegram_id
+    )
+    await conn.close()
+    return event
+
+
+async def update_home_event(telegram_id: int, event_id: int) -> bool: 
+    conn = await db_conn()
+    event = await find_event_by_id(event_id)
+    if not event:
+        return False
+    athlete = await find_home_event(telegram_id)
+    result = await conn.execute('UPDATE athletes SET event_id=$2 WHERE id=$1', athlete['id'], event_id)
+    return True if result.endswith('1') else False
+
+
 async def find_user_by_email(email: str):
     conn = await db_conn()
     user = await conn.fetchrow('SELECT * FROM users WHERE LOWER(email) = $1', email.lower())
     await conn.close()
     return user
+
+
+async def events():
+    conn = await db_conn()
+    events_list = await conn.fetch('SELECT * FROM events WHERE id != 4 ORDER BY id')
+    await conn.close()
+    return events_list
+
+
+async def find_event_by_id(event_id: int):
+    if event_id == 4:
+        return
+    conn = await db_conn()
+    event = await conn.fetchrow('SELECT * FROM events WHERE id = $1', event_id)
+    await conn.close()
+    return event
 
 
 async def user_results(telegram_id):

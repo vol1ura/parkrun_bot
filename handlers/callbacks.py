@@ -5,7 +5,7 @@ import keyboards as kb
 
 from app import dp, bot
 from bot_exceptions import CallbackException
-from handlers.helpers import UserStates, handle_throttled_query, find_user_by
+from handlers.helpers import ClubStates, UserStates, events, handle_throttled_query, find_user_by
 from s95 import latest, records, clubs
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
@@ -255,3 +255,34 @@ async def process_new_athlete_registration(callback_query: types.CallbackQuery):
         reply_markup=types.ReplyKeyboardRemove(),
         parse_mode='Markdown'
     )
+
+    
+@dp.callback_query_handler(lambda c: c.data == 'cancel_action')
+async def process_cancel_action(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await bot.send_message(callback_query.from_user.id, 'Действие отменено')
+
+
+@dp.callback_query_handler(lambda c: c.data == 'set_club')
+async def process_set_club_ask(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await bot.send_message(
+        callback_query.from_user.id, 
+        content.ask_club, 
+        parse_mode='Markdown', 
+        disable_web_page_preview=True
+    )
+
+
+@dp.callback_query_handler(lambda c: c.data == 'set_home_event_ask')
+async def process_set_home_event_ask(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    events_list = await events()
+    message = content.ask_home_event
+    for event in events_list:
+        message += f'\n*{event["id"]}* - {event["name"]}'
+    await bot.send_message(callback_query.from_user.id, message, parse_mode='Markdown')
+    await ClubStates.INPUT_CLUB_ID.set()
