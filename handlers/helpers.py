@@ -10,6 +10,7 @@ from utils import content
 
 FRIENDS_EVENT_ID = 4
 
+
 class UserStates(StatesGroup):
     SEARCH_ATHLETE_CODE = State()
     SAVE_WITH_PARKRUN_CODE = State()
@@ -20,8 +21,15 @@ class UserStates(StatesGroup):
     VALIDATE_EMAIL = State()
     PASSWORD = State()
 
+
+class ClubStates(StatesGroup):
+    INPUT_NAME = State()
+    CONFIRM_NAME = State()
+
+
 class HomeEventStates(StatesGroup):
     INPUT_EVENT_ID = State()
+
 
 async def find_athlete_by(field: str, value):
     conn = await db_conn()
@@ -37,10 +45,10 @@ async def find_user_by(field: str, value):
     return user
 
 
-async def find_club(telegram_id):
+async def find_club(telegram_id: int):
     conn = await db_conn()
     club = await conn.fetchrow(
-        f"""SELECT athletes.*, clubs.name as club_name
+        """SELECT athletes.*, clubs.name as club_name
         FROM athletes
         LEFT JOIN clubs ON athletes.club_id = clubs.id
         INNER JOIN users ON users.id = athletes.user_id
@@ -51,10 +59,16 @@ async def find_club(telegram_id):
     return club
 
 
+async def find_club_by_name(name: str):
+    conn = await db_conn()
+    club = await conn.fetchrow('SELECT * FROM clubs WHERE name ILIKE $1', f'{name}%')
+    return club
+
+
 async def find_home_event(telegram_id):
     conn = await db_conn()
     event = await conn.fetchrow(
-        f"""SELECT athletes.*, events.name as event_name
+        """SELECT athletes.*, events.name as event_name
         FROM athletes
         INNER JOIN users ON users.id = athletes.user_id
         LEFT JOIN events ON athletes.event_id = events.id
@@ -72,6 +86,13 @@ async def update_home_event(telegram_id: int, event_id: int) -> bool:
         return False
     athlete = await find_home_event(telegram_id)
     result = await conn.execute('UPDATE athletes SET event_id = $2 WHERE id = $1', athlete['id'], event_id)
+    return True if result.endswith('1') else False
+
+
+async def update_club(telegram_id: int, club_id: int) -> bool:
+    conn = await db_conn()
+    athlete = await find_club(telegram_id)
+    result = await conn.execute('UPDATE athletes SET club_id = $2 WHERE id = $1', athlete['id'], club_id)
     return True if result.endswith('1') else False
 
 
@@ -100,7 +121,7 @@ async def find_event_by_id(event_id: int):
 
 async def user_results(telegram_id):
     conn = await db_conn()
-    query = f"""SELECT results.position, results.total_time, activities.date, events.name FROM results
+    query = """SELECT results.position, results.total_time, activities.date, events.name FROM results
         INNER JOIN activities ON activities.id = results.activity_id
         INNER JOIN events ON events.id = activities.event_id
         INNER JOIN athletes ON athletes.id = results.athlete_id

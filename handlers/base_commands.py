@@ -75,16 +75,16 @@ async def process_command_info(message: types.Message):
     await message.answer('Кое-что ещё:', reply_markup=kb.inline_info)
 
 
-# @dp.message_handler(commands=['club'])
-# @dp.throttled(rate=2)
-# async def process_command_club(message: types.Message):
-#     await message.delete()
-#     club = await find_club(message.from_user.id)
-#     if not club:
-#         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
-#     if not club['club_id']:
-#         return await message.answer('Клуб не установлен. Хотите установить?', reply_markup=kb.confirm_set_club)
-#     await message.answer(f'Ваш клуб: {club["club_name"]}. Хотите сменить?', reply_markup=kb.confirm_set_club)
+@dp.message_handler(commands=['club'])
+@dp.throttled(rate=2)
+async def process_command_club(message: types.Message):
+    await message.delete()
+    club = await find_club(message.from_user.id)
+    if not club:
+        return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
+    if not club['club_id']:
+        return await message.answer('Клуб не установлен. Хотите установить?', reply_markup=kb.confirm_club_changing)
+    await message.answer(f'Ваш клуб: {club["club_name"]}. Хотите сменить?', reply_markup=kb.confirm_club_changing)
 
 
 @dp.message_handler(commands=['home'])
@@ -95,5 +95,5 @@ async def process_command_home(message: types.Message):
     if not event:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
     if not event['event_id']:
-        return await message.answer('Домашний забег не установлен. Хотите установить?', reply_markup=kb.confirm_set_home_event)
-    await message.answer(f'Ваш домашний забег: {event["event_name"]}. Хотите сменить?', reply_markup=kb.confirm_set_home_event)
+        return await message.answer('Домашний забег не установлен. Хотите установить?', reply_markup=kb.confirm_home_event_changing)
+    await message.answer(f'Ваш домашний забег: {event["event_name"]}. Хотите сменить?', reply_markup=kb.confirm_home_event_changing)

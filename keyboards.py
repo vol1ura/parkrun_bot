@@ -40,14 +40,18 @@ info_btn2 = InlineKeyboardButton("Загрязнение воздуха", switch
 inline_info.row(info_btn1, info_btn2)
 
 # CLUB ask to set/change
+confirm_club_changing = InlineKeyboardMarkup(row_width=2)
+confirm_club_changing.insert(InlineKeyboardButton('Да', callback_data='ask_club'))
+confirm_club_changing.insert(InlineKeyboardButton('Нет', callback_data='cancel_action'))
+
 confirm_set_club = InlineKeyboardMarkup(row_width=2)
 confirm_set_club.insert(InlineKeyboardButton('Да', callback_data='set_club'))
 confirm_set_club.insert(InlineKeyboardButton('Нет', callback_data='cancel_action'))
 
 # HOME EVENT ask to set/change
-confirm_set_home_event = InlineKeyboardMarkup(row_width=2)
-confirm_set_home_event.insert(InlineKeyboardButton('Да', callback_data='set_home_event_ask'))
-confirm_set_home_event.insert(InlineKeyboardButton('Нет', callback_data='cancel_action'))
+confirm_home_event_changing = InlineKeyboardMarkup(row_width=2)
+confirm_home_event_changing.insert(InlineKeyboardButton('Да', callback_data='ask_home_event'))
+confirm_home_event_changing.insert(InlineKeyboardButton('Нет', callback_data='cancel_action'))
 
 #
 open_s95_button = InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/')

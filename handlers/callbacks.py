@@ -5,7 +5,7 @@ import keyboards as kb
 
 from app import dp, bot
 from bot_exceptions import CallbackException
-from handlers.helpers import HomeEventStates, UserStates, events, handle_throttled_query, find_user_by
+from handlers.helpers import ClubStates, HomeEventStates, UserStates, events, handle_throttled_query, find_user_by, update_club
 from s95 import latest, records, clubs
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
@@ -264,8 +264,16 @@ async def process_cancel_action(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, 'Действие отменено')
 
 
-@dp.callback_query_handler(lambda c: c.data == 'set_club')
-async def process_set_club_ask(callback_query: types.CallbackQuery):
+@dp.callback_query_handler(lambda c: c.data == 'cancel_action', state=ClubStates)
+async def process_cancel_action_with_state(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await state.finish()
+    await bot.send_message(callback_query.from_user.id, 'Действие отменено')
+
+
+@dp.callback_query_handler(lambda c: c.data == 'ask_club')
+async def process_ask_club(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await bot.send_message(
@@ -274,10 +282,29 @@ async def process_set_club_ask(callback_query: types.CallbackQuery):
         parse_mode='Markdown', 
         disable_web_page_preview=True
     )
+    await ClubStates.INPUT_NAME.set()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'set_home_event_ask')
-async def process_set_home_event_ask(callback_query: types.CallbackQuery):
+@dp.callback_query_handler(lambda c: c.data == 'set_club', state=ClubStates.CONFIRM_NAME)
+async def process_set_club(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    async with state.proxy() as data:
+        result = await update_club(callback_query.from_user.id, data['club_id'])
+        if result:
+            await bot.send_message(
+                callback_query.from_user.id, 
+                f'Клуб [{data["club_name"]}](https://s95.ru/clubs/{data["club_id"]}) установлен', 
+                parse_mode='Markdown', 
+                disable_web_page_preview=False
+            )
+        else:
+            await bot.send_message(callback_query.from_user.id, 'Не удалось установить клуб. Попробуйте снова')
+    await state.finish()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'ask_home_event')
+async def process_ask_home_event(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     events_list = await events()

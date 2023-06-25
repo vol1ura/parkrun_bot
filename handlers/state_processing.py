@@ -9,7 +9,7 @@ from random import randint
 import keyboards as kb
 
 from app import dp
-from handlers.helpers import HomeEventStates, UserStates, find_athlete_by, find_user_by_email, update_home_event
+from handlers.helpers import ClubStates, HomeEventStates, UserStates, find_athlete_by, find_club_by_name, find_user_by_email, update_home_event
 from s95.athlete_code import AthleteCode
 from utils import content, mailer
 
@@ -257,3 +257,19 @@ async def process_input_event_id(message: types.Message, state: FSMContext):
 @dp.message_handler(state=HomeEventStates.INPUT_EVENT_ID)
 async def process_incorrect_input_club_id(message: types.Message):
     await message.answer('Введите число из приведённого выше списка. Либо /reset для отмены')
+
+
+@dp.message_handler(state=ClubStates.INPUT_NAME)
+async def process_club_name(message: types.Message, state: FSMContext):
+    if len(message.text) < 3:
+        return await message.answer('Введите название клуба немного точнее')
+    club = await find_club_by_name(message.text)
+    if not club:
+        return await message.answer('Клуб не найден. Попробуйте ещё раз')
+    await state.update_data(club_id=club['id'], club_name=club['name'])
+    await ClubStates.next()
+    await message.answer(
+        f'Найден клуб [{club["name"]}](https://s95.ru/clubs/{club["id"]}). Установить?',
+        reply_markup=kb.confirm_set_club,
+        parse_mode='Markdown'
+    )
