@@ -5,7 +5,7 @@ import keyboards as kb
 
 from app import dp, bot
 from bot_exceptions import CallbackException
-from handlers.helpers import ClubStates, HomeEventStates, UserStates, events, handle_throttled_query, find_user_by, update_club
+from handlers import helpers
 from s95 import latest, records, clubs
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
@@ -13,7 +13,7 @@ from utils import content
 
 
 @dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
-@dp.throttled(handle_throttled_query, rate=6)
+@dp.throttled(helpers.handle_throttled_query, rate=6)
 async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
     pic = await records.top_records_count('gen_png/records.png')
@@ -22,7 +22,7 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'top_active_clubs')
-@dp.throttled(handle_throttled_query, rate=6)
+@dp.throttled(helpers.handle_throttled_query, rate=6)
 async def process_top_active_clubs(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
     pic = clubs.top_active_clubs_diagram('gen_png/top_clubs.png')
@@ -53,13 +53,13 @@ async def process_personal_results(callback_query: types.CallbackQuery):
         callback_query.from_user.id,
         '*Представление ваших результатов.*\n'
         'Здесь можно сделать визуализацию ваших результатов за всю историю участия в забегах S95.',
-        reply_markup=kb.inline_personal, 
+        reply_markup=kb.inline_personal,
         parse_mode='Markdown'
     )
 
 
 async def get_compared_pages(user_id):
-    settings = None # await redis.get_value(user_id)
+    settings = None  # await redis.get_value(user_id)
     athlete_id_1 = settings.get('id', None)
     athlete_id_2 = settings.get('compare_id', None)
     if not athlete_id_1:
@@ -70,8 +70,8 @@ async def get_compared_pages(user_id):
                                 'Нажмите кнопку Ввести ID участника.')
     if athlete_id_1 == athlete_id_2:
         raise CallbackException('Ваш parkrun ID не должен совпадать с parkrun ID, выбранного участника.')
-    athlete_name_1 = await find_user_by('id', athlete_id_1)
-    athlete_name_2 = await find_user_by('id', athlete_id_2)
+    athlete_name_1 = await helpers.find_user_by('id', athlete_id_1)
+    athlete_name_2 = await helpers.find_user_by('id', athlete_id_2)
     # with Vedis(DB_FILE) as db:
     #     try:
     #         h = db.Hash(f'A{athlete_id_1}')
@@ -85,7 +85,7 @@ async def get_compared_pages(user_id):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'battle_diagram')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_battle_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     user_id = callback_query.from_user.id
@@ -96,7 +96,7 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'battle_scatter')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_battle_scatter(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю график. Подождите...')
     user_id = callback_query.from_user.id
@@ -107,7 +107,7 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'battle_table')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_battle_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
     user_id = callback_query.from_user.id
@@ -116,7 +116,7 @@ async def process_battle_table(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'excel_table')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_excel_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Создаю файл. Подождите...')
     user_id = callback_query.from_user.id
@@ -127,7 +127,7 @@ async def process_excel_table(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'last_activity_diagram')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_last_activity_diagram(callback_query: types.CallbackQuery):
     try:
         await bot.answer_callback_query(callback_query.id, content.wait_diagram)
@@ -140,7 +140,7 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_history')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
     try:
         await bot.answer_callback_query(callback_query.id, content.wait_diagram)
@@ -153,7 +153,7 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_bests')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
     try:
         await bot.answer_callback_query(callback_query.id, content.wait_diagram)
@@ -166,7 +166,7 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_tourism')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     try:
         await bot.answer_callback_query(callback_query.id, content.wait_diagram)
@@ -179,7 +179,7 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_last')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
     try:
         await bot.answer_callback_query(callback_query.id, content.wait_diagram)
@@ -192,7 +192,7 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_wins')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(helpers.handle_throttled_query, rate=10)
 async def process_personal_wins_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
     telegram_id = callback_query.from_user.id
@@ -204,7 +204,7 @@ async def process_personal_wins_table(callback_query: types.CallbackQuery):
 @dp.throttled(rate=5)
 async def process_athlete_code_search(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await UserStates.SEARCH_ATHLETE_CODE.set()
+    await helpers.UserStates.SEARCH_ATHLETE_CODE.set()
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await bot.send_message(callback_query.from_user.id, content.athlete_code_search, parse_mode='Markdown')
 
@@ -248,7 +248,7 @@ async def process_start_registration(callback_query: types.CallbackQuery):
 async def process_new_athlete_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    await UserStates.ATHLETE_LAST_NAME.set()
+    await helpers.UserStates.ATHLETE_LAST_NAME.set()
     await bot.send_message(
         callback_query.from_user.id,
         'Введите пожалуйста свою *Фамилию*',
@@ -256,7 +256,7 @@ async def process_new_athlete_registration(callback_query: types.CallbackQuery):
         parse_mode='Markdown'
     )
 
-    
+
 @dp.callback_query_handler(lambda c: c.data == 'cancel_action')
 async def process_cancel_action(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
@@ -264,7 +264,7 @@ async def process_cancel_action(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, 'Действие отменено')
 
 
-@dp.callback_query_handler(lambda c: c.data == 'cancel_action', state=ClubStates)
+@dp.callback_query_handler(lambda c: c.data == 'cancel_action', state=helpers.ClubStates)
 async def process_cancel_action_with_state(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
@@ -277,25 +277,25 @@ async def process_ask_club(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await bot.send_message(
-        callback_query.from_user.id, 
-        content.ask_club, 
-        parse_mode='Markdown', 
+        callback_query.from_user.id,
+        content.ask_club,
+        parse_mode='Markdown',
         disable_web_page_preview=True
     )
-    await ClubStates.INPUT_NAME.set()
+    await helpers.ClubStates.INPUT_NAME.set()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'set_club', state=ClubStates.CONFIRM_NAME)
+@dp.callback_query_handler(lambda c: c.data == 'set_club', state=helpers.ClubStates.CONFIRM_NAME)
 async def process_set_club(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     async with state.proxy() as data:
-        result = await update_club(callback_query.from_user.id, data['club_id'])
+        result = await helpers.update_club(callback_query.from_user.id, data['club_id'])
         if result:
             await bot.send_message(
-                callback_query.from_user.id, 
-                f'Клуб [{data["club_name"]}](https://s95.ru/clubs/{data["club_id"]}) установлен', 
-                parse_mode='Markdown', 
+                callback_query.from_user.id,
+                f'Клуб [{data["club_name"]}](https://s95.ru/clubs/{data["club_id"]}) установлен',
+                parse_mode='Markdown',
                 disable_web_page_preview=False
             )
         else:
@@ -307,9 +307,9 @@ async def process_set_club(callback_query: types.CallbackQuery, state: FSMContex
 async def process_ask_home_event(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    events_list = await events()
+    events_list = await helpers.events()
     message = content.ask_home_event
     for event in events_list:
         message += f'\n*{event["id"]}* - {event["name"]}'
     await bot.send_message(callback_query.from_user.id, message, parse_mode='Markdown')
-    await HomeEventStates.INPUT_EVENT_ID.set()
+    await helpers.HomeEventStates.INPUT_EVENT_ID.set()

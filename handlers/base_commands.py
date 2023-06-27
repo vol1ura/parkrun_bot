@@ -3,7 +3,7 @@ from aiogram import types
 import keyboards as kb
 
 from app import dp, bot
-from handlers.helpers import find_athlete_by, find_club, find_home_event, find_user_by, athlete_code
+from handlers import helpers
 from utils import content
 from utils import barcode
 
@@ -22,8 +22,8 @@ async def commands(message: types.Message):
     await message.delete()
     await message.answer(
         content.help_message,
-        disable_notification=True, 
-        parse_mode='Markdown', 
+        disable_notification=True,
+        parse_mode='Markdown',
         reply_markup=await kb.main(message.from_user.id)
     )
 
@@ -34,10 +34,10 @@ async def commands(message: types.Message):
 async def process_command_settings(message: types.Message):
     await message.delete()
     telegram_id = message.from_user.id
-    user = await find_user_by('telegram_id', telegram_id)
+    user = await helpers.find_user_by('telegram_id', telegram_id)
     if not user:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
-    athlete = await find_athlete_by('user_id', user['id'])
+    athlete = await helpers.find_athlete_by('user_id', user['id'])
     if not athlete:
         return await message.answer(content.user_without_athlete)
     await message.answer(f'Вы зарегистрированы. Ссылка на ваш профиль: https://s95.ru/athletes/{athlete["id"]}')
@@ -49,14 +49,14 @@ async def process_command_settings(message: types.Message):
 async def process_command_barcode(message: types.Message):
     await message.delete()
     telegram_id = message.from_user.id
-    user = await find_user_by('telegram_id', telegram_id)
+    user = await helpers.find_user_by('telegram_id', telegram_id)
     if not user:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
 
-    athlete = await find_athlete_by('user_id', user['id'])
+    athlete = await helpers.find_athlete_by('user_id', user['id'])
     if not athlete:
         return await message.answer('Вы зарегистрированы, но участник почему-то не привязан или не создан.')
-    with barcode.generate(athlete_code(athlete)) as pic:
+    with barcode.generate(helpers.athlete_code(athlete)) as pic:
         await bot.send_photo(message.chat.id, pic, caption=athlete["name"])
 
 
@@ -79,7 +79,7 @@ async def process_command_info(message: types.Message):
 @dp.throttled(rate=2)
 async def process_command_club(message: types.Message):
     await message.delete()
-    club = await find_club(message.from_user.id)
+    club = await helpers.find_club(message.from_user.id)
     if not club:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
     if not club['club_id']:
@@ -91,9 +91,15 @@ async def process_command_club(message: types.Message):
 @dp.throttled(rate=2)
 async def process_command_home(message: types.Message):
     await message.delete()
-    event = await find_home_event(message.from_user.id)
+    event = await helpers.find_home_event(message.from_user.id)
     if not event:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
     if not event['event_id']:
-        return await message.answer('Домашний забег не установлен. Хотите установить?', reply_markup=kb.confirm_home_event_changing)
-    await message.answer(f'Ваш домашний забег: {event["event_name"]}. Хотите сменить?', reply_markup=kb.confirm_home_event_changing)
+        return await message.answer(
+            'Домашний забег не установлен. Хотите установить?',
+            reply_markup=kb.confirm_home_event_changing
+        )
+    await message.answer(
+        f'Ваш домашний забег: {event["event_name"]}. Хотите сменить?',
+        reply_markup=kb.confirm_home_event_changing
+    )

@@ -13,7 +13,7 @@ from s95.helpers import min_to_mmss, time_conv
 
 async def parse_latest_results(telegram_id: int):
     conn = await db_conn()
-    query = f"""SELECT activities.id, activities.date, events.name, athletes.id AS athlete_id FROM activities
+    query = """SELECT activities.id, activities.date, events.name, athletes.id AS athlete_id FROM activities
         INNER JOIN events ON events.id = activities.event_id
         INNER JOIN results ON results.activity_id = activities.id
         INNER JOIN athletes ON athletes.id = results.athlete_id

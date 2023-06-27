@@ -36,7 +36,7 @@ class PersonalResults:
         boundaries = np.arange(-0.5, maxruns + 1.5)
 
         sns.heatmap(rundata, linewidths=0.4, cmap='Greens',
-                    cbar_kws={"ticks": ticks, "boundaries": boundaries, 'label': 'Паркранов в месяц'})
+                    cbar_kws={"ticks": ticks, "boundaries": boundaries, 'label': 'Забегов в месяц'})
         ax.set_title(f'{self.__athlete_name}: история участия в S95', fontweight='bold')
         plt.tight_layout()
         plt.savefig(pic)
@@ -67,7 +67,7 @@ class PersonalResults:
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
         # pivot df into long form and aggregate by fastest time
         rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Event', fill_value=0,
-                                        aggfunc=lambda parkruns: len(np.unique(parkruns, return_counts=True)[1]))
+                                        aggfunc=lambda runs: len(np.unique(runs, return_counts=True)[1]))
         maxuniq = rundata.max().max()
 
         # add rows of zeros for any months missed

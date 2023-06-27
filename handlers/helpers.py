@@ -79,7 +79,7 @@ async def find_home_event(telegram_id):
     return event
 
 
-async def update_home_event(telegram_id: int, event_id: int) -> bool: 
+async def update_home_event(telegram_id: int, event_id: int) -> bool:
     conn = await db_conn()
     event = await find_event_by_id(event_id)
     if not event:

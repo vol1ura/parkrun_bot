@@ -16,6 +16,7 @@ async def setup_bot_commands(_: Dispatcher):
         types.BotCommand(command='/register', description='Зарегистрироваться в S95'),
         types.BotCommand(command='/statistics', description='Персональная статистика'),
         types.BotCommand(command='/help', description='Краткая справка'),
+        types.BotCommand(command='/club', description='Установить клуб'),
         types.BotCommand(command='/home', description='Установить домашний забег'),
         types.BotCommand(command='/start', description='Перезапуск'),
         types.BotCommand(command='/reset', description='Отмена действия')
@@ -39,7 +40,7 @@ async def on_shutdown(dispatcher: Dispatcher):
 
 
 if __name__ == '__main__':
-    if False: #  config.PRODUCTION_ENV
+    if False:  # config.PRODUCTION_ENV
         executor.start_webhook(
             dispatcher=dp,
             webhook_path=config.WEBHOOK_PATH,

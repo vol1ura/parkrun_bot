@@ -3,8 +3,6 @@ import os
 import random
 from datetime import date, timedelta
 
-import aiohttp
-
 from app import logger
 
 
@@ -22,10 +20,10 @@ class ParkrunSite:
         {"User-Agent": "Opera/9.80 (Macintosh; Intel Mac OS X 10.14.1) Presto/2.12.388 Version/12.16"}
     ]
 
-    __PARKRUN_URL = {
-        'largestclubs': 'https://www.parkrun.com.au/results/largestclubs/',
-        'courserecords': 'https://www.parkrun.com.au/results/courserecords/'
-    }
+    # __PARKRUN_URL = {
+    #     'largestclubs': 'https://www.parkrun.com.au/results/largestclubs/',
+    #     'courserecords': 'https://www.parkrun.com.au/results/courserecords/'
+    # }
 
     def __init__(self, key=''):
         self.__key = key
@@ -41,22 +39,7 @@ class ParkrunSite:
         return date1 >= date_sun
 
     async def get_html(self, url=None):
-        content = None # await redis.get_value(self.__redis_key)
-        content_date = content.get('date', None)
-        today = date.today()
-        logger.info(f'Get [{self.__key}] with date={content_date}')
-        if ParkrunSite._compare_dates(content_date, today):
-            return content['html']
-        if not url:
-            url = ParkrunSite.__PARKRUN_URL[self.__key]
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with session.get(url) as resp:
-                html = await resp.text()
-                is_ok = resp.ok
-        if is_ok:
-            # await redis.set_value(self.__redis_key, date=today.isoformat(), html=html)
-            logger.info(f'Page [{url}] was updated by date={today.isoformat()}')
-        return html
+        return url
 
     async def update_info(self, actual_date: str):
         """
