@@ -250,14 +250,16 @@ async def process_invalid_password(message: types.Message):
 
 @dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID, regexp=r'\A\d+\Z')
 async def process_input_event_id(message: types.Message, state: FSMContext):
-    result = await helpers.update_home_event(message.from_user.id, int(message.text))
+    event_id = int(message.text)
+    result = await helpers.update_home_event(message.from_user.id, event_id)
     if not result:
         return await message.answer('Введён некорректный номер. Попробуйте ещё раз. Либо /reset для отмены')
-    await message.answer('Домашний забег установлен')
-    try:
-        await message.delete()
-    finally:
-        await state.finish()
+    answer = 'Домашний забег установлен.'
+    link = await helpers.tg_channel_of_event(event_id)
+    if link:
+        answer += ' ' + content.home_event_notice.format(link)
+    await message.answer(answer, parse_mode='Markdown', disable_web_page_preview=True)
+    await state.finish()
 
 
 @dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID)
