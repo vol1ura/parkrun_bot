@@ -5,6 +5,7 @@ fuzzywuzzy>=0.18.0
 geopy==2.1
 lxml~=4.9
 openpyxl~=3.0.7
+Pillow~=9.4
 pycparser~=2.20
 python-dotenv>=0.17.0
 python-barcode~=0.14.0
