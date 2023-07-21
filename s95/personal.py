@@ -105,7 +105,7 @@ class PersonalResults:
         ax.xaxis.set_minor_locator(NullLocator())
         plt.xlabel('Дата забега')
         plt.ylabel('Минуты')
-        plt.title('10 забегов S95', fontweight='bold')
+        plt.title(f'{len(df_last)} забегов S95', fontweight='bold')
         plt.tight_layout()
         plt.savefig(pic)
         return open(pic, 'rb')
