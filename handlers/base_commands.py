@@ -28,7 +28,7 @@ async def commands(message: types.Message):
     )
 
 
-@dp.message_handler(regexp='⚙️ зарегистрироваться')
+@dp.message_handler(regexp='⚙️ регистрация')
 @dp.message_handler(commands=['register'])
 @dp.throttled(rate=2)
 async def process_command_settings(message: types.Message):
