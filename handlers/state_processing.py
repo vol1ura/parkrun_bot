@@ -86,6 +86,7 @@ async def process_get_athlete_first_name(message: types.Message, state: FSMConte
     await message.answer('Укажите свой пол', reply_markup=kb.select_gender)
 
 
+# Повторно запрашиваем имя, если не сработала регулярка
 @dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME)
 async def process_repeat_first_name(message: types.Message):
     await message.answer('Введите своё имя. Допустимы только буквы.')
@@ -104,7 +105,7 @@ async def process_gender_invalid(message: types.Message):
 # Просим Почту
 @dp.message_handler(state=helpers.UserStates.GENDER)
 async def process_gender(message: types.Message, state: FSMContext):
-    await state.update_data(male=(message.text.strip().lower() == "мужской"))
+    await state.update_data(male=(message.text.strip().lower() == 'мужской'))
     await helpers.UserStates.next()
     await message.answer(content.ask_email, reply_markup=types.ReplyKeyboardRemove())
 
@@ -122,7 +123,7 @@ async def process_get_email(message: types.Message, state: FSMContext):
         # проверить, что у юзера с этой почтой не привязан участник
         if await helpers.find_athlete_by('user_id', user['id']):
             await state.finish()
-            # Залогировать эту ситуацию
+            # TODO: Залогировать эту ситуацию
             return await message.reply(content.athlete_already_linked)
         # Если участник не привязан, то делаем привязку
         await state.update_data(user_id=user['id'])
@@ -262,6 +263,7 @@ async def process_input_event_id(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+# Повторный запрос кода локации
 @dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID)
 async def process_incorrect_input_club_id(message: types.Message):
     await message.answer('Введите число из приведённого выше списка. Либо /reset для отмены')
