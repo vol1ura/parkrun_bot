@@ -121,9 +121,9 @@ async def find_event_by_id(event_id: int):
 
 async def tg_channel_of_event(event_id: int):
     conn = await db_conn()
-    link = await conn.fetchrow('SELECT link FROM contacts WHERE event_id = $1 AND contact_type = 2', event_id)
+    link = await conn.fetchrow('SELECT link FROM contacts WHERE event_id = $1 AND contact_type = 3', event_id)
     await conn.close()
-    return link['link']
+    return link and link['link']
 
 
 async def user_results(telegram_id):
