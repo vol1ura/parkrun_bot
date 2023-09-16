@@ -8,7 +8,7 @@ from handlers.helpers import find_user_by, user_results
 
 
 class PersonalResults:
-    def __init__(self, telegram_id):
+    def __init__(self, telegram_id: int):
         self.__telegram_id = telegram_id
 
     async def _fetch_results(self):

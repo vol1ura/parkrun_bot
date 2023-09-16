@@ -9,5 +9,5 @@ checkup:
 	--exclude venv,htmlcov,service_scripts,handlers/__init__.py
 	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude venv,htmlcov,service_scripts
 
-deploy:
-	./venv/bin/ansible-playbook -i deploy/inventory deploy/deploy.yml
+publish:
+	./venv/bin/ansible-playbook -i deploy/inventory deploy/deploy.yml --private-key=~/.ssh/id_ed25519

@@ -19,7 +19,7 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(commands=['help'])
 @dp.throttled(rate=3)
 async def commands(message: types.Message):
-    await message.delete()
+    await helpers.delete_message(message)
     await message.answer(
         content.help_message,
         disable_notification=True,
@@ -32,7 +32,7 @@ async def commands(message: types.Message):
 @dp.message_handler(commands=['register'])
 @dp.throttled(rate=2)
 async def process_command_settings(message: types.Message):
-    await message.delete()
+    await helpers.delete_message(message)
     telegram_id = message.from_user.id
     user = await helpers.find_user_by('telegram_id', telegram_id)
     if not user:
@@ -47,7 +47,7 @@ async def process_command_settings(message: types.Message):
 @dp.message_handler(commands=['barcode'])
 @dp.throttled(rate=3)
 async def process_command_barcode(message: types.Message):
-    await message.delete()
+    await helpers.delete_message(message)
     telegram_id = message.from_user.id
     user = await helpers.find_user_by('telegram_id', telegram_id)
     if not user:
@@ -63,7 +63,7 @@ async def process_command_barcode(message: types.Message):
 @dp.message_handler(commands=['statistics'])
 @dp.throttled(rate=2)
 async def process_command_statistics(message: types.Message):
-    await message.delete()
+    await helpers.delete_message(message)
     await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_personal)
 
 
@@ -71,14 +71,14 @@ async def process_command_statistics(message: types.Message):
 @dp.message_handler(commands=['info'])
 @dp.throttled(rate=2)
 async def process_command_info(message: types.Message):
-    await message.delete()
+    await helpers.delete_message(message)
     await message.answer('Кое-что ещё:', reply_markup=kb.inline_info)
 
 
 @dp.message_handler(commands=['club'])
 @dp.throttled(rate=2)
 async def process_command_club(message: types.Message):
-    await message.delete()
+    await helpers.delete_message(message)
     club = await helpers.find_club(message.from_user.id)
     if not club:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')
@@ -90,7 +90,7 @@ async def process_command_club(message: types.Message):
 @dp.message_handler(commands=['home'])
 @dp.throttled(rate=2)
 async def process_command_home(message: types.Message):
-    await message.delete()
+    await helpers.delete_message(message)
     event = await helpers.find_home_event(message.from_user.id)
     if not event:
         return await message.answer(content.confirm_registration, reply_markup=kb.inline_agreement, parse_mode='Markdown')

@@ -1,6 +1,8 @@
 import random
 
+from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.utils.exceptions import MessageToDeleteNotFound
 import pandas as pd
 
 from app import logger, db_conn
@@ -29,6 +31,13 @@ class ClubStates(StatesGroup):
 
 class HomeEventStates(StatesGroup):
     INPUT_EVENT_ID = State()
+
+
+async def delete_message(message: types.Message) -> None:
+    try:
+        await message.delete()
+    except MessageToDeleteNotFound:
+        pass
 
 
 async def find_athlete_by(field: str, value):
@@ -65,7 +74,7 @@ async def find_club_by_name(name: str):
     return club
 
 
-async def find_home_event(telegram_id):
+async def find_home_event(telegram_id: int):
     conn = await db_conn()
     event = await conn.fetchrow(
         """SELECT athletes.*, events.name as event_name
@@ -126,7 +135,7 @@ async def tg_channel_of_event(event_id: int):
     return link and link['link']
 
 
-async def user_results(telegram_id):
+async def user_results(telegram_id: int) -> pd.DataFrame:
     conn = await db_conn()
     query = """SELECT results.position, results.total_time, activities.date, events.name FROM results
         INNER JOIN activities ON activities.id = results.activity_id
