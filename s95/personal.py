@@ -102,6 +102,7 @@ class PersonalResults:
         ax.yaxis.set_major_locator(MultipleLocator(1))
         ax.yaxis.set_minor_locator(MultipleLocator(1 / 6))
         ax.yaxis.tick_right()
+        ax.invert_yaxis()
         ax.xaxis.set_minor_locator(NullLocator())
         plt.xlabel('Дата забега')
         plt.ylabel('Минуты')
