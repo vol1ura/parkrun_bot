@@ -1,4 +1,5 @@
 import aiohttp
+import re
 import time
 
 from aiogram import types
@@ -31,7 +32,10 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
             return await message.answer('Участник с этим ID уже зарегистрирован и привязан.')
         async with state.proxy() as data:
             data['athlete_id'] = athlete['id']
-            data['first_name'], data["last_name"] = athlete['name'].split(' ', 1)
+            names_list = re.split(r'\s', athlete['name'], maxsplit=1)
+            if len(names_list) < 2:
+                names_list.insert(0, 'Товарищ')
+            data['first_name'], data['last_name'] = names_list
         await message.answer(
             content.found_athlete_info.format(athlete_id=athlete['id'], name=athlete['name']),
             reply_markup=kb.accept_athlete,
