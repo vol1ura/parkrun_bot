@@ -1,13 +1,15 @@
-from contextlib import contextmanager
-import barcode
+import qrcode
 import os
+
+from contextlib import contextmanager
+from qrcode.image.pure import PyPNGImage
 
 
 @contextmanager
 def generate(athlete_code: int):
-    code128 = barcode.get_barcode_class('code128')
-    code_obj = code128(f'A{athlete_code}', writer=barcode.writer.ImageWriter())
-    barcode_file = code_obj.save(f'gen_png/barcode_{athlete_code}')
+    code_obj = qrcode.make(f'A{athlete_code}', image_factory=PyPNGImage)
+    barcode_file = f'gen_png/barcode_{athlete_code}'
+    code_obj.save(barcode_file)
     file_obj = open(barcode_file, 'rb')
     yield file_obj
     if file_obj:
