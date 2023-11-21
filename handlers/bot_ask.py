@@ -68,7 +68,7 @@ async def simple_answers(message: types.Message):
         ans = content.phrases_about_myself
     elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
-        ans = [s.format(user) for s in content.greeting]
+        ans = [s.format(user) for s in content.greetings]
     elif 'погода' in message.text:
         bot_info = await bot.get_me()
         ans = ['Информацию о погоде можно получить через inline запрос: '

@@ -272,6 +272,17 @@ async def process_cancel_action_with_state(callback_query: types.CallbackQuery, 
     await bot.send_message(callback_query.from_user.id, 'Действие отменено')
 
 
+@dp.callback_query_handler(lambda c: c.data == 'remove_club')
+async def process_remove_club(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    result = await helpers.update_club(callback_query.from_user.id, None)
+    if result:
+        await bot.send_message(callback_query.from_user.id, 'Вы успешно вышли из клуба.')
+    else:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось удалить клуб. Попробуйте снова')
+
+
 @dp.callback_query_handler(lambda c: c.data == 'ask_club')
 async def process_ask_club(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
@@ -313,3 +324,14 @@ async def process_ask_home_event(callback_query: types.CallbackQuery):
         message += f'\n*{event["id"]}* - {event["name"]}'
     await bot.send_message(callback_query.from_user.id, message, parse_mode='Markdown')
     await helpers.HomeEventStates.INPUT_EVENT_ID.set()
+
+
+@dp.callback_query_handler(lambda c: c.data == 'remove_home_event')
+async def process_remove_home_event(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    result = await helpers.update_home_event(callback_query.from_user.id, None)
+    if result:
+        await bot.send_message(callback_query.from_user.id, 'Вы успешно удалили домашний забег.')
+    else:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось удалить домашний забег. Попробуйте снова')

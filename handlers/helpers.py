@@ -88,17 +88,16 @@ async def find_home_event(telegram_id: int):
     return event
 
 
-async def update_home_event(telegram_id: int, event_id: int) -> bool:
+async def update_home_event(telegram_id: int, event_id: int | None) -> bool:
     conn = await db_conn()
-    event = await find_event_by_id(event_id)
-    if not event:
+    if event_id is not None and not await find_event_by_id(event_id):
         return False
     athlete = await find_home_event(telegram_id)
     result = await conn.execute('UPDATE athletes SET event_id = $2 WHERE id = $1', athlete['id'], event_id)
     return True if result.endswith('1') else False
 
 
-async def update_club(telegram_id: int, club_id: int) -> bool:
+async def update_club(telegram_id: int, club_id: int | None) -> bool:
     conn = await db_conn()
     athlete = await find_club(telegram_id)
     result = await conn.execute('UPDATE athletes SET club_id = $2 WHERE id = $1', athlete['id'], club_id)
