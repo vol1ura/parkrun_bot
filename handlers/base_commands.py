@@ -5,7 +5,7 @@ import keyboards as kb
 from app import dp, bot
 from handlers import helpers
 from utils import content
-from utils import barcode
+from utils import qrcode
 
 
 @dp.message_handler(commands=['start'])
@@ -43,10 +43,10 @@ async def process_command_settings(message: types.Message):
     await message.answer(f'Вы зарегистрированы. Ссылка на ваш профиль: https://s95.ru/athletes/{athlete["id"]}')
 
 
-@dp.message_handler(regexp='ℹ️ штрих-код')
-@dp.message_handler(commands=['barcode'])
+@dp.message_handler(regexp='ℹ️ QR-код')
+@dp.message_handler(commands=['qrcode'])
 @dp.throttled(rate=3)
-async def process_command_barcode(message: types.Message):
+async def process_command_qrcode(message: types.Message):
     await helpers.delete_message(message)
     telegram_id = message.from_user.id
     user = await helpers.find_user_by('telegram_id', telegram_id)
@@ -56,7 +56,7 @@ async def process_command_barcode(message: types.Message):
     athlete = await helpers.find_athlete_by('user_id', user['id'])
     if not athlete:
         return await message.answer('Вы зарегистрированы, но участник почему-то не привязан или не создан.')
-    with barcode.generate(helpers.athlete_code(athlete)) as pic:
+    with qrcode.generate(helpers.athlete_code(athlete)) as pic:
         await bot.send_photo(message.chat.id, pic, caption=athlete["name"])
 
 

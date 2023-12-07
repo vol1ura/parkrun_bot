@@ -10,7 +10,7 @@ async def main(telegram_id: int) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
     kbd = ReplyKeyboardMarkup(resize_keyboard=True)
     user = await find_user_by('telegram_id', telegram_id)
-    btn_title = 'ℹ️ штрих-код' if user else '⚙️ регистрация'
+    btn_title = 'ℹ️ QR-код' if user else '⚙️ регистрация'
     btn1 = KeyboardButton(btn_title)
     btn2 = KeyboardButton('❓ справка')
     kbd.add(btn1, btn2)

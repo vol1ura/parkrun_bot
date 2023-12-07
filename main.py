@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.utils import executor
 
 import config
-import handlers  # important import!!!
+import handlers
 
 from app import bot, dp
 
@@ -12,7 +12,7 @@ async def setup_bot_commands(_: Dispatcher):
     Here we setup bot commands to make them visible in Telegram UI
     """
     bot_commands = [
-        types.BotCommand(command='/barcode', description='Ваш штрих-код в S95'),
+        types.BotCommand(command='/qrcode', description='Ваш QR-код в S95'),
         types.BotCommand(command='/register', description='Зарегистрироваться в S95'),
         types.BotCommand(command='/statistics', description='Персональная статистика'),
         types.BotCommand(command='/help', description='Краткая справка'),
