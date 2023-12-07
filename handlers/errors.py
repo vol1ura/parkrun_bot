@@ -36,7 +36,7 @@ async def callback_errors_handler(update, error):
 
 @dp.errors_handler(exception=NoCollationRuns)
 async def no_collation_runs_handler(update, error):
-    error_msg = f"Exception of type {type(error)}. UserName: {update.callback_query.from_user.username}. " \
+    error_msg = f"Exception {type(error)}. UserName: {update.callback_query.from_user.username}. " \
                 f"User ID: {update.callback_query.from_user.id}. Error: no collation runs with {error}"
     await bot.send_message(update.callback_query.from_user.id, f'У вас пока ещё не было совместных пробежек с {error}')
     logger.error(error_msg)
@@ -65,7 +65,14 @@ async def api_errors_handler(update, error):
     if isinstance(error, BotBlocked):
         return True
     # We collect some info about an exception and write to log
-    error_msg = f"Exception of type {type(error)}. Error: {error}"
+    error_msg = f"Exception {type(error)}. Error: {error}"
     logger.error(error_msg)
     rollbar.report_message(error_msg, 'error')
+    return True
+
+@dp.errors_handler(exception=Exception)
+async def general_exeption_handler(update, error):
+    error_msg = f"Exception {type(error)}. Error: {error}"
+    logger.error(error_msg)
+    rollbar.report_message(error_msg, 'error', extra_data={ 'data': update })
     return True
