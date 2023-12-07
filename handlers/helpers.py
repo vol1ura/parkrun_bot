@@ -153,7 +153,7 @@ async def user_results(telegram_id: int) -> pd.DataFrame:
 
 
 def athlete_code(athlete):
-    return athlete["parkrun_code"] or athlete["fiveverst_code"] or athlete["parkzhrun_code"] \
+    return athlete["parkrun_code"] or athlete["fiveverst_code"] or athlete["runpark_code"] or athlete["parkzhrun_code"] \
         or athlete["id"] + AthleteCode.SAT_5AM_9KM_BORDER
 
 

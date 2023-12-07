@@ -22,7 +22,7 @@ class AthleteCode:
         if self._is_parkrun_code:
             return 'parkrun_code'
         if self._is_runpark_code:
-            return 'fiveverst_code'
+            return 'runpark_code'
         if self._is_fiveverst_code:
             return 'fiveverst_code'
         if self._is_parkzhrun_code:
@@ -34,7 +34,7 @@ class AthleteCode:
         if self._is_parkrun_code:
             return f'https://www.parkrun.com.au/results/athleteresultshistory/?athleteNumber={self._int_val}'
         if self._is_runpark_code:
-            return 'https://runpark.ru'
+            return f'https://runpark.ru/UserCard/A{self._int_val}'
         if self._is_fiveverst_code:
             return f'https://5verst.ru/userstats/{self._int_val}/'
         return f'https://s95.ru/athletes/{self._int_val}'

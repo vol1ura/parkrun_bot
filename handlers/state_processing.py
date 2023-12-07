@@ -177,7 +177,8 @@ async def process_email_validation(message: types.Message, state: FSMContext):
                 'name': f'{data["first_name"]} {data["last_name"]}',
                 'male': data['male'],
                 'parkrun_code': data['parkrun_code'] if 'parkrun_code' in data else None,
-                'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None
+                'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None,
+                'runpark_code': data['runpark_code'] if 'runpark_code' in data else None
             }
         try:
             async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
@@ -220,7 +221,8 @@ async def process_password_validation(message: types.Message, state: FSMContext)
                 'name': f'{data["first_name"]} {data["last_name"]}',
                 'male': data['male'],
                 'parkrun_code': data['parkrun_code'] if 'parkrun_code' in data else None,
-                'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None
+                'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None,
+                'runpark_code': data['runpark_code'] if 'runpark_code' in data else None
             }
     try:
         async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
