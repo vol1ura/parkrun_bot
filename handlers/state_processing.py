@@ -9,7 +9,7 @@ from random import randint
 
 import keyboards as kb
 
-from app import dp
+from app import dp, logger
 from handlers import helpers
 from s95.athlete_code import AthleteCode
 from utils import content, mailer
@@ -259,12 +259,23 @@ async def process_input_event_id(message: types.Message, state: FSMContext):
     result = await helpers.update_home_event(message.from_user.id, event_id)
     if not result:
         return await message.answer('Введён некорректный номер. Попробуйте ещё раз. Либо /reset для отмены')
-    answer = 'Домашний забег установлен.'
-    link = await helpers.tg_channel_of_event(event_id)
-    if link:
-        answer += ' ' + content.home_event_notice.format(link)
-    await message.answer(answer, parse_mode='Markdown', disable_web_page_preview=True)
-    await state.finish()
+    try:
+        async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
+            async with session.post(f'{INTERNAL_API_URL}/badges/refresh_home_badges') as resp:
+                if not resp.ok:
+                    logger.warn(f'{INTERNAL_API_URL}/badges/refresh_home_badges')
+                    logger.error(f'Failed to call refresh_home_badges for telegram_id={message.from_user.id}')
+                    await message.answer('Во время операции произошла непредвиденная ошибка.')
+    except Exception:
+        logger.error(f'Error while call refresh_home_badges for telegram_id={message.from_user.id}')
+        await message.answer('Во время операции произошла непредвиденная ошибка.')
+    else:
+        answer = 'Домашний забег установлен.'
+        link = await helpers.tg_channel_of_event(event_id)
+        if link:
+            answer += ' ' + content.home_event_notice.format(link)
+        await message.answer(answer, parse_mode='Markdown', disable_web_page_preview=True)
+        await state.finish()
 
 
 # Повторный запрос кода локации
