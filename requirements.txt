@@ -10,5 +10,5 @@ pycparser~=2.20
 python-dotenv>=0.17.0
 python-Levenshtein>=0.12.2
 qrcode~=7.4
-rollbar~=0.16
+rollbar~=1.0
 seaborn>=0.11.1
