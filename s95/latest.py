@@ -162,6 +162,9 @@ if __name__ == '__main__':
     if os.path.exists(dotenv_path):
         load_dotenv(dotenv_path)
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     df = loop.run_until_complete(make_latest_results_diagram(444495414, 'test.png', 30))
     print(df)
+
+    loop.close()

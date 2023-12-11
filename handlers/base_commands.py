@@ -98,7 +98,7 @@ async def process_command_home(message: types.Message):
     if not event['event_id']:
         return await message.answer('Домашний забег не установлен. Хотите установить?', reply_markup=kb.set_home_event)
     await message.answer(
-        content.about_home_event.format(event['event_name']), 
-        reply_markup=kb.change_home_event,  
+        content.about_home_event.format(event['event_name']),
+        reply_markup=kb.change_home_event,
         parse_mode='Markdown'
     )

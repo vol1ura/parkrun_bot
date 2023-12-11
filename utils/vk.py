@@ -33,6 +33,8 @@ async def get_random_photo(token):
 #     if os.path.exists(dotenv_path):
 #         load_dotenv(dotenv_path)
 #
-#     loop = asyncio.get_event_loop()
+#     loop = asyncio.new_event_loop()
+#     asyncio.set_event_loop(loop)
 #     link = loop.run_until_complete(get_random_photo(os.getenv('VK_SERVICE_TOKEN')))
 #     print(link)
+#     loop.close()

@@ -89,7 +89,7 @@ async def find_home_event(telegram_id: int):
     return event
 
 
-async def update_home_event(telegram_id: int, event_id: Optional[int]=None) -> bool:
+async def update_home_event(telegram_id: int, event_id: Optional[int] = None) -> bool:
     conn = await db_conn()
     if event_id is not None and not await find_event_by_id(event_id):
         return False
@@ -99,20 +99,20 @@ async def update_home_event(telegram_id: int, event_id: Optional[int]=None) -> b
             await conn.execute(
                 """DELETE FROM trophies WHERE athlete_id = $1 AND badge_id IN (
                     SELECT badges.id FROM badges WHERE badges.kind = 11
-                )""", 
+                )""",
                 athlete['id']
             )
             result = await conn.execute('UPDATE athletes SET event_id = $2 WHERE id = $1', athlete['id'], event_id)
             if not result.endswith('1'):
                 raise Exception
-    except:
+    except Exception:
         logger.error(f'Failed to update home event_id={event_id} for athlete_id={athlete["id"]}')
         return False
     else:
         return True
 
 
-async def update_club(telegram_id: int, club_id: Optional[int]=None) -> bool:
+async def update_club(telegram_id: int, club_id: Optional[int] = None) -> bool:
     conn = await db_conn()
     athlete = await find_club(telegram_id)
     result = await conn.execute('UPDATE athletes SET club_id = $2 WHERE id = $1', athlete['id'], club_id)

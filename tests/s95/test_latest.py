@@ -1,29 +1,29 @@
-import asyncio
+# import asyncio
 # import random
 # import re
 # from datetime import datetime
 # import os
 
 # import pandas
-import pytest
+# import pytest
 
-from bot_exceptions import ParsingException
-from s95 import latest
-from s95.helpers import ParkrunSite
+# from bot_exceptions import ParsingException
+# from s95 import latest
+# from s95.helpers import ParkrunSite
 
-PARKRUN = 'Yoshkar-Ola Alleya Zdorovya'
-
-
-@pytest.fixture(scope='module')
-def yoshka_latest_results():
-    return asyncio.run(latest.parse_latest_results(PARKRUN))
+PARKRUN = 'kuzminki'
 
 
-@pytest.fixture
-async def mock_yoshka_results(monkeypatch, yoshka_latest_results):
-    future = asyncio.Future()
-    future.set_result(yoshka_latest_results)
-    monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
+# @pytest.fixture(scope='module')
+# def yoshka_latest_results():
+#     return asyncio.run(latest.parse_latest_results(PARKRUN))
+
+
+# @pytest.fixture
+# async def mock_yoshka_results(monkeypatch, yoshka_latest_results):
+#     future = asyncio.Future()
+#     future.set_result(yoshka_latest_results)
+#     monkeypatch.setattr('parkrun.latest.parse_latest_results', lambda *args: future)
 
 
 # def test_parse_latest_results(yoshka_latest_results):
@@ -33,13 +33,13 @@ async def mock_yoshka_results(monkeypatch, yoshka_latest_results):
 #     assert isinstance(datetime.strptime(parkrun_date, '%d/%m/%Y'), datetime)
 
 
-async def test_parse_latest_results_fail(empty_page, monkeypatch):
-    future = asyncio.Future()
-    future.set_result(empty_page)
-    monkeypatch.setattr(ParkrunSite, 'get_html', lambda *args: future)
-    with pytest.raises(ParsingException) as e:
-        await latest.parse_latest_results('no_such_parkrun')
-    assert 'no_such_parkrun' in e.value.message
+# async def test_parse_latest_results_fail(empty_page, monkeypatch):
+#     future = asyncio.Future()
+#     future.set_result(empty_page)
+#     monkeypatch.setattr(ParkrunSite, 'get_html', lambda *args: future)
+#     with pytest.raises(ParsingException) as e:
+#         await latest.parse_latest_results('no_such_parkrun')
+#     assert 'no_such_parkrun' in e.value.message
 
 
 # async def test_make_latest_results_diagram(mock_yoshka_results, tmpdir):

@@ -70,9 +70,10 @@ async def api_errors_handler(update, error):
     rollbar.report_message(error_msg, 'error')
     return True
 
+
 @dp.errors_handler(exception=Exception)
 async def general_exeption_handler(update, error):
     error_msg = f"Exception {type(error)}. Error: {error}"
     logger.error(error_msg)
-    rollbar.report_message(error_msg, 'error', extra_data={ 'data': update })
+    rollbar.report_message(error_msg, 'error', extra_data={'data': update})
     return True

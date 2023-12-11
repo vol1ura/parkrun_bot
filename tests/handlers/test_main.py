@@ -11,7 +11,6 @@ async def bot_fixture(monkeypatch):
 
     _bot = app.bot
     yield _bot
-    await _bot.close()
 
 
 async def test_setup_bot_commands(fake_bot, loop):

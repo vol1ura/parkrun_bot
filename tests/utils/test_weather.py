@@ -23,7 +23,7 @@ def test_compass_direction(degree, direction_en, direction_ru):
     assert weather.compass_direction(degree, 'ru') == direction_ru
 
 
-async def test_get_weather():
+async def test_get_weather() -> None:
     descr = await weather.get_weather('Some Place', LAT, LON)
     print('Description:\n', descr)
     assert re.fullmatch(r'🏙 Some Place: сейчас (\w+\s?){1,3}\n'
