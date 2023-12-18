@@ -1,12 +1,14 @@
+import aiohttp
+import pandas as pd
 import random
-from typing import Optional
 
 from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.exceptions import MessageToDeleteNotFound
-import pandas as pd
+from typing import Optional
 
 from app import logger, db_conn
+from config import INTERNAL_API_URL
 from s95.athlete_code import AthleteCode
 from s95.helpers import time_conv
 from utils import content
@@ -90,33 +92,33 @@ async def find_home_event(telegram_id: int):
 
 
 async def update_home_event(telegram_id: int, event_id: Optional[int] = None) -> bool:
-    conn = await db_conn()
-    if event_id is not None and not await find_event_by_id(event_id):
-        return False
-    athlete = await find_home_event(telegram_id)
     try:
-        async with conn.transaction():
-            await conn.execute(
-                """DELETE FROM trophies WHERE athlete_id = $1 AND badge_id IN (
-                    SELECT badges.id FROM badges WHERE badges.kind = 11
-                )""",
-                athlete['id']
-            )
-            result = await conn.execute('UPDATE athletes SET event_id = $2 WHERE id = $1', athlete['id'], event_id)
-            if not result.endswith('1'):
-                raise Exception
+        async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
+            payload = {'telegram_id': telegram_id, 'athlete': {'event_id': event_id}}
+            async with session.put(f'{INTERNAL_API_URL}/athlete', json=payload) as response:
+                if not response.ok:
+                    logger.error(f'Failed to update home event_id={event_id} for user with telegram_id={telegram_id}')
+                    return False
     except Exception:
-        logger.error(f'Failed to update home event_id={event_id} for athlete_id={athlete["id"]}')
+        logger.error(f'Error while update event_id={event_id} for user with telegram_id={telegram_id}')
         return False
     else:
         return True
 
 
 async def update_club(telegram_id: int, club_id: Optional[int] = None) -> bool:
-    conn = await db_conn()
-    athlete = await find_club(telegram_id)
-    result = await conn.execute('UPDATE athletes SET club_id = $2 WHERE id = $1', athlete['id'], club_id)
-    return True if result.endswith('1') else False
+    try:
+        async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
+            payload = {'telegram_id': telegram_id, 'athlete': {'club_id': club_id}}
+            async with session.put(f'{INTERNAL_API_URL}/athlete', json=payload) as response:
+                if not response.ok:
+                    logger.error(f'Failed to set club_id={club_id} for user with telegram_id={telegram_id}')
+                    return False
+    except Exception:
+        logger.error(f'Error while update club_id={club_id} for user with telegram_id={telegram_id}')
+        return False
+    else:
+        return True
 
 
 async def find_user_by_email(email: str):

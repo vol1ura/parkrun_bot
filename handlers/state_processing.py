@@ -9,7 +9,7 @@ from random import randint
 
 import keyboards as kb
 
-from app import dp, logger
+from app import dp
 from handlers import helpers
 from s95.athlete_code import AthleteCode
 from utils import content, mailer
@@ -162,7 +162,6 @@ async def process_email_validation(message: types.Message, state: FSMContext):
             await helpers.UserStates.next()
             return await message.answer(content.input_password)
 
-        # привязать участника к юзеру
         payload = {
             'user_id': data['user_id'],
             'user': {
@@ -170,6 +169,7 @@ async def process_email_validation(message: types.Message, state: FSMContext):
                 'telegram_user': message.from_user.username
             }
         }
+        # привязать участника к юзеру либо создать нового
         if 'athlete_id' in data:
             payload['athlete_id'] = data['athlete_id']
         else:
@@ -182,18 +182,18 @@ async def process_email_validation(message: types.Message, state: FSMContext):
             }
         try:
             async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
-                async with session.put(f'{INTERNAL_API_URL}/user', json=payload) as resp:
-                    data = await resp.json()
+                async with session.put(f'{INTERNAL_API_URL}/user', json=payload) as response:
+                    resp = await response.json()
                     if resp.ok:
                         await state.finish()
                         kbd = await kb.main(message.from_user.id)
-                        await message.answer(data['message'], reply_markup=kbd)
+                        await message.answer('Участник успешно привязан.', reply_markup=kbd)
                         await message.answer(content.subscription_suggestion)
                     else:
-                        if 'user' in data['errors']:
-                            await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
-                        if 'athlete' in data['errors']:
-                            await message.answer('Ошибки в данных участника: ' + ', '.join(data['errors']['athlete']))
+                        if 'user' in resp['errors']:
+                            await message.answer('Ошибки в данных пользователя: ' + ', '.join(resp['errors']['user']))
+                        if 'athlete' in resp['errors']:
+                            await message.answer('Ошибки в данных участника: ' + ', '.join(resp['errors']['athlete']))
                         await message.answer(content.try_pin_code)
         except Exception:
             await message.answer(content.try_pin_code)
@@ -226,18 +226,18 @@ async def process_password_validation(message: types.Message, state: FSMContext)
             }
     try:
         async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
-            async with session.post(f'{INTERNAL_API_URL}/user', json=payload) as resp:
-                data = await resp.json()
-                if resp.ok:
+            async with session.post(f'{INTERNAL_API_URL}/user', json=payload) as response:
+                resp = await response.json()
+                if response.ok:
                     await state.finish()
                     kbd = await kb.main(message.from_user.id)
-                    await message.answer(data['message'], reply_markup=kbd)
+                    await message.answer('Регистрация успешно завершена.', reply_markup=kbd)
                     await message.answer(content.subscription_suggestion)
                 else:
-                    if 'user' in data['errors']:
-                        await message.answer('Ошибки в данных пользователя: ' + ', '.join(data['errors']['user']))
-                    if 'athlete' in data['errors']:
-                        await message.answer('Ошибки в данных участника: ' + ', '.join(data['errors']['athlete']))
+                    if 'user' in resp['errors']:
+                        await message.answer('Ошибки в данных пользователя: ' + ', '.join(resp['errors']['user']))
+                    if 'athlete' in resp['errors']:
+                        await message.answer('Ошибки в данных участника: ' + ', '.join(resp['errors']['athlete']))
                     await message.answer(content.try_password)
     except Exception:
         await message.answer(content.try_password)
@@ -259,16 +259,6 @@ async def process_input_event_id(message: types.Message, state: FSMContext):
     result = await helpers.update_home_event(message.from_user.id, event_id)
     if not result:
         return await message.answer('Введён некорректный номер. Попробуйте ещё раз. Либо /reset для отмены')
-    try:
-        async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
-            async with session.post(f'{INTERNAL_API_URL}/badges/refresh_home_badges') as resp:
-                if not resp.ok:
-                    logger.warn(f'{INTERNAL_API_URL}/badges/refresh_home_badges')
-                    logger.error(f'Failed to call refresh_home_badges for telegram_id={message.from_user.id}')
-                    await message.answer('Во время операции произошла непредвиденная ошибка.')
-    except Exception:
-        logger.error(f'Error while call refresh_home_badges for telegram_id={message.from_user.id}')
-        await message.answer('Во время операции произошла непредвиденная ошибка.')
     else:
         answer = 'Домашний забег установлен.'
         link = await helpers.tg_channel_of_event(event_id)
