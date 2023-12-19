@@ -10,7 +10,7 @@ import config
 bot = Bot(config.TOKEN_BOT)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-logging.basicConfig(format=u'%(levelname)s [ LINE:%(lineno)+3s ]: %(message)s', level=logging.INFO)
+logging.basicConfig(format=u'%(levelname)s [ %(filename)s:%(lineno)+3s ]: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
