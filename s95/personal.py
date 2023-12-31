@@ -47,8 +47,7 @@ class PersonalResults:
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
 
         # pivot df into long form and aggregate by fastest time
-        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='m',
-                                        aggfunc=np.min, fill_value=np.nan)
+        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='m', aggfunc=np.min, fill_value=np.nan)
         # add rows of zeros for any months missed
         for month in self.__months:
             if month not in rundata.index.values:
