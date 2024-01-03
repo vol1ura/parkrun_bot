@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 import keyboards as kb
 
-from app import dp, bot
+from app import dp, bot, logger
 from bot_exceptions import CallbackException
 from handlers import helpers
 from s95 import latest, records, clubs
@@ -47,7 +47,7 @@ async def process_compare_results(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_results')
 @dp.throttled(rate=2)
 async def process_personal_results(callback_query: types.CallbackQuery):
-    await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
@@ -205,7 +205,7 @@ async def process_personal_wins_table(callback_query: types.CallbackQuery):
 async def process_athlete_code_search(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await helpers.UserStates.SEARCH_ATHLETE_CODE.set()
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await bot.send_message(callback_query.from_user.id, content.athlete_code_search, parse_mode='Markdown')
 
 
@@ -214,7 +214,7 @@ async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FS
     if await state.get_state():
         await state.reset_state()
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await bot.send_message(callback_query.from_user.id, content.help_to_find_id,
                            parse_mode='Markdown', reply_markup=kb.inline_open_s95)
 
@@ -224,7 +224,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
     if await state.get_state():
         await state.reset_state()
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     kbd = await kb.main(callback_query.from_user.id)
     await bot.send_message(
         callback_query.from_user.id,
@@ -236,7 +236,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
 @dp.callback_query_handler(lambda c: c.data == 'start_registration')
 async def process_start_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
         content.you_already_have_id,
@@ -247,7 +247,7 @@ async def process_start_registration(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'create_new_athlete')
 async def process_new_athlete_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await helpers.UserStates.ATHLETE_LAST_NAME.set()
     await bot.send_message(
         callback_query.from_user.id,
@@ -260,14 +260,14 @@ async def process_new_athlete_registration(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'cancel_action')
 async def process_cancel_action(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await bot.send_message(callback_query.from_user.id, 'Действие отменено')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'cancel_action', state=helpers.ClubStates)
 async def process_cancel_action_with_state(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await state.finish()
     await bot.send_message(callback_query.from_user.id, 'Действие отменено')
 
@@ -275,7 +275,7 @@ async def process_cancel_action_with_state(callback_query: types.CallbackQuery, 
 @dp.callback_query_handler(lambda c: c.data == 'remove_club')
 async def process_remove_club(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     result = await helpers.update_club(callback_query.from_user.id, None)
     if result:
         await bot.send_message(callback_query.from_user.id, 'Вы успешно вышли из клуба.')
@@ -286,7 +286,7 @@ async def process_remove_club(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'ask_club')
 async def process_ask_club(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
         content.ask_club,
@@ -299,7 +299,7 @@ async def process_ask_club(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'set_club', state=helpers.ClubStates.CONFIRM_NAME)
 async def process_set_club(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     async with state.proxy() as data:
         result = await helpers.update_club(callback_query.from_user.id, data['club_id'])
         if result:
@@ -317,7 +317,7 @@ async def process_set_club(callback_query: types.CallbackQuery, state: FSMContex
 @dp.callback_query_handler(lambda c: c.data == 'ask_home_event')
 async def process_ask_home_event(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     events_list = await helpers.events()
     message = content.ask_home_event
     for event in events_list:
@@ -329,9 +329,16 @@ async def process_ask_home_event(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'remove_home_event')
 async def process_remove_home_event(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await delete_message(callback_query)
     result = await helpers.update_home_event(callback_query.from_user.id, None)
     if result:
         await bot.send_message(callback_query.from_user.id, 'Вы успешно удалили домашний забег.')
     else:
         await bot.send_message(callback_query.from_user.id, 'Не удалось удалить домашний забег. Попробуйте снова')
+
+
+async def delete_message(callback_query: types.CallbackQuery) -> None:
+    try:
+        await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+    except Exception:
+        logger.warning("Message can't be deleted")
