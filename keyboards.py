@@ -75,7 +75,6 @@ inline_personal.insert(InlineKeyboardButton('История', callback_data='per
 inline_personal.insert(InlineKeyboardButton('Личники', callback_data='personal_bests'))
 # inline_personal.insert(InlineKeyboardButton('S95-туризм', callback_data='personal_tourism'))
 inline_personal.insert(InlineKeyboardButton('График 10 рез.', callback_data='personal_last'))
-# inline_personal.insert(InlineKeyboardButton('Победы/участия', callback_data='personal_wins'))
 
 # COMPARATION of personal results
 inline_compare = InlineKeyboardMarkup(row_width=2)

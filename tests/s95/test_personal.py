@@ -32,9 +32,3 @@
 #     pic_path = tmpdir.join('last_runs.png')
 #     personal_results.last_runs(pic_path)
 #     assert os.path.exists(pic_path)
-
-
-# def test_wins_table(personal_results):
-#     table = personal_results.wins_table()
-#     assert isinstance(table, str)
-#     assert 'Забег/Место' in table

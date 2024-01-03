@@ -56,7 +56,7 @@ class PersonalResults:
         rundata = rundata.reindex(self.__months)
 
         sns.heatmap(rundata, linewidths=0.4, cmap='hot', cbar_kws={'label': 'Время (минуты)'}, ax=ax)
-        ax.set_title(f'{self.__athlete_name}: изменение лучшего результата с годами', fontweight='bold')
+        ax.set_title(f'{self.__athlete_name}: тепловая карта лучших результатов', fontweight='bold')
         plt.tight_layout()
         plt.savefig(pic)
         return open(pic, 'rb')
@@ -109,21 +109,3 @@ class PersonalResults:
         plt.tight_layout()
         plt.savefig(pic)
         return open(pic, 'rb')
-
-    async def wins_table(self):
-        await self._fetch_results()
-        pos_df = pd.crosstab(self.__df['Event'], self.__df['Pos'], margins=True)
-        columns = [1, 2, 3, 'All']
-        for i in columns:
-            if i not in pos_df.columns:
-                pos_df[i] = 0
-        pos_df = pos_df[columns].sort_values(by=columns, ascending=False)
-        total = pos_df.loc['All']
-        pos_df.drop('All', axis=0, inplace=True)
-        pos_df = pos_df.append(total)
-        separator = '-------------+-----+-----+-----+----'
-        rows = ['```', 'Забег/Место|  1  |  2  |  3  | ∑ ', separator]
-        for row in pos_df.itertuples():
-            rows.append(f'{row[0][:12]:<12} | {row[1]:3d} | {row[2]:3d} | {row[3]:3d} | {row[4]:3d}')
-        rows += [separator, rows.pop().replace('All  ', 'Итого'), '```']
-        return '\n'.join(rows)

@@ -191,15 +191,6 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
         await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
-@dp.callback_query_handler(lambda c: c.data == 'personal_wins')
-@dp.throttled(helpers.handle_throttled_query, rate=10)
-async def process_personal_wins_table(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
-    telegram_id = callback_query.from_user.id
-    table = await PersonalResults(telegram_id).wins_table()
-    await bot.send_message(callback_query.from_user.id, table, parse_mode='Markdown')
-
-
 @dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')
 @dp.throttled(rate=5)
 async def process_athlete_code_search(callback_query: types.CallbackQuery):
