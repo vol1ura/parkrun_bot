@@ -5,10 +5,10 @@ from os import getenv
 from aiogram import types
 from geopy import Nominatim
 
-from app import bot, logger, dp
+from app import bot, language_code, logger, dp
 from handlers.helpers import handle_throttled_query
 from s95 import latest
-from utils import content, fucomp, search, vk, weather
+from utils import content, vk, weather
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
@@ -68,29 +68,15 @@ async def simple_answers(message: types.Message):
         ans = content.phrases_about_myself
     elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
-        ans = [s.format(user) for s in content.greetings]
+        ans = [s.format(user) for s in content.t(language_code(message), 'greetings')]
     elif 'погода' in message.text:
         bot_info = await bot.get_me()
         ans = ['Информацию о погоде можно получить через inline запрос: '
                f'в строке сообщений наберите "@{bot_info.username} погода".'
                'Либо, набрав сообщение, "Бот, погода Населённый пункт", '
                'например, "Бот, погода Кузьминки Москва".']
-    elif re.search(r'GRUT|ГРУТ', message.text, re.I):
-        ans = content.phrases_grut
-    elif re.search(r'\bгречк|\bгречневая', message.text, re.I):
-        ans = content.phrases_grechka
     else:
-        ans = []
+        ans = content.phrases_about_running
 
     if ans:
         await message.reply(random.choice(ans), disable_web_page_preview=True)
-        return
-    else:
-        await bot.send_chat_action(message.chat.id, 'typing')
-        if random.randrange(11) % 2:
-            ans = await search.google(message.text)
-            if not ans:
-                ans = [random.choice(content.phrases_about_running)]
-        else:
-            ans = [fucomp.best_answer(message.text, fucomp.message_base_m)]
-    await message.answer(random.choice(ans), disable_web_page_preview=True, disable_notification=True)

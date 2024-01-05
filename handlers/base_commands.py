@@ -19,6 +19,7 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(commands=['help'])
 @dp.throttled(rate=3)
 async def commands(message: types.Message):
+    # print(language_code(message))
     await helpers.delete_message(message)
     await message.answer(
         content.help_message,
@@ -68,12 +69,12 @@ async def process_command_statistics(message: types.Message):
     await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_personal)
 
 
-@dp.message_handler(regexp='📋 разное')
-@dp.message_handler(commands=['info'])
-@dp.throttled(rate=2)
-async def process_command_info(message: types.Message):
-    await helpers.delete_message(message)
-    await message.answer('Кое-что ещё:', reply_markup=kb.inline_info)
+# @dp.message_handler(regexp='📋 разное')
+# @dp.message_handler(commands=['info'])
+# @dp.throttled(rate=2)
+# async def process_command_info(message: types.Message):
+#     await helpers.delete_message(message)
+#     await message.answer('Кое-что ещё:', reply_markup=kb.inline_info)
 
 
 @dp.message_handler(commands=['club'])

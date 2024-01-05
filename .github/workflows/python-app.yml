@@ -50,8 +50,6 @@ jobs:
         API_BOT_TOKEN: ${{ secrets.API_BOT_TOKEN }}
         OWM_TOKEN: ${{ secrets.OWM_TOKEN }}
         WEBHOOK: ${{ secrets.WEBHOOK }}
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-        GOOGLE_CX: ${{ secrets.GOOGLE_CX }}
         VK_SERVICE_TOKEN: ${{ secrets.VK_SERVICE_TOKEN }}
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

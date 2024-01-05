@@ -2,9 +2,6 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 
 from handlers.helpers import find_user_by
 
-# btn3 = KeyboardButton('🌳 Sat 9am 5km')
-# btn4 = KeyboardButton('📋 разное')
-
 
 async def main(telegram_id: int) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
@@ -18,10 +15,10 @@ async def main(telegram_id: int) -> ReplyKeyboardMarkup:
 
 
 # STATISTICS inline keyboard layout
-inline_stat = InlineKeyboardMarkup(row_width=2)
-inline_stat.insert(InlineKeyboardButton('Личные результаты', callback_data='personal_results'))
+# inline_stat = InlineKeyboardMarkup(row_width=2)
+# inline_stat.insert(InlineKeyboardButton('Личные результаты', callback_data='personal_results'))
 # inline_stat.insert(InlineKeyboardButton('Сравнение результатов', callback_data='compare_results'))
-inline_stat.row(InlineKeyboardButton('Последний паркран', switch_inline_query_current_chat='latestresults'))
+# inline_stat.row(InlineKeyboardButton('Последний паркран', switch_inline_query_current_chat='latestresults'))
 
 # inline_stat.row(InlineKeyboardButton('Одноклубники', switch_inline_query_current_chat='teammates'))
 # inline_stat.insert(InlineKeyboardButton('Top10 клубов', callback_data='top_active_clubs'))
@@ -31,13 +28,13 @@ inline_stat.row(InlineKeyboardButton('Последний паркран', switch
 
 
 # INFORMATION keyboard layout with additional information
-inline_info = InlineKeyboardMarkup(row_width=2)
-inline_info.insert(InlineKeyboardButton("Ближайшие старты", switch_inline_query_current_chat='events'))
+# inline_info = InlineKeyboardMarkup(row_width=2)
+# inline_info.insert(InlineKeyboardButton("Ближайшие старты", switch_inline_query_current_chat='events'))
 
-info_btn1 = InlineKeyboardButton("Посмотреть погоду", switch_inline_query_current_chat='weather')
-info_btn2 = InlineKeyboardButton("Загрязнение воздуха", switch_inline_query_current_chat='air')
+# info_btn1 = InlineKeyboardButton("Посмотреть погоду", switch_inline_query_current_chat='weather')
+# info_btn2 = InlineKeyboardButton("Загрязнение воздуха", switch_inline_query_current_chat='air')
 
-inline_info.row(info_btn1, info_btn2)
+# inline_info.row(info_btn1, info_btn2)
 
 # CLUB ask to change
 change_club = InlineKeyboardMarkup(row_width=2)
@@ -65,9 +62,6 @@ set_home_event = InlineKeyboardMarkup(row_width=2)
 set_home_event.insert(InlineKeyboardButton('Установить', callback_data='ask_home_event'))
 set_home_event.insert(InlineKeyboardButton('Отмена', callback_data='cancel_action'))
 
-#
-open_s95_button = InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/')
-
 # PERSONAL RESULTS inline keyboard layout
 inline_personal = InlineKeyboardMarkup(row_width=2)
 inline_personal.insert(InlineKeyboardButton('Последний забег', callback_data='last_activity_diagram'))
@@ -77,11 +71,11 @@ inline_personal.insert(InlineKeyboardButton('Личники', callback_data='per
 inline_personal.insert(InlineKeyboardButton('График 10 рез.', callback_data='personal_last'))
 
 # COMPARATION of personal results
-inline_compare = InlineKeyboardMarkup(row_width=2)
-inline_compare.add(InlineKeyboardButton('Баттл-таблица', callback_data='battle_table'))
-inline_compare.insert(InlineKeyboardButton('Баттл-диаграмма', callback_data='battle_diagram'))
-inline_compare.insert(InlineKeyboardButton('Файл Excel', callback_data='excel_table'))
-inline_compare.insert(InlineKeyboardButton('Scatter', callback_data='battle_scatter'))
+# inline_compare = InlineKeyboardMarkup(row_width=2)
+# inline_compare.add(InlineKeyboardButton('Баттл-таблица', callback_data='battle_table'))
+# inline_compare.insert(InlineKeyboardButton('Баттл-диаграмма', callback_data='battle_diagram'))
+# inline_compare.insert(InlineKeyboardButton('Файл Excel', callback_data='excel_table'))
+# inline_compare.insert(InlineKeyboardButton('Scatter', callback_data='battle_scatter'))
 
 # ATHLETE REGISTRATION
 accept_athlete = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
@@ -104,7 +98,4 @@ inline_find_athlete_by_id.insert(InlineKeyboardButton('Я новый участ�
 inline_find_athlete_by_id.insert(InlineKeyboardButton('Отмена', callback_data='cancel_registration'))
 
 inline_open_s95 = InlineKeyboardMarkup()
-inline_open_s95.row(open_s95_button)
-
-confirm_existed_email = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
-confirm_existed_email.add('Да, это мой адрес', 'Отмена')
+inline_open_s95.row(InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/'))
