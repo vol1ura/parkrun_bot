@@ -3,7 +3,7 @@ aiogram~=2.12
 asyncpg~=0.26
 geopy==2.1
 lxml~=4.9
-openpyxl~=3.0.7
+openpyxl~=3.1.2
 Pillow~=10.1
 pycparser~=2.20
 python-dotenv>=0.17.0
