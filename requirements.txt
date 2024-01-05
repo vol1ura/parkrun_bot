@@ -1,7 +1,6 @@
 aiodns~=2.0
 aiogram~=2.12
 asyncpg~=0.26
-fuzzywuzzy>=0.18.0
 geopy==2.1
 lxml~=4.9
 openpyxl~=3.0.7

@@ -2,10 +2,7 @@ import pytest
 
 from utils import content
 
-sets_of_phrases_to_try = [
-    content.greetings, content.phrases_grut, content.phrases_grechka,
-    content.phrases_about_myself, content.phrases_about_running
-]
+sets_of_phrases_to_try = [content.t('ru', 'greetings'), content.phrases_about_myself, content.phrases_about_running]
 
 
 @pytest.mark.parametrize('phrases', sets_of_phrases_to_try)

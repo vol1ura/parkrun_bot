@@ -30,18 +30,18 @@ async def process_top_active_clubs(callback_query: types.CallbackQuery):
     pic.close()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'compare_results')
-@dp.throttled(rate=2)
-async def process_compare_results(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(
-        callback_query.from_user.id,
-        '*Сравнение персональных результатов.*\n'
-        'Здесь можно сравнить свои результаты с результатами другого '
-        'участника на тех паркранах, на которых вы когда-либо бежали вместе.\n'
-        'Предварительно необходимо установить свой паркран ID (через меню настройки) '
-        'и паркран ID участника для сравнения (кнопка Ввести ID участника)',
-        reply_markup=kb.inline_compare, parse_mode='Markdown')
+# @dp.callback_query_handler(lambda c: c.data == 'compare_results')
+# @dp.throttled(rate=2)
+# async def process_compare_results(callback_query: types.CallbackQuery):
+#     await bot.answer_callback_query(callback_query.id)
+#     await bot.send_message(
+#         callback_query.from_user.id,
+#         '*Сравнение персональных результатов.*\n'
+#         'Здесь можно сравнить свои результаты с результатами другого '
+#         'участника на тех паркранах, на которых вы когда-либо бежали вместе.\n'
+#         'Предварительно необходимо установить свой паркран ID (через меню настройки) '
+#         'и паркран ID участника для сравнения (кнопка Ввести ID участника)',
+#         reply_markup=kb.inline_compare, parse_mode='Markdown')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_results')
