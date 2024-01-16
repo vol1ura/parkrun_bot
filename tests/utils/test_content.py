@@ -2,7 +2,9 @@ import pytest
 
 from utils import content
 
-sets_of_phrases_to_try = [content.t('ru', 'greetings'), content.phrases_about_myself, content.phrases_about_running]
+sets_of_phrases_to_try = [
+    content.t('ru', 'greetings'), content.t('ru', 'phrases_about_myself'), content.phrases_about_running
+]
 
 
 @pytest.mark.parametrize('phrases', sets_of_phrases_to_try)
@@ -12,8 +14,7 @@ def test_content_with_lists(phrases):
 
 
 phrases_to_try = [
-    content.help_message, content.start_message, content.no_parkrun_message,
-    content.no_club_message, content.no_athlete_message, content.settings_save_failed
+    content.t('ru', 'help_message').format('0.0.0'), content.t('ru', 'start_message'), content.settings_save_failed
 ]
 
 

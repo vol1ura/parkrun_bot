@@ -45,7 +45,7 @@ async def s95_personal_result(message: types.Message):
         pic = await latest.make_latest_results_diagram(telegram_id, 'gen_png/results.png', turn)
         await bot.send_photo(message.chat.id, pic)
         if turn == 0:
-            await message.answer(content.how_to_rotate_labels, disable_notification=True)
+            await message.answer(content.t(language_code(message), 'how_to_rotate_labels'), disable_notification=True)
         pic.close()
     except Exception as e:
         logger.warning(f'Attempt to generate personal diagram failed. Query: {message.text}. Error: {e}')
@@ -64,11 +64,12 @@ async def get_parkrun_picture(message: types.Message):
 @dp.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
 @dp.throttled(handle_throttled_query, rate=2)
 async def simple_answers(message: types.Message):
+    locale = language_code(message)
     if 'как' in message.text and re.search(r'\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
-        ans = content.phrases_about_myself
+        ans = content.t(locale, 'phrases_about_myself')
     elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
-        ans = [s.format(user) for s in content.t(language_code(message), 'greetings')]
+        ans = [s.format(user) for s in content.t(locale, 'greetings')]
     elif 'погода' in message.text:
         bot_info = await bot.get_me()
         ans = ['Информацию о погоде можно получить через inline запрос: '

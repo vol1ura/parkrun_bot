@@ -1,8 +1,9 @@
 from aiogram import types
+from config import VERSION
 
 import keyboards as kb
 
-from app import dp, bot
+from app import dp, bot, language_code
 from handlers import helpers
 from utils import content
 from utils import qrcode
@@ -12,17 +13,16 @@ from utils import qrcode
 @dp.throttled(rate=5)
 async def send_welcome(message: types.Message):
     kbd = await kb.main(message.from_user.id)
-    await message.answer(content.start_message, reply_markup=kbd, disable_notification=True)
+    await message.answer(content.t(language_code(message), 'start_message'), reply_markup=kbd, disable_notification=True)
 
 
 @dp.message_handler(regexp='❓ справка')
 @dp.message_handler(commands=['help'])
 @dp.throttled(rate=3)
 async def commands(message: types.Message):
-    # print(language_code(message))
     await helpers.delete_message(message)
     await message.answer(
-        content.help_message,
+        content.t(language_code(message), 'help_message').format(VERSION),
         disable_notification=True,
         parse_mode='Markdown',
         reply_markup=await kb.main(message.from_user.id)

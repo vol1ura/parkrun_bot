@@ -9,6 +9,8 @@ if os.path.exists(dotenv_path):
 
 PRODUCTION_ENV = os.getenv('PRODUCTION')
 
+VERSION = '1.5.4'
+
 TOKEN_BOT = os.getenv('API_BOT_TOKEN', '123456:123456test')
 
 WEBHOOK_PATH = f'/webhook/{os.getenv("WEBHOOK")}'
