@@ -4,10 +4,11 @@ from collections import namedtuple
 
 from s95.athlete_code import AthleteCode
 
+
 DEFAULT_LOCALE = 'en'
 
 translations = {DEFAULT_LOCALE: {}}
-for locale_file in os.listdir('locales'):   
+for locale_file in os.listdir('locales'):
     with open(os.path.join('locales', locale_file), 'r') as f:
         translations = {**translations, **yaml.safe_load(f)}
 

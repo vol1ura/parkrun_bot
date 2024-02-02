@@ -59,7 +59,7 @@ async def process_command_qrcode(message: types.Message):
         return await message.answer('Вы зарегистрированы, но участник почему-то не привязан или не создан.')
     code = helpers.athlete_code(athlete)
     with qrcode.generate(code) as pic:
-        await bot.send_photo(message.chat.id, pic, caption=f'{athlete["name"]} ({code})')
+        await bot.send_photo(message.chat.id, pic, caption=f'{athlete["name"]} (A{code})')
 
 
 @dp.message_handler(commands=['statistics'])

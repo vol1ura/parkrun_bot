@@ -17,5 +17,6 @@ logger = logging.getLogger(__name__)
 async def db_conn():
     return await asyncpg.connect(config.DATABASE_URL)
 
+
 def language_code(message: types.Message) -> str:
     return message.from_user.language_code or 'ru'

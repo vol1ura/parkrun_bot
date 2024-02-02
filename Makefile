@@ -12,3 +12,6 @@ checkup:
 
 publish:
 	./venv/bin/ansible-playbook -i deploy/inventory deploy/deploy.yml --private-key=~/.ssh/id_ed25519
+
+psql:
+	psql -d s95_dev

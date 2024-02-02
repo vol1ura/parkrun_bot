@@ -17,9 +17,9 @@ async def ask_weather(message: types.Message):
     match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
     if match:
         place = re.sub(r' в ', '', match.group(2)).strip()
-        app = Nominatim(user_agent="s95-bot")
+        nominatim = Nominatim(user_agent="s95-bot")
         try:
-            location = app.geocode(place).raw
+            location = nominatim.geocode(place).raw
         except AttributeError:
             logger.warning(f'Requesting location failed. No such place {place}.')
             return await message.reply(f'Есть такой населённый пункт - {place}? ...не знаю. Введите запрос в в формате '
