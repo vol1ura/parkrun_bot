@@ -47,7 +47,7 @@ class PersonalResults:
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
 
         # pivot df into long form and aggregate by fastest time
-        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='m', aggfunc=np.min, fill_value=np.nan)
+        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='m', aggfunc='min', fill_value=np.nan)
         # add rows of zeros for any months missed
         for month in self.__months:
             if month not in rundata.index.values:
@@ -79,7 +79,7 @@ class PersonalResults:
         ticks = np.arange(0, maxuniq + 1)
         boundaries = np.arange(-0.5, maxuniq + 1.5)
         sns.heatmap(rundata, linewidths=0.4, cmap=cmap,
-                    cbar_kws={"ticks": ticks, 'label': 'Количество разных паркранов', "boundaries": boundaries}, ax=ax)
+                    cbar_kws={"ticks": ticks, 'label': 'Количество разных парков', "boundaries": boundaries}, ax=ax)
         ax.set_title(f'{self.__athlete_name}: интенсивность паркран-туризма', fontweight='bold')
         plt.tight_layout()
         plt.savefig(pic)
@@ -89,11 +89,9 @@ class PersonalResults:
         await self._fetch_results()
         plt.figure(figsize=(7, 9), dpi=150)
         df_last = self.__df.head(10)[::-1].reset_index(drop=True)
-        df_last['Run Date'] = pd.to_datetime(df_last['Run Date'])
         ax = df_last.plot(x='Run Date', y='m', lw=2, label='Результат')
-        xlabels = df_last['Run Date']
-        ax.set_xticks(xlabels)
-        ax.set_xticklabels(xlabels.dt.strftime('%d.%m.%Y'), rotation=70)
+        ax.set_xticks(df_last['Run Date'])
+        ax.set_xticklabels(df_last['Run Date'].apply(lambda x: x.strftime('%d.%m.%Y')), rotation=70)
         ax.minorticks_on()
         ax.grid(which='major', axis='x', lw=0.5)
         ax.grid(which='major', axis='y', lw=1)
