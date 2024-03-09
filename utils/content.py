@@ -14,13 +14,8 @@ for locale_file in os.listdir('locales'):
 
 
 def t(locale, key):
-    translation = (translations[locale] or translations[DEFAULT_LOCALE])[key]
-    if translation:
-        return translation
-    else:
-        message = f"no translation in locale '{locale}' for key '{key}'"
-        print(message)
-        return message
+    return (translations.get(locale) or translations[DEFAULT_LOCALE]).get(key) or \
+           f"no translation in locale '{locale}' for key '{key}'"
 
 
 phrases_about_running = [
