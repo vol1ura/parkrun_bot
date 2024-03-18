@@ -1,5 +1,5 @@
 aiodns~=3.1
-aiogram~=2.12
+aiogram~=3.4
 asyncpg~=0.26
 geopy==2.1
 lxml~=4.9
