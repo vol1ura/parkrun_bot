@@ -83,7 +83,7 @@ async def process_repeat_last_name(message: types.Message):
 
 # Сохраняем Имя
 # Запрашиваем Пол
-@dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME, regexp=r'\A[^\W\d_]+?\Z')
+@dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME, regexp=r'\A[^\W\d_]+\Z')
 async def process_get_athlete_first_name(message: types.Message, state: FSMContext):
     await helpers.UserStates.next()
     await state.update_data(first_name=message.text)
