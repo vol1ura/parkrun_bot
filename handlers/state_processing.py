@@ -69,7 +69,7 @@ async def process_cancel_parkrun_code(message: types.Message, state: FSMContext)
 
 # Получаем Фамилию
 # Запрашиваем Имя
-@dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME, regexp=r'\A[^\W\d_]{1,}([-\' ][^\W\d_]{2,})?\Z')
+@dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME, regexp=r'\A[^\W\d_]+([-\' ][^\W\d_]{2,})?\Z')
 async def process_get_athlete_last_name(message: types.Message, state: FSMContext):
     await helpers.UserStates.next()
     await state.update_data(last_name=message.text.upper())
@@ -83,7 +83,7 @@ async def process_repeat_last_name(message: types.Message):
 
 # Сохраняем Имя
 # Запрашиваем Пол
-@dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME, regexp=r'\A[^\W\d_]{1,}?\Z')
+@dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME, regexp=r'\A[^\W\d_]+?\Z')
 async def process_get_athlete_first_name(message: types.Message, state: FSMContext):
     await helpers.UserStates.next()
     await state.update_data(first_name=message.text)
