@@ -9,7 +9,7 @@ from random import randint
 
 import keyboards as kb
 
-from app import dp
+from app import dp, language_code
 from handlers import helpers
 from s95.athlete_code import AthleteCode
 from utils import content, mailer
@@ -19,7 +19,7 @@ from utils import content, mailer
 async def process_user_enter_parkrun_code(message: types.Message, state: FSMContext):
     athlete_code = AthleteCode(message.text)
     if not athlete_code.is_valid:
-        return await message.reply('Введите свой номер ID (только цифры, без буквы А в начале). Либо /reset для отмены.')
+        return await message.reply(content.t(language_code(message), 'input_athletes_id'))
     await helpers.UserStates.next()
     if athlete_code.key == 's95':
         await state.update_data(parkrun_code=None)
@@ -29,42 +29,54 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
     if athlete:
         if athlete["user_id"]:
             await state.finish()
-            return await message.answer('Участник с этим ID уже зарегистрирован и привязан.')
+            return await message.answer(content.t(language_code(message), 'user_exists_linked'))
         async with state.proxy() as data:
             data['athlete_id'] = athlete['id']
             names_list = re.split(r'\s', athlete['name'], maxsplit=1)
             if len(names_list) < 2:
                 names_list.insert(0, 'Товарищ')
             data['first_name'], data['last_name'] = names_list
-        await message.answer(
-            content.found_athlete_info.format(athlete_id=athlete['id'], name=athlete['name']),
-            reply_markup=kb.accept_athlete,
+            accept_athlete_kbd = await kb.accept_athlete(message)
+        await message.answer(content.t(language_code(message), 'found_athlete_info')
+                             .format(athlete_id=athlete['id'], name=athlete['name']),
+            reply_markup=accept_athlete_kbd,
             parse_mode='html'
         )
     else:
-        await message.reply(content.athlete_code_check(athlete_code),
-                            reply_markup=kb.ask_for_new_athlete, parse_mode='html', disable_web_page_preview=True)
+        new_athlete_kbd = await kb.ask_for_new_athlete(message)
+        await message.reply(content.t(language_code(message), 'athlete_code_check')
+                            .format(athlete_id=athlete_code.value, url=athlete_code.url),
+            reply_markup=new_athlete_kbd,
+            parse_mode='html',
+            disable_web_page_preview=True
+        )
 
 
 # Просим Почту сразу
 @dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp='Это я, привязать')
+@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp='Yes, it is me')
 async def process_save_with_parkrun_code(message: types.Message):
     await helpers.UserStates.EMAIL.set()
-    await message.reply(content.ask_email, reply_markup=types.ReplyKeyboardRemove())
+    await message.reply(content.t(language_code(message), 'ask_email'),
+                        reply_markup=types.ReplyKeyboardRemove()
+                        )
 
 
 # Запрашиваем Фамилию
 @dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp='Всё верно, создать')
+@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp='Okay, proceed')
 async def process_ask_athlete_last_name(message: types.Message):
     await helpers.UserStates.next()
-    await message.answer("Введите свою фамилию", reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(content.t(language_code(message), 'input_lastname'),
+                         reply_markup=types.ReplyKeyboardRemove()
+                         )
 
 
 @dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE)
 async def process_cancel_parkrun_code(message: types.Message, state: FSMContext):
     await state.finish()
-    kbd = await kb.main(message.from_user.id)
-    await message.reply("Запрос отменён. Попробуйте снова.", reply_markup=kbd)
+    kbd = await kb.main(message)
+    await message.reply(content.t(language_code(message), 'request_cancelled'), reply_markup=kbd)
 
 
 # Получаем Фамилию
@@ -73,12 +85,13 @@ async def process_cancel_parkrun_code(message: types.Message, state: FSMContext)
 async def process_get_athlete_last_name(message: types.Message, state: FSMContext):
     await helpers.UserStates.next()
     await state.update_data(last_name=message.text.upper())
-    await message.answer("Введите своё имя")
+    await message.answer(content.t(language_code(message), 'input_firstname'))
 
 
 @dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME)
 async def process_repeat_last_name(message: types.Message):
-    await message.answer('Введите свою фамилию. Допустимы только буквы и дефис.', reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(content.t(language_code(message), 'input_lastname_again'),
+                         reply_markup=types.ReplyKeyboardRemove())
 
 
 # Сохраняем Имя
@@ -87,22 +100,28 @@ async def process_repeat_last_name(message: types.Message):
 async def process_get_athlete_first_name(message: types.Message, state: FSMContext):
     await helpers.UserStates.next()
     await state.update_data(first_name=message.text)
-    await message.answer('Укажите свой пол', reply_markup=kb.select_gender)
+    gender_kbd = await kb.select_gender(message)
+    await message.answer(content.t(language_code(message), 'input_gender'),
+                         reply_markup=gender_kbd
+                         )
 
 
 # Повторно запрашиваем имя, если не сработала регулярка
 @dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME)
 async def process_repeat_first_name(message: types.Message):
-    await message.answer('Введите своё имя. Допустимы только буквы.')
+    await message.answer(content.t(language_code(message), 'input_firstname_again'))
 
 
 # Запрашиваем Пол ещё раз
 @dp.message_handler(
-    lambda message: message.text.strip().lower() not in ['мужской', 'женский'],
+    lambda message: message.text.strip().lower() not in ['мужской', 'женский', 'male', 'female'],
     state=helpers.UserStates.GENDER
 )
 async def process_gender_invalid(message: types.Message):
-    await message.reply(content.define_yourself_gender, reply_markup=kb.select_gender)
+    gender_kbd = await kb.select_gender(message)
+    await message.reply(content.t(language_code(message), 'define_your_gender'),
+                        reply_markup=gender_kbd
+                        )
 
 
 # Сохраняем Пол
@@ -111,7 +130,8 @@ async def process_gender_invalid(message: types.Message):
 async def process_gender(message: types.Message, state: FSMContext):
     await state.update_data(male=(message.text.strip().lower() == 'мужской'))
     await helpers.UserStates.next()
-    await message.answer(content.ask_email, reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(content.t(language_code(message), 'ask_email'),
+                         reply_markup=types.ReplyKeyboardRemove())
 
 
 # Почту для подтверждения
@@ -128,24 +148,26 @@ async def process_get_email(message: types.Message, state: FSMContext):
         if await helpers.find_athlete_by('user_id', user['id']):
             await state.finish()
             # TODO: Залогировать эту ситуацию
-            return await message.reply(content.athlete_already_linked)
+            return await message.reply(content.t(language_code(message), 'athlete_already_linked'))
         # Если участник не привязан, то делаем привязку
         await state.update_data(user_id=user['id'])
-        await message.answer('Пользователь с таким адресом уже зарегистрирован. Теперь необходимо сделать привязку участника.')
+        await message.answer(content.t(language_code(message), 'user_exists_needs_linking'))
     await helpers.UserStates.next()
     async with state.proxy() as data:
         data["email"] = email
         data["attempt"] = 0
         data["sent_at"] = int(time.time())
         data["pin"] = randint(100, 999)
-        confirmation_mailer = mailer.EmailConfirmation(data['pin'])
+        #new
+        lang = message.from_user.language_code
+        confirmation_mailer = mailer.EmailConfirmation(data['pin'], lang)
         confirmation_mailer.send(email, f'{data["first_name"]} {data["last_name"]}')
-    await message.reply(content.input_pin_code)
+    await message.reply(content.t(language_code(message), 'input_pin_code'))
 
 
 @dp.message_handler(state=helpers.UserStates.EMAIL)
 async def process_repeat_email(message: types.Message):
-    await message.reply("Введите Ваш e-mail. На него будет выслан проверочный код.")
+    await message.reply(content.t(language_code(message), 'incorrect_pin_code'))
 
 
 @dp.message_handler(state=helpers.UserStates.VALIDATE_EMAIL)
@@ -154,13 +176,18 @@ async def process_email_validation(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         if not data.get('sent_at') or data['sent_at'] + 30 * 60 < time.time() or data.get('attempt', 3) >= 3:
             await helpers.UserStates.previous()
-            return await message.reply(content.pin_code_expired)
+            return await message.reply(content.t(language_code(message), 'pin_code_expired'))
         data['attempt'] += 1
         if not message.text.isdigit() or data['pin'] != int(message.text.strip()):
-            return await message.reply(f'Неверный код. Попробуйте ввести ещё раз. Это {data["attempt"]} попытка из 3.')
+            return await message.reply(
+                content.t(language_code(message), 'pincode_input_attempts')
+                .format(attempt=data["attempt"])
+            )
         if 'user_id' not in data:
             await helpers.UserStates.next()
-            return await message.answer(content.input_password)
+            return await message.answer(content.t(language_code(message), 'input_password')
+                                        + content.t(language_code(message), 'password_requirements'
+                                        ))
 
         payload = {
             'user_id': data['user_id'],
@@ -186,17 +213,17 @@ async def process_email_validation(message: types.Message, state: FSMContext):
                     resp = await response.json()
                     if resp.ok:
                         await state.finish()
-                        kbd = await kb.main(message.from_user.id)
-                        await message.answer('Участник успешно привязан.', reply_markup=kbd)
-                        await message.answer(content.subscription_suggestion)
+                        kbd = await kb.main(message)
+                        await message.answer(content.t(language_code(message), 'user_linked_successfully'), reply_markup=kbd)
+                        await message.answer(content.t(language_code(message), 'subscription_suggestion'))
                     else:
                         if 'user' in resp['errors']:
                             await message.answer('Ошибки в данных пользователя: ' + ', '.join(resp['errors']['user']))
                         if 'athlete' in resp['errors']:
                             await message.answer('Ошибки в данных участника: ' + ', '.join(resp['errors']['athlete']))
-                        await message.answer(content.try_pin_code)
+                        await message.answer(content.t(language_code(message), 'try_pin_code'))
         except Exception:
-            await message.answer(content.try_pin_code)
+            await message.answer(content.t(language_code(message), 'try_pin_code'))
         finally:
             await message.delete()
 
@@ -230,27 +257,30 @@ async def process_password_validation(message: types.Message, state: FSMContext)
                 resp = await response.json()
                 if response.ok:
                     await state.finish()
-                    kbd = await kb.main(message.from_user.id)
-                    await message.answer('Регистрация успешно завершена.', reply_markup=kbd)
-                    await message.answer(content.subscription_suggestion)
+                    kbd = await kb.main(message)
+                    await message.answer(content.t(language_code(message), 'successful_registration'), reply_markup=kbd)
+                    await message.answer(content.t(language_code(message), 'subscription_suggestion'))
                 else:
                     if 'user' in resp['errors']:
                         await message.answer('Ошибки в данных пользователя: ' + ', '.join(resp['errors']['user']))
                     if 'athlete' in resp['errors']:
                         await message.answer('Ошибки в данных участника: ' + ', '.join(resp['errors']['athlete']))
-                    await message.answer(content.try_password)
+                    await message.answer(content.t(language_code(message), 'try_password'))
     except Exception:
-        await message.answer(content.try_password)
+        await message.answer(content.t(language_code(message), 'try_password'))
     finally:
         await message.delete()
-        await message.answer(content.password_erased)
+        await message.answer(content.t(language_code(message), 'password_erased'))
 
 
 @dp.message_handler(state=helpers.UserStates.PASSWORD)
 async def process_invalid_password(message: types.Message):
-    await message.answer(content.invalid_password)
+    await message.answer(content.t(language_code(message), 'invalid_password')
+                         +
+                         content.t(language_code(message), 'password_requirements')
+                         )
     await helpers.delete_message(message)
-    await message.answer(f'{content.password_erased} Придумайте пароль.')
+    await message.answer(content.t(language_code(message), 'password_erased_again'))
 
 
 @dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID, regexp=r'\A\d+\Z')

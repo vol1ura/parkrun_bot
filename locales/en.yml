@@ -1,26 +1,146 @@
 en:
-  start_message: 'S95 Bot подключен. Наберите /help, чтобы посмотреть доступные команды.'
+  start_message: 'S95 Bot is all set up. Type /help to see what it can do for you'
   greetings:
     - 'Hello, {}!'
-    - 'Hi, {}' 
-    - 'How are you, {}!' 
-    - 'Hi, bro 😉' 
+    - 'Hi, {}'
+    - 'How are you, {}!'
+    - 'Hi, bro 😉'
     - 'How do you do!'
   phrases_about_myself:
-    - 'Супер!' 
-    - 'Спасибо, всё нормально.' 
-    - 'Всё хорошо' 
-    - 'Отлично!'
-    - 'Нормально, но в последнее время некогда тренироваться' 
+    - 'Super!'
+    - 'Thank you, everything is OK.'
+    - 'Alright'
+    - 'Excellent!'
+    - 'Нормально, но в последнее время некогда тренироваться'
     - 'Хорошо, бегаю тут потихоньку'
     - '"Занимаюсь ресинтезом гликогена". Такой ответ на вопрос "Что делаешь?" звучит куда научнее и солиднее, чем "Пью сладкий чай с вафлями и пряниками после бега на пятьдесят километров". Сразу ясно, что человек не просто лежит на диване, вытянув свои убегавшиеся ноги, а занят серьезным делом.'
   help_message: >
-    Все _команды_ доступны через левое нижнее меню.
+    Welcome to S95 bot! See what it can do for you by pressing menu button down there ↙️
 
-    Боту можно что-нибудь написать. Например, "Бот, Кузьминки" и бот найдёт случайное фото с забега.
-    Либо "Бот, диаграмма" и бот построит гистограмму по результатам вашего последнего забега.
+    Got questions or ideas? Share them with @vol1ura (Yura Volodin).
 
-    Вопросы и предложения по боту и сайту, направляйте @vol1ura (Володин Юра)
-
-    🤖 *S95 Bot*, версия {}
+    🤖 *S95 Bot*, version {}
   how_to_rotate_labels: 'При необходимости надписи можно повернуть. Для этого отправьте сообщение "бот диаграмма 30", где 30 - угол поворота.'
+
+  confirm_registration: >
+    Looks like S95 Bot doesn't recognize you yet. Let's fix that!
+
+    Press *'Yes, I agree'* to register for S95 runs. By pressing it you agree with [the rules of participation](https://s95.rs/pages/rules) and give us [a consent to personal data processing](https://s95.ru/pages/privacy-policy).
+
+  user_without_athlete: >
+    You are almost registered, but it seems like there's a little trouble with linking your account.
+
+    Please contact @vol1ura to solve the issue.
+
+  input_athletes_id: 'Type in your ID (only numbers, no letter A) or tap /reset to cancel the registration'
+
+  input_firstname: 'Enter your first name'
+
+  input_firstname_again: 'Just your first name, please! Letters only, no numbers'
+
+  input_lastname: 'Enter your last name'
+
+  input_lastname_again: 'Type in your last name, please! Letters, dash, space, and apostrophe are allowed'
+
+  input_gender: 'Tap the button with your gender (male or female). It will be used for building leaderboards'
+
+  define_your_gender: '👇Tap the button below with your gender, please!'
+
+  ask_email: >
+    Enter your email. We need your email to send you a verification pin.
+
+    Once registered, you can use it to log into your profile on the S95 website.
+
+  found_athlete_info: >
+    Bot found participant {name}.
+
+    Check out <a href="https://s95.rs/athletes/{athlete_id}">participant's profile</a>.
+
+  input_pin_code: >
+    We've sent a pin code to your email for verification. Check your inbox (or spam folder).
+
+    Copy the pin code and send it to the bot.
+
+  pin_code_expired: >
+    Looks like you've used up all your attempts or the verification time has run out.
+
+    No worries! Just enter your email again or try using another email address.
+
+  athlete_already_linked: >
+    It seems an athlete with this email is already linked. The registration is almost completed!
+
+    Bot has sent information about this issue to S95 administrators.
+
+  password_requirements: >
+    should be a mix of UPPERCASE and lowercase letters, plus at least one digit. Make sure it's at least 6 characters long.
+
+  input_password: 'Type in a password. You can use it to log into your user profile on the S95 website.
+
+    The password '
+
+  invalid_password: 'Please enter the password again. It '
+
+  athlete_already_registered: >
+    🎉 You are registered! Check out your user profile https://s95.rs/athletes/{athlete["id"]}
+
+  setup_running_club: >
+    Ready to set your running club? Press "OK" to continue
+
+  setup_home_run: >
+    Ready to set your home run? Press "OK" to continue
+
+  athlete_code_search: >
+    Enter your *parkrun* or *S95* ID (just numbers, no letter A)
+
+  athlete_code_check: >
+    Couldn't find a participant with ID={athlete_id} in S95 runs. Perhaps, you haven't joined S95 runs yet.
+
+    Make sure to enter only numbers (no letter A) and check it's your ID on the website.
+
+  help_to_find_id: >
+    Need help finding your S95 ID? Open s95.rs in your browser, tap the menu button in the top right, and enter you surname in the search field at the bottom right.
+
+    You can find your ID by tapping the *barcode* button in your profile.
+
+  user_exists_needs_linking: >
+    An account with this email already exists. Let's link your data with it!
+
+  incorrect_pin_code: 'Share your email with us! We will send a verification code to this email'
+
+  pincode_input_attempts: >
+    Looks like you've entered the wrong verification pin.
+
+    Please try again. You've used {attempt} attempts of 3.
+
+  request_cancelled: 'Your request has been cancelled'
+
+  user_exists_linked: 'An account with this ID has already been created'
+
+  password_erased: 'Your password was erased for safety reasons'
+
+  password_erased_again: 'Your password was erased for safety reasons. Enter a new password again'
+
+  try_password: >
+    Something went wrong.
+
+    Please re-enter your password, or cancel your registration by sending the /reset command
+
+  try_pin_code: >
+    Something went wrong.
+
+    Please re-enter the pin code from an email sent to you, or cancel your registration by sending the /reset command
+
+  subscription_suggestion: >
+    Stay in touch with us!
+
+    Subscribe to our social media accounts in [Belgrade](https://s95.rs/events/belgrade) and [Novi Sad](https://s95.rs/events/novisad)
+
+  athlete_code_search: 'Enter your parkrun ID (only numbers, without letter A).'
+
+  available_commands: 'All commands are available by tapping the menu button at the bottom left ↙️'
+
+  you_already_have_id: 'If you have ever participated in parkruns or S95 runs before, you already have a personal barcode'
+
+  user_linked_successfully: 'The participant has been successfully linked'
+
+  successful_registration: '🎉 Your registraion in S95 is completed!'

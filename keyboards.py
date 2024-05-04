@@ -3,13 +3,18 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 from handlers.helpers import find_user_by
 
 
-async def main(telegram_id: int) -> ReplyKeyboardMarkup:
+async def main(message) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
     kbd = ReplyKeyboardMarkup(resize_keyboard=True)
-    user = await find_user_by('telegram_id', telegram_id)
-    btn_title = 'ℹ️ QR-код' if user else '⚙️ регистрация'
+    user = await find_user_by('telegram_id', message.from_user.id)
+    lang = message.from_user.language_code
+    if lang in ('ru', 'be'):
+        btn_title = 'ℹ️ QR-код' if user else '⚙️ регистрация'
+        btn2 = KeyboardButton('❓ справка')
+    else:
+        btn_title = 'ℹ️ QR-code' if user else '⚙️ registration'
+        btn2 = KeyboardButton('❓ help')
     btn1 = KeyboardButton(btn_title)
-    btn2 = KeyboardButton('❓ справка')
     kbd.add(btn1, btn2)
     return kbd
 
@@ -78,24 +83,67 @@ inline_personal.insert(InlineKeyboardButton('График 10 рез.', callback_
 # inline_compare.insert(InlineKeyboardButton('Scatter', callback_data='battle_scatter'))
 
 # ATHLETE REGISTRATION
-accept_athlete = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
-accept_athlete.add('Это я, привязать', 'Это не я')
+async def accept_athlete(message) -> ReplyKeyboardMarkup:
+    accept_athlete_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+    lang = message.from_user.language_code
+    if lang in ('ru', 'be'):
+        accept_athlete_kbd.add('Это я, привязать', 'Это не я')
+    else:
+        accept_athlete_kbd.add('Yes, it is me', 'No, it is not me')
+    return accept_athlete_kbd
 
-ask_for_new_athlete = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
-ask_for_new_athlete.add('Всё верно, создать', 'Отмена')
+async def ask_for_new_athlete(message) -> ReplyKeyboardMarkup:
+    ask_for_new_athlete_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+    lang = message.from_user.language_code
+    if lang in ('ru', 'be'):
+        ask_for_new_athlete_kbd.add('Всё верно, создать', 'Отмена')
+    else:
+        ask_for_new_athlete_kbd.add('Okay, proceed', 'Cancel')
+    return ask_for_new_athlete_kbd
 
-select_gender = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
-select_gender.add('мужской', 'женский')
 
-inline_agreement = InlineKeyboardMarkup(row_width=2)
-inline_agreement.insert(InlineKeyboardButton('Да, я согласен', callback_data='start_registration'))
-inline_agreement.insert(InlineKeyboardButton('Нет, отмена', callback_data='cancel_registration'))
+async def select_gender(message) -> ReplyKeyboardMarkup:
+    select_gender_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+    lang = message.from_user.language_code
+    if lang in ('ru', 'be'):
+        select_gender_kbd.add('мужской', 'женский')
+    else:
+        select_gender_kbd.add('male', 'female')
+    return select_gender_kbd
 
-inline_find_athlete_by_id = InlineKeyboardMarkup(row_width=2)
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Ввести ID', callback_data='athlete_code_search'))
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Не помню ID', callback_data='help_to_find_id'))
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Я новый участник', callback_data='create_new_athlete'))
-inline_find_athlete_by_id.insert(InlineKeyboardButton('Отмена', callback_data='cancel_registration'))
+async def inline_agreement(message) -> ReplyKeyboardMarkup:
+    inline_agreement_kbd = InlineKeyboardMarkup(row_width=2)
+    lang = message.from_user.language_code
+    if lang in ('ru', 'be'):
+        inline_agreement_kbd.insert(InlineKeyboardButton('Да, я согласен', callback_data='start_registration'))
+        inline_agreement_kbd.insert(InlineKeyboardButton('Нет, отмена', callback_data='cancel_registration'))
+    else:
+        inline_agreement_kbd.insert(InlineKeyboardButton('Yes, I agree', callback_data='start_registration'))
+        inline_agreement_kbd.insert(InlineKeyboardButton('No, cancel', callback_data='cancel_registration'))
+    return inline_agreement_kbd
 
-inline_open_s95 = InlineKeyboardMarkup()
-inline_open_s95.row(InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/'))
+
+async def inline_find_athlete_by_id(message) -> ReplyKeyboardMarkup:
+    inline_find_athlete_by_id_kbd = InlineKeyboardMarkup(row_width=2)
+    lang = message.from_user.language_code
+    if lang in ('ru', 'be'):
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Ввести ID', callback_data='athlete_code_search'))
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Не помню S95 ID', callback_data='help_to_find_id'))
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Я новый участник', callback_data='create_new_athlete'))
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Отмена', callback_data='cancel_registration'))
+    else:
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Input ID', callback_data='athlete_code_search'))
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Forgot S95 ID', callback_data='help_to_find_id'))
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('I am new to parkruns', callback_data='create_new_athlete'))
+        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Cancel', callback_data='cancel_registration'))
+    return inline_find_athlete_by_id_kbd
+
+async def inline_open_s95(message) -> ReplyKeyboardMarkup:
+    inline_open_s95_kbd = InlineKeyboardMarkup()
+    lang = message.from_user.language_code
+    if lang in ('ru', 'be'):
+        inline_open_s95_kbd.row(InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/'))
+    else:
+        inline_open_s95_kbd.row(InlineKeyboardButton('Go to website s95.rs', url='https://s95.rs/'))
+    return inline_open_s95_kbd
+

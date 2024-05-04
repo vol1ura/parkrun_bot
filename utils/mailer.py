@@ -32,28 +32,39 @@ class Mailer:
 
 
 class EmailConfirmation(Mailer):
-    def __init__(self, pin_code):
+    def __init__(self, pin_code, lang):
         self.__pin_code = pin_code
-        self.__subject = 'Подтверждение регистрации'
+        if lang in ('ru', 'be'):
+            self.__subject = 'Подтверждение регистрации'
+            self.__body = f"""Приветствуем!
+
+            Секретный код: {self.__pin_code}
+            Отправьте его боту. Код действителен 30 минут с момента запроса.
+
+            Вы получили данное сообщение, так как ваш e-mail был указан в процессе регистрации на сайте https://{config.HOST}/
+            Если это были не вы, просто проигнорируйте данное сообщение.
+
+            --
+            С уважением,
+            команда {config.EMAIL_SENDER}
+            """
+        else:
+            self.__subject = 'Registration in S95 almost done!'
+            self.__body = f"""Hi!
+
+            Your pin code is {self.__pin_code}
+            Please send this pin code to S95 bot. Remember, this pin code is valid for 30 minutes.
+
+            You're receiving this message because your email was used for registration in https://{config.HOST}/
+            If you didn't initiate registration, feel free to ignore this message.
+
+            Wishing you an active day ahead!
+            {config.EMAIL_SENDER} team"""
+
         super().__init__()
 
     def send(self, receiver_email, receiver_name):
         super().send(receiver_email, receiver_name, self.__subject, self.__body)
-
-    @property
-    def __body(self):
-        return f"""Приветствуем!
-
-        Секретный код: {self.__pin_code}
-        Отправьте его боту. Код действителен 30 минут с момента запроса.
-
-        Вы получили данное сообщение, так как ваш e-mail был указан в процессе регистрации на сайте https://{config.HOST}/
-        Если это были не вы, просто проигнорируйте данное сообщение.
-
-        --
-        С уважением,
-        команда {config.EMAIL_SENDER}
-        """
 
 
 if __name__ == '__main__':
