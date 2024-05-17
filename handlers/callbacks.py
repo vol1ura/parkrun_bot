@@ -10,6 +10,7 @@ from s95 import latest, records, clubs
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
 from utils import content
+from utils.content import t
 
 
 @dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
@@ -136,7 +137,8 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
         await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(callback_query.from_user.id,
+                               'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_history')
@@ -149,7 +151,8 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
         await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(callback_query.from_user.id,
+                               'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_bests')
@@ -162,7 +165,8 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
         await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(callback_query.from_user.id,
+                               'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_tourism')
@@ -175,7 +179,8 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
         await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(callback_query.from_user.id,
+                               'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_last')
@@ -188,7 +193,8 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
         await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(callback_query.from_user.id,
+                               'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')
@@ -199,7 +205,7 @@ async def process_athlete_code_search(callback_query: types.CallbackQuery):
     await delete_message(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        content.t(language_code(callback_query), 'athlete_code_search'),
+        t(language_code(callback_query), 'athlete_code_search'),
         parse_mode='Markdown'
     )
 
@@ -213,7 +219,7 @@ async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FS
     s95_kbd = await kb.inline_open_s95(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        content.t(language_code(callback_query), 'help_to_find_id'),
+        t(language_code(callback_query), 'help_to_find_id'),
         parse_mode='Markdown',
         reply_markup=s95_kbd
     )
@@ -228,7 +234,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
     kbd = await kb.main(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        content.t(language_code(callback_query), 'available_commands'),
+        t(language_code(callback_query), 'available_commands'),
         reply_markup=kbd
     )
 
@@ -240,7 +246,7 @@ async def process_start_registration(callback_query: types.CallbackQuery):
     find_athlete_kbd = await kb.inline_find_athlete_by_id(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        content.t(language_code(callback_query), 'you_already_have_id'),
+        t(language_code(callback_query), 'you_already_have_id'),
         reply_markup=find_athlete_kbd
     )
 
@@ -252,7 +258,7 @@ async def process_new_athlete_registration(callback_query: types.CallbackQuery):
     await helpers.UserStates.ATHLETE_LAST_NAME.set()
     await bot.send_message(
         callback_query.from_user.id,
-        content.t(language_code(callback_query), 'input_lastname_again'),
+        t(language_code(callback_query), 'input_lastname'),
         reply_markup=types.ReplyKeyboardRemove(),
         parse_mode='Markdown'
     )
@@ -264,7 +270,7 @@ async def process_cancel_action(callback_query: types.CallbackQuery):
     await delete_message(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        content.t(language_code(callback_query), 'request_cancelled')
+        t(language_code(callback_query), 'request_cancelled')
     )
 
 
@@ -275,7 +281,7 @@ async def process_cancel_action_with_state(callback_query: types.CallbackQuery, 
     await state.finish()
     await bot.send_message(
         callback_query.from_user.id,
-        content.t(language_code(callback_query), 'request_cancelled')
+        t(language_code(callback_query), 'request_cancelled')
     )
 
 

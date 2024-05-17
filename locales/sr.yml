@@ -1,4 +1,4 @@
-en:
+sr:
   start_message: 'S95 Bot is all set up. Type /help to see what it can do for you'
   greetings:
     - 'Hello, {}!'
@@ -135,8 +135,6 @@ en:
 
     Subscribe to our social media accounts in [Belgrade](https://s95.rs/events/belgrade) and [Novi Sad](https://s95.rs/events/novisad)
 
-  athlete_code_search: 'Enter your parkrun ID (only numbers, without letter A).'
-
   available_commands: 'All commands are available by tapping the menu button at the bottom left ↙️'
 
   you_already_have_id: 'If you have ever participated in parkruns or S95 runs before, you already have a personal barcode'
@@ -144,3 +142,33 @@ en:
   user_linked_successfully: 'The participant has been successfully linked'
 
   successful_registration: '🎉 Your registraion in S95 is completed!'
+
+  email_subject: 'Registration in S95 almost done!'
+
+  email_body: |
+      Hi!
+
+      Your pin code is {pin_code}
+      Please send this pin code to S95 bot. Remember, this pin code is valid for 30 minutes.
+
+      You're receiving this message because your email was used for registration in https://{webhost}/
+      If you didn't initiate registration, feel free to ignore this message.
+
+      Wishing you an active day ahead!
+      {email_sender} team
+
+  btn_qr_code: 'ℹ️ QR-код'
+  btn_registration: '⚙️ регистрација'
+  btn_help: '❓ помоћ'
+  btn_link: 'Yes, it is me'
+  btn_no_link: 'No, it is not me'
+  btn_create: 'Okay, proceed'
+  btn_cancel: 'Cancel'
+  btn_male: 'male'
+  btn_female: 'female'
+  btn_agree: 'Yes, I agree'
+  btn_disagree: 'No, cancel'
+  btn_input_ID: 'Input ID'
+  btn_dont_remember_ID: 'Forgot S95 ID'
+  btn_new_runner: 'I am new to parkruns'
+  btn_open_website: 'Go to website s95.rs'

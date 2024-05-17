@@ -1,6 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 
 from handlers.helpers import find_user_by
+from utils.content import t
 
 
 async def main(message) -> ReplyKeyboardMarkup:
@@ -8,12 +9,8 @@ async def main(message) -> ReplyKeyboardMarkup:
     kbd = ReplyKeyboardMarkup(resize_keyboard=True)
     user = await find_user_by('telegram_id', message.from_user.id)
     lang = message.from_user.language_code
-    if lang in ('ru', 'be'):
-        btn_title = 'ℹ️ QR-код' if user else '⚙️ регистрация'
-        btn2 = KeyboardButton('❓ справка')
-    else:
-        btn_title = 'ℹ️ QR-code' if user else '⚙️ registration'
-        btn2 = KeyboardButton('❓ help')
+    btn_title = t(lang, 'btn_qr_code') if user else t(lang, 'btn_registration')
+    btn2 = KeyboardButton(t(lang, 'btn_help'))
     btn1 = KeyboardButton(btn_title)
     kbd.add(btn1, btn2)
     return kbd
@@ -75,6 +72,7 @@ inline_personal.insert(InlineKeyboardButton('Личники', callback_data='per
 # inline_personal.insert(InlineKeyboardButton('S95-туризм', callback_data='personal_tourism'))
 inline_personal.insert(InlineKeyboardButton('График 10 рез.', callback_data='personal_last'))
 
+
 # COMPARATION of personal results
 # inline_compare = InlineKeyboardMarkup(row_width=2)
 # inline_compare.add(InlineKeyboardButton('Баттл-таблица', callback_data='battle_table'))
@@ -86,64 +84,49 @@ inline_personal.insert(InlineKeyboardButton('График 10 рез.', callback_
 async def accept_athlete(message) -> ReplyKeyboardMarkup:
     accept_athlete_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
     lang = message.from_user.language_code
-    if lang in ('ru', 'be'):
-        accept_athlete_kbd.add('Это я, привязать', 'Это не я')
-    else:
-        accept_athlete_kbd.add('Yes, it is me', 'No, it is not me')
+    accept_athlete_kbd.add(t(lang, "btn_link"), t(lang, "btn_no_link"))
     return accept_athlete_kbd
+
 
 async def ask_for_new_athlete(message) -> ReplyKeyboardMarkup:
     ask_for_new_athlete_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
     lang = message.from_user.language_code
-    if lang in ('ru', 'be'):
-        ask_for_new_athlete_kbd.add('Всё верно, создать', 'Отмена')
-    else:
-        ask_for_new_athlete_kbd.add('Okay, proceed', 'Cancel')
+    ask_for_new_athlete_kbd.add(t(lang, "btn_create"), t(lang, "btn_cancel"))
     return ask_for_new_athlete_kbd
 
 
 async def select_gender(message) -> ReplyKeyboardMarkup:
     select_gender_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
     lang = message.from_user.language_code
-    if lang in ('ru', 'be'):
-        select_gender_kbd.add('мужской', 'женский')
-    else:
-        select_gender_kbd.add('male', 'female')
+    select_gender_kbd.add(t(lang, "btn_male"), t(lang, "btn_female"))
     return select_gender_kbd
+
 
 async def inline_agreement(message) -> ReplyKeyboardMarkup:
     inline_agreement_kbd = InlineKeyboardMarkup(row_width=2)
     lang = message.from_user.language_code
-    if lang in ('ru', 'be'):
-        inline_agreement_kbd.insert(InlineKeyboardButton('Да, я согласен', callback_data='start_registration'))
-        inline_agreement_kbd.insert(InlineKeyboardButton('Нет, отмена', callback_data='cancel_registration'))
-    else:
-        inline_agreement_kbd.insert(InlineKeyboardButton('Yes, I agree', callback_data='start_registration'))
-        inline_agreement_kbd.insert(InlineKeyboardButton('No, cancel', callback_data='cancel_registration'))
+    inline_agreement_kbd.insert(InlineKeyboardButton(t(lang, 'btn_agree'), callback_data='start_registration'))
+    inline_agreement_kbd.insert(InlineKeyboardButton(t(lang, 'btn_disagree'), callback_data='cancel_registration'))
     return inline_agreement_kbd
 
 
 async def inline_find_athlete_by_id(message) -> ReplyKeyboardMarkup:
     inline_find_athlete_by_id_kbd = InlineKeyboardMarkup(row_width=2)
     lang = message.from_user.language_code
-    if lang in ('ru', 'be'):
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Ввести ID', callback_data='athlete_code_search'))
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Не помню S95 ID', callback_data='help_to_find_id'))
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Я новый участник', callback_data='create_new_athlete'))
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Отмена', callback_data='cancel_registration'))
-    else:
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Input ID', callback_data='athlete_code_search'))
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Forgot S95 ID', callback_data='help_to_find_id'))
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('I am new to parkruns', callback_data='create_new_athlete'))
-        inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton('Cancel', callback_data='cancel_registration'))
+    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_input_ID'),
+                                                              callback_data='athlete_code_search'))
+    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_dont_remember_ID'),
+                                                              callback_data='help_to_find_id'))
+    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_new_runner'),
+                                                              callback_data='create_new_athlete'))
+    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_cancel'),
+                                                              callback_data='cancel_registration'))
     return inline_find_athlete_by_id_kbd
+
 
 async def inline_open_s95(message) -> ReplyKeyboardMarkup:
     inline_open_s95_kbd = InlineKeyboardMarkup()
     lang = message.from_user.language_code
-    if lang in ('ru', 'be'):
-        inline_open_s95_kbd.row(InlineKeyboardButton('Открыть сайт s95.ru', url='https://s95.ru/'))
-    else:
-        inline_open_s95_kbd.row(InlineKeyboardButton('Go to website s95.rs', url='https://s95.rs/'))
+    inline_open_s95_kbd.row(InlineKeyboardButton(t(lang, 'btn_open_website'),
+                                                 url='https://s95.ru/'))
     return inline_open_s95_kbd
-
