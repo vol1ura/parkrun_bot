@@ -25,7 +25,7 @@ en:
   confirm_registration: >
     Looks like S95 Bot doesn't recognize you yet. Let's fix that!
 
-    Press *'Yes, I agree'* to register for S95 runs. By pressing it you agree with [the rules of participation](https://s95.rs/pages/rules) and give us [a consent to personal data processing](https://s95.ru/pages/privacy-policy).
+    Press *'Yes, I agree'* to register for S95 runs. By pressing it you agree with [the rules of participation](https://s95.rs/pages/rules) and give us [a consent to personal data processing](https://s95.rs/pages/privacy-policy).
 
   user_without_athlete: >
     You are almost registered, but it seems like there's a little trouble with linking your account.
@@ -81,7 +81,7 @@ en:
   invalid_password: 'Please enter the password again. It '
 
   athlete_already_registered: >
-    🎉 You are registered! Check out your user profile https://s95.rs/athletes/{athlete["id"]}
+    You are already registered! Check out your user profile https://s95.rs/athletes/{athlete_id}
 
   setup_running_club: >
     Ready to set your running club? Press "OK" to continue
@@ -172,3 +172,5 @@ en:
   btn_dont_remember_ID: 'Forgot S95 ID'
   btn_new_runner: 'I am new to parkruns'
   btn_open_website: 'Go to website s95.rs'
+
+  link_to_s95_website: 'https://s95.rs/'

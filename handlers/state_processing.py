@@ -17,8 +17,8 @@ from utils.content import t, home_event_notice
 
 
 REGEXP_PROCEED = '(Всё верно, создать|Okay, proceed)'
-REGEXP_GENDER = ['мужской', 'женский', 'male', 'female']
-REGEXP_MALE = ['мужской', 'male']
+ARRAY_GENDERS = ['мужской', 'женский', 'male', 'female']
+ARRAY_MALE = ['мужской', 'male']
 REGEXP_LINK = '(Это я, привязать|Yes, it is me)'
 
 
@@ -119,7 +119,7 @@ async def process_repeat_first_name(message: types.Message):
 
 # Запрашиваем Пол ещё раз
 @dp.message_handler(
-    lambda message: message.text.strip().lower() not in REGEXP_GENDER,
+    lambda message: message.text.strip().lower() not in ARRAY_GENDERS,
     state=helpers.UserStates.GENDER
 )
 async def process_gender_invalid(message: types.Message):
@@ -133,7 +133,7 @@ async def process_gender_invalid(message: types.Message):
 # Просим Почту
 @dp.message_handler(state=helpers.UserStates.GENDER)
 async def process_gender(message: types.Message, state: FSMContext):
-    await state.update_data(male=(message.text.strip().lower() in REGEXP_MALE))
+    await state.update_data(male=(message.text.strip().lower() in ARRAY_MALE))
     await helpers.UserStates.next()
     await message.answer(t(language_code(message), 'ask_email'),
                          reply_markup=types.ReplyKeyboardRemove())

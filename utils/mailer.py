@@ -35,13 +35,14 @@ class Mailer:
 class EmailConfirmation(Mailer):
     def __init__(self, pin_code, lang):
         self.__pin_code = pin_code
-        self.__subject = t(lang, 'email_subject')
-        self.__body = t(lang, 'email_body')\
-            .format(pin_code=self.__pin_code, webhost=config.HOST, email_sender=config.EMAIL_SENDER)
+        self.__lang = lang
         super().__init__()
 
     def send(self, receiver_email, receiver_name):
-        super().send(receiver_email, receiver_name, self.__subject, self.__body)
+        subject = t(self.__lang, 'email_subject')
+        body = t(self.__lang, 'email_body') \
+            .format(pin_code=self.__pin_code, webhost=config.HOST, email_sender=config.EMAIL_SENDER)
+        super().send(receiver_email, receiver_name, subject, body)
 
 
 if __name__ == '__main__':

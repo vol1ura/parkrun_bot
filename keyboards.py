@@ -128,5 +128,5 @@ async def inline_open_s95(message) -> ReplyKeyboardMarkup:
     inline_open_s95_kbd = InlineKeyboardMarkup()
     lang = message.from_user.language_code
     inline_open_s95_kbd.row(InlineKeyboardButton(t(lang, 'btn_open_website'),
-                                                 url='https://s95.ru/'))
+                                                 url=t(lang, 'link_to_s95_website')))
     return inline_open_s95_kbd
