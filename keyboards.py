@@ -10,9 +10,7 @@ async def main(message) -> ReplyKeyboardMarkup:
     user = await find_user_by('telegram_id', message.from_user.id)
     lang = message.from_user.language_code
     btn_title = t(lang, 'btn_qr_code') if user else t(lang, 'btn_registration')
-    btn2 = KeyboardButton(t(lang, 'btn_help'))
-    btn1 = KeyboardButton(btn_title)
-    kbd.add(btn1, btn2)
+    kbd.add(KeyboardButton(btn_title), KeyboardButton(t(lang, 'btn_help')))
     return kbd
 
 
@@ -102,7 +100,7 @@ async def select_gender(message) -> ReplyKeyboardMarkup:
     return select_gender_kbd
 
 
-async def inline_agreement(message) -> ReplyKeyboardMarkup:
+async def inline_agreement(message) -> InlineKeyboardMarkup:
     inline_agreement_kbd = InlineKeyboardMarkup(row_width=2)
     lang = message.from_user.language_code
     inline_agreement_kbd.insert(InlineKeyboardButton(t(lang, 'btn_agree'), callback_data='start_registration'))
@@ -110,7 +108,7 @@ async def inline_agreement(message) -> ReplyKeyboardMarkup:
     return inline_agreement_kbd
 
 
-async def inline_find_athlete_by_id(message) -> ReplyKeyboardMarkup:
+async def inline_find_athlete_by_id(message) -> InlineKeyboardMarkup:
     inline_find_athlete_by_id_kbd = InlineKeyboardMarkup(row_width=2)
     lang = message.from_user.language_code
     inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_input_ID'),
@@ -124,9 +122,8 @@ async def inline_find_athlete_by_id(message) -> ReplyKeyboardMarkup:
     return inline_find_athlete_by_id_kbd
 
 
-async def inline_open_s95(message) -> ReplyKeyboardMarkup:
+async def inline_open_s95(message) -> InlineKeyboardMarkup:
     inline_open_s95_kbd = InlineKeyboardMarkup()
     lang = message.from_user.language_code
-    inline_open_s95_kbd.row(InlineKeyboardButton(t(lang, 'btn_open_website'),
-                                                 url=t(lang, 'link_to_s95_website')))
+    inline_open_s95_kbd.row(InlineKeyboardButton(t(lang, 'btn_open_website'), url=t(lang, 'link_to_s95_website')))
     return inline_open_s95_kbd

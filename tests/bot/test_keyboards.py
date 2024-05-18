@@ -1,10 +1,12 @@
-from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, User
+from aiogram.types.message import Message
 
 import keyboards
 
 
 async def test_main_kb(database) -> None:
-    main_kb = await keyboards.main(1)
+    message = Message(from_user=User(id=1))
+    main_kb = await keyboards.main(message)
     assert isinstance(main_kb, ReplyKeyboardMarkup)
     print([main_kb.values['keyboard']])
 
@@ -35,5 +37,6 @@ def test_inline_personal_kb():
 
 
 def test_inline_open_s95_kb():
-    inline_open_s95_kb = keyboards.inline_open_s95
+    message = Message(from_user=User(id=1, language_code='ru'))
+    inline_open_s95_kb = keyboards.inline_open_s95(message)
     assert isinstance(inline_open_s95_kb, InlineKeyboardMarkup)
