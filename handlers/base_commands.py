@@ -49,7 +49,8 @@ async def process_command_settings(message: types.Message):
     athlete = await helpers.find_athlete_by('user_id', user['id'])
     if not athlete:
         return await message.answer(t(language_code(message), 'user_without_athlete'))
-    await message.answer(t(language_code(message), 'athlete_already_registered'))
+    await message.answer(t(language_code(message), 'athlete_already_registered')
+                         .format(athlete_id=user['id']))
 
 
 @dp.message_handler(regexp=REGEXP_QR)
