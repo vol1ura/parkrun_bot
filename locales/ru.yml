@@ -78,7 +78,7 @@ ru:
 
   invalid_password: 'Пароль не удовлетворяет требованиям: '
 
-  athlete_already_registered: 'Вы зарегистрированы. Ссылка на ваш профиль: https://s95.ru/athletes/{athlete_id}'
+  athlete_already_registered: 'Вы зарегистрированы. Ссылка на ваш профиль: https://s95.ru/athletes/{}'
 
   setup_running_club: 'Клуб не установлен. Хотите установить?'
 

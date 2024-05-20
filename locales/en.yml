@@ -80,8 +80,7 @@ en:
 
   invalid_password: 'Please enter the password again. It '
 
-  athlete_already_registered: >
-    You are already registered! Check out your user profile https://s95.rs/athletes/{athlete_id}
+  athlete_already_registered: 'You are already registered! Check out your user profile https://s95.rs/athletes/{}'
 
   setup_running_club: >
     Ready to set your running club? Press "OK" to continue
