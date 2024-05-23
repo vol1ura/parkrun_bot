@@ -1,5 +1,5 @@
 sr:
-  start_message: 'S95 Bot is all set up. Type /help to see what it can do for you'
+  start_message: 'S95 Bot je povezan. Ukucajte /help da biste videli dostupne komande.'
   greetings:
     - 'Hello, {}!'
     - 'Hi, {}'
@@ -15,161 +15,161 @@ sr:
     - 'Хорошо, бегаю тут потихоньку'
     - '"Занимаюсь ресинтезом гликогена". Такой ответ на вопрос "Что делаешь?" звучит куда научнее и солиднее, чем "Пью сладкий чай с вафлями и пряниками после бега на пятьдесят километров". Сразу ясно, что человек не просто лежит на диване, вытянув свои убегавшиеся ноги, а занят серьезным делом.'
   help_message: >
-    Welcome to S95 bot! See what it can do for you by pressing menu button down there ↙️
+    Dobrodošli u S95 bot! Pogledajte dostupne opcije pritiskom na menu dugme dole ↙️
 
-    Got questions or ideas? Share them with @vol1ura (Yura Volodin).
+    Imate pitanja ili predloge? Podelite ih sa @vol1ura (Yura Volodin).
 
-    🤖 *S95 Bot*, version {}
-  how_to_rotate_labels: 'При необходимости надписи можно повернуть. Для этого отправьте сообщение "бот диаграмма 30", где 30 - угол поворота.'
+    🤖 *S95 Bot*, verzija {}
+  how_to_rotate_labels: 'Po potrebi tekst se može okrenuti. Za to, pošaljite poruku "bot dijagram 30", gde 30 predstavlja ugao okretanja.'
 
   confirm_registration: >
-    Looks like S95 Bot doesn't recognize you yet. Let's fix that!
+    Izgleda da vas S95 Bot još uvek ne prepoznaje. Hajde da to ispravimo!
 
-    Press *'Yes, I agree'* to register for S95 runs. By pressing it you agree with [the rules of participation](https://s95.rs/pages/rules) and give us [a consent to personal data processing](https://s95.rs/pages/privacy-policy).
+    Pritisnite *'Da, slažem se'* da se registrujete za S95 trke. Pritiskanjem potvrđujete da se slažete sa [pravilima učešća](https://s95.rs/pages/rules) i dajete nam [saglasnost za obradu ličnih podataka](https://s95.rs/pages/privacy-policy).
 
   user_without_athlete: >
-    You are almost registered, but it seems like there's a little trouble with linking your account.
+    Skoro ste registrovani, ali izgleda da postoji mala poteškoća u povezivanju vašeg naloga.
 
-    Please contact @vol1ura to solve the issue.
+    Molimo kontaktirajte @vol1ura kako biste rešili problem.
 
-  input_athletes_id: 'Type in your ID (only numbers, no letter A) or tap /reset to cancel the registration'
+  input_athletes_id: 'Unesite svoj ID (samo brojevi, bez slova A) ili pritisnite /reset da otkažete registraciju'
 
-  input_firstname: 'Enter your first name'
+  input_firstname: 'Unesite svoje ime'
 
-  input_firstname_again: 'Just your first name, please! Letters only, no numbers'
+  input_firstname_again: 'Molimo unestite samo svoje ime! Samo slova, bez brojeva'
 
-  input_lastname: 'Enter your last name'
+  input_lastname: 'Unesite svoje prezime'
 
-  input_lastname_again: 'Type in your last name, please! Letters, dash, space, and apostrophe are allowed'
+  input_lastname_again: 'Molimo unestite svoje prezime! Dozvoljena su slova, crta, razmak i apostrof'
 
-  input_gender: 'Tap the button with your gender (male or female). It will be used for building leaderboards'
+  input_gender: 'Pritisnite dugme sa vašim polom (muški ili ženski). Koristiće se za izradu rang-liste sa rezultatima'
 
-  define_your_gender: '👇Tap the button below with your gender, please!'
+  define_your_gender: '👇Molimo pritisnite dugme ispod sa vašim polom!'
 
   ask_email: >
-    Enter your email. We need your email to send you a verification pin.
+    Unesite svoju e-mail adresu. Potrebna nam je vaša e-mail adresa kako bismo vam poslali verifikacioni kod.
 
-    Once registered, you can use it to log into your profile on the S95 website.
+    Nakon registracije, moći ćete da ga koristite za prijavu na svoj profil na sajtu S95.
 
   found_athlete_info: >
-    Bot found participant {name}.
+    Bot je pronašao učesnika {name}.
 
-    Check out <a href="https://s95.rs/athletes/{athlete_id}">participant's profile</a>.
+    Proverite <a href="https://s95.rs/athletes/{athlete_id}">profil učesnika</a>.
 
   input_pin_code: >
-    We've sent a pin code to your email for verification. Check your inbox (or spam folder).
+    Poslali smo vam pin kod na mejl za verifikaciju. Proverite vaše prijemno sanduče (ili nepoželjnu poštu/spam).
 
-    Copy the pin code and send it to the bot.
+    Kopirjate pin kod i pošaljite ga botu.
 
   pin_code_expired: >
-    Looks like you've used up all your attempts or the verification time has run out.
+    Izgleda da ste iskoristili sve pokušaje ili je vreme za verifikaciju isteklo.
 
-    No worries! Just enter your email again or try using another email address.
+    Bez brige! Samo unesite vašu e-mail adresu ponovo ili pokušajte sa drugom e-mail adresom.
 
   athlete_already_linked: >
-    It seems an athlete with this email is already linked. The registration is almost completed!
+    Izgleda da je sportista sa ovom e-mail adresom već povezan. Registracija je skoro gotova!
 
-    Bot has sent information about this issue to S95 administrators.
+    Bot je poslao informacije o ovom problemu S95 administratorima.
 
   password_requirements: >
-    should be a mix of UPPERCASE and lowercase letters, plus at least one digit. Make sure it's at least 6 characters long.
+    trebalo bi da sadrži kombinaciju VELIKIH i malih slova, kao i najmanje jednu cifru. Uverite se da ima najmanje 6 karatkera.
 
-  input_password: 'Type in a password. You can use it to log into your user profile on the S95 website.
+  input_password: 'Unesite lozinku. Možete je koristiti za prijavu na svoj korisnički profil na sajtu S95.
 
-    The password '
+    Lozinka '
 
-  invalid_password: 'Please enter the password again. It '
+  invalid_password: 'Molimo unesite lozinku ponovo. Lozinka '
 
-  athlete_already_registered: 'You are already registered! Check out your user profile https://s95.rs/athletes/{}'
+  athlete_already_registered: 'Već ste registrovani! Proverite svoj korisnički profil https://s95.rs/athletes/{}'
 
   setup_running_club: >
-    Ready to set your running club? Press "OK" to continue
+    Spremni ste da podesite svoj trkački klub? Pritisnite "OK" da nastavite.
 
   setup_home_run: >
-    Ready to set your home run? Press "OK" to continue
+    Spremni ste da podesite svoju osnovnu trku? Pritisnite "OK" da nastavite.
 
   athlete_code_search: >
-    Enter your *parkrun* or *S95* ID (just numbers, no letter A)
+    Unesite svoj *parkrun* ili *S95* ID (samo brojevi, bez slova A)
 
   athlete_code_check: >
-    Couldn't find a participant with ID={athlete_id} in S95 runs. Perhaps, you haven't joined S95 runs yet.
+    Nismo pronašli učesnika sa ID={athlete_id} u S95 trkama. Možda se još uvek niste pridružili S95 trkama.
 
-    Make sure to enter only numbers (no letter A) and check it's your ID on the website.
+    Uverite se da unosite samo brojeve (bez slova A) i proverite da li je vaš ID na sajtu.
 
   help_to_find_id: >
-    Need help finding your S95 ID? Open s95.rs in your browser, tap the menu button in the top right, and enter you surname in the search field at the bottom right.
+    Potrebna vam je pomoć da pronađete svoj S95 ID? Otvorite s95.rs u svom pretraživaču, kliknite na dugme menija u gornjem desnem uglu i unesite svoje prezime u polje za pretragu u donjem desnom uglu.
 
-    You can find your ID by tapping the *barcode* button in your profile.
+    Možete pronaći svoj ID pritiskom na dugme *barcode* na vašem profilu.
 
   user_exists_needs_linking: >
-    An account with this email already exists. Let's link your data with it!
+    Nalog sa ovom e-mail adresom već postoji. Hajde da povežemo vaše podatke sa njim!
 
-  incorrect_pin_code: 'Share your email with us! We will send a verification code to this email'
+  incorrect_pin_code: 'Podelite svoj e-mail sa nama! Prosledićemo vam identifikacioni kod na ovu adresu.'
 
   pincode_input_attempts: >
-    Looks like you've entered the wrong verification pin.
+    Izgleda da ste uneli pogrešan identifikacioni kod.
 
-    Please try again. You've used {attempt} attempts of 3.
+    Molimo pokušajte ponovo. Iskoristili ste {attempt} pokušaja od 3.
 
-  request_cancelled: 'Your request has been cancelled'
+  request_cancelled: 'Vaš zahtev je poništen.'
 
-  user_exists_linked: 'An account with this ID has already been created'
+  user_exists_linked: 'Nalog sa ovim ID-jem je već kreiran.'
 
-  password_erased: 'Your password was erased for safety reasons'
+  password_erased: 'Vaša lozinka je izbrisana iz sigurnosnih razloga'
 
-  password_erased_again: 'Your password was erased for safety reasons. Enter a new password again'
+  password_erased_again: 'Vaša lozinka je izbrisana iz sigurnosnih razloga. Unesite novu lozinku ponovo'
 
   try_password: >
-    Something went wrong.
+    Došlo je do greške.
 
-    Please re-enter your password, or cancel your registration by sending the /reset command
+    Molimo ponovo unesite svoju šifru ili otkažite svoju registraciju slanjem komande /reset
 
   try_pin_code: >
-    Something went wrong.
+    Došlo je do greške.
 
-    Please re-enter the pin code from an email sent to you, or cancel your registration by sending the /reset command
+    Molimo ponovo unesite pin kod koji vam je poslat na e-mail ili otkažite svoju registraciju slanjem komande /reset
 
   subscription_suggestion: >
-    Stay in touch with us!
+    Ostanite u kontaktu sa nama!
 
-    Subscribe to our social media accounts in [Belgrade](https://s95.rs/events/belgrade) and [Novi Sad](https://s95.rs/events/novisad)
+    Zapratite naše naloge na društvenim mrežama u [Beogradu](https://s95.rs/events/belgrade) i [Novom Sadu](https://s95.rs/events/novisad)
 
-  available_commands: 'All commands are available by tapping the menu button at the bottom left ↙️'
+  available_commands: 'Sve komande dostupne su klikom na menu dugme u donjem levom uglu ↙️'
 
-  you_already_have_id: 'If you have ever participated in parkruns or S95 runs before, you already have a personal barcode'
+  you_already_have_id: 'Ako ste barem jednom do sada učestvovali na parkrun ili S95 trkama, već imate lični barkod'
 
-  user_linked_successfully: 'The participant has been successfully linked'
+  user_linked_successfully: 'Učesnik je uspešno povezan'
 
-  successful_registration: '🎉 Your registraion in S95 is completed!'
+  successful_registration: '🎉 Vaša registracija na S95 je završena!'
 
-  email_subject: 'Registration in S95 almost done!'
+  email_subject: 'Registracija na S95 je skoro završena!'
 
   email_body: |
-      Hi!
+      Zdravo!
 
-      Your pin code is {pin_code}
-      Please send this pin code to S95 bot. Remember, this pin code is valid for 30 minutes.
+      Vaš pin kod je {pin_code}
+      Molimo vas, pošajite ovaj pin kod botu S95. Zapamite, ovaj pin kod važi 30 minuta.
 
-      You're receiving this message because your email was used for registration in https://{webhost}/
-      If you didn't initiate registration, feel free to ignore this message.
+      Dobli ste ovu poruku jer je vaša e-mail adresa korišćena za registraciju na https://{webhost}/
+      Ukoliko niste pokrenuli registraciju, slobodno ignorišite ovu poruku.
 
-      Wishing you an active day ahead!
-      {email_sender} team
+      Želimo vam aktivan dan!
+      {email_sender} tim
 
-  btn_qr_code: 'ℹ️ QR-код'
-  btn_registration: '⚙️ регистрација'
-  btn_help: '❓ помоћ'
-  btn_link: 'Yes, it is me'
-  btn_no_link: 'No, it is not me'
-  btn_create: 'Okay, proceed'
-  btn_cancel: 'Cancel'
-  btn_male: 'male'
-  btn_female: 'female'
-  btn_agree: 'Yes, I agree'
-  btn_disagree: 'No, cancel'
-  btn_input_ID: 'Input ID'
-  btn_dont_remember_ID: 'Forgot S95 ID'
-  btn_new_runner: 'I am new to parkruns'
-  btn_open_website: 'Go to website s95.rs'
+  btn_qr_code: 'ℹ️ QR-kod'
+  btn_registration: '⚙️ registracija'
+  btn_help: '❓ pomoć'
+  btn_link: 'Da, to sam ja'
+  btn_no_link: 'Ne, nisam ja'
+  btn_create: 'Ok, nastavi'
+  btn_cancel: 'Otkaži'
+  btn_male: 'muški'
+  btn_female: 'ženski'
+  btn_agree: 'Da, slažem se'
+  btn_disagree: 'Ne, otkaži'
+  btn_input_ID: 'Unesi ID'
+  btn_dont_remember_ID: 'Ne sećam se S95 ID'
+  btn_new_runner: 'Ja sam nov u parkrun'
+  btn_open_website: 'Na sajt s95.rs'
 
   link_to_s95_website: 'https://s95.rs/'
