@@ -8,9 +8,9 @@ from handlers import helpers
 from utils.content import t, about_club, about_home_event
 from utils import qrcode
 
-REGEXP_QR = 'ℹ️ (QR-код|QR-code)'
-REGEXP_REGISTRATION = '⚙️ (регистрация|registration|регистрација)'
-REGEXP_HELP = '❓ (справка|help|помоћ)'
+REGEXP_QR = 'ℹ️ (QR-код|QR-code|QR-kod)'
+REGEXP_REGISTRATION = '⚙️ (регистрация|registration|registracija)'
+REGEXP_HELP = '❓ (справка|help|pomoć)'
 
 
 @dp.message_handler(commands=['start'])
