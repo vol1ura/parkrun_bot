@@ -16,10 +16,10 @@ from utils import mailer
 from utils.content import t, home_event_notice
 
 
-REGEXP_PROCEED = '(Всё верно, создать|Okay, proceed)'
-REGEXP_LINK = '(Это я, привязать|Yes, it is me)'
-ARRAY_GENDERS = ['мужской', 'женский', 'male', 'female']
-ARRAY_MALE = ['мужской', 'male']
+REGEXP_PROCEED = '(Всё верно, создать|Okay, proceed|Ok, nastavi)'
+REGEXP_LINK = '(Это я, привязать|Yes, it is me|Da, to sam ja)'
+ARRAY_GENDERS = ['мужской', 'женский', 'male', 'female', 'muški', 'ženski']
+ARRAY_MALE = ['мужской', 'male', 'muški']
 
 
 @dp.message_handler(state=helpers.UserStates.SEARCH_ATHLETE_CODE)
