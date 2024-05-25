@@ -13,8 +13,8 @@ REGEXP_REGISTRATION = '⚙️ (регистрация|registration|registracija)
 REGEXP_HELP = '❓ (справка|help|pomoć)'
 
 
+# @dp.throttled(rate=5)
 @dp.message_handler(commands=['start'])
-@dp.throttled(rate=5)
 async def send_welcome(message: types.Message):
     kbd = await kb.main(message)
     await message.answer(
@@ -24,9 +24,9 @@ async def send_welcome(message: types.Message):
     )
 
 
+# @dp.throttled(rate=3)
 @dp.message_handler(regexp=REGEXP_HELP)
 @dp.message_handler(commands=['help'])
-@dp.throttled(rate=3)
 async def commands(message: types.Message):
     await helpers.delete_message(message)
     await message.answer(
@@ -37,9 +37,9 @@ async def commands(message: types.Message):
     )
 
 
+# @dp.throttled(rate=2)
 @dp.message_handler(regexp=REGEXP_REGISTRATION)
 @dp.message_handler(commands=['register'])
-@dp.throttled(rate=2)
 async def process_command_settings(message: types.Message):
     await helpers.delete_message(message)
     telegram_id = message.from_user.id
@@ -57,9 +57,9 @@ async def process_command_settings(message: types.Message):
     await message.answer(t(language_code(message), 'athlete_already_registered').format(athlete['id']))
 
 
+# @dp.throttled(rate=3)
 @dp.message_handler(regexp=REGEXP_QR)
 @dp.message_handler(commands=['qrcode'])
-@dp.throttled(rate=3)
 async def process_command_qrcode(message: types.Message):
     await helpers.delete_message(message)
     telegram_id = message.from_user.id

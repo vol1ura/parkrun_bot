@@ -141,11 +141,11 @@ async def process_gender(message: types.Message, state: FSMContext):
 
 
 # Почту для подтверждения
+# @dp.throttled(rate=15)
 @dp.message_handler(
     state=helpers.UserStates.EMAIL,
     regexp=r'\A[a-zA-Z0-9.!#$%&*+/=?^_{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\Z'
 )
-@dp.throttled(rate=15)
 async def process_get_email(message: types.Message, state: FSMContext):
     email = message.text.lower()
     user = await helpers.find_user_by_email(email)
@@ -175,8 +175,8 @@ async def process_repeat_email(message: types.Message):
     await message.reply(t(language_code(message), 'incorrect_pin_code'))
 
 
+# @dp.throttled(rate=5)
 @dp.message_handler(state=helpers.UserStates.VALIDATE_EMAIL)
-@dp.throttled(rate=5)
 async def process_email_validation(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         if not data.get('sent_at') or data['sent_at'] + 30 * 60 < time.time() or data.get('attempt', 3) >= 3:

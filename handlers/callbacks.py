@@ -197,8 +197,8 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
                                'Не удалось построить диаграмму. Возможно, нет результатов.')
 
 
+# @dp.throttled(rate=5)
 @dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')
-@dp.throttled(rate=5)
 async def process_athlete_code_search(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await helpers.UserStates.SEARCH_ATHLETE_CODE.set()
