@@ -13,7 +13,6 @@ REGEXP_REGISTRATION = '⚙️ (регистрация|registration|registracija)
 REGEXP_HELP = '❓ (справка|help|pomoć)'
 
 
-# @dp.throttled(rate=5)
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     kbd = await kb.main(message)
@@ -24,7 +23,6 @@ async def send_welcome(message: types.Message):
     )
 
 
-# @dp.throttled(rate=3)
 @dp.message_handler(regexp=REGEXP_HELP)
 @dp.message_handler(commands=['help'])
 async def commands(message: types.Message):
@@ -37,7 +35,6 @@ async def commands(message: types.Message):
     )
 
 
-# @dp.throttled(rate=2)
 @dp.message_handler(regexp=REGEXP_REGISTRATION)
 @dp.message_handler(commands=['register'])
 async def process_command_settings(message: types.Message):
@@ -57,7 +54,6 @@ async def process_command_settings(message: types.Message):
     await message.answer(t(language_code(message), 'athlete_already_registered').format(athlete['id']))
 
 
-# @dp.throttled(rate=3)
 @dp.message_handler(regexp=REGEXP_QR)
 @dp.message_handler(commands=['qrcode'])
 async def process_command_qrcode(message: types.Message):

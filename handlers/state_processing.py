@@ -45,8 +45,7 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
             data['first_name'], data['last_name'] = names_list
             accept_athlete_kbd = await kb.accept_athlete(message)
         await message.answer(
-            t(language_code(message), 'found_athlete_info')
-            .format(athlete_id=athlete['id'], name=athlete['name']),
+            t(language_code(message), 'found_athlete_info').format(athlete_id=athlete['id'], name=athlete['name']),
             reply_markup=accept_athlete_kbd,
             parse_mode='html'
         )
@@ -90,7 +89,7 @@ async def process_cancel_parkrun_code(message: types.Message, state: FSMContext)
 
 # Получаем Фамилию
 # Запрашиваем Имя
-@dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME, regexp=r'\A[^\W\d_]+([-\' ][^\W\d_]{2,})?\Z')
+@dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME, regexp=r'\A[^\W\d_]+([-\'][^\W\d_]{2,})?\Z')
 async def process_get_athlete_last_name(message: types.Message, state: FSMContext):
     await helpers.UserStates.next()
     await state.update_data(last_name=message.text.upper())
@@ -141,7 +140,6 @@ async def process_gender(message: types.Message, state: FSMContext):
 
 
 # Почту для подтверждения
-# @dp.throttled(rate=15)
 @dp.message_handler(
     state=helpers.UserStates.EMAIL,
     regexp=r'\A[a-zA-Z0-9.!#$%&*+/=?^_{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\Z'
@@ -175,7 +173,6 @@ async def process_repeat_email(message: types.Message):
     await message.reply(t(language_code(message), 'incorrect_pin_code'))
 
 
-# @dp.throttled(rate=5)
 @dp.message_handler(state=helpers.UserStates.VALIDATE_EMAIL)
 async def process_email_validation(message: types.Message, state: FSMContext):
     async with state.proxy() as data:

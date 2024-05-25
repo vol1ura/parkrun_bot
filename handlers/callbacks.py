@@ -60,12 +60,9 @@ async def process_personal_results(callback_query: types.CallbackQuery):
 
 
 async def get_compared_pages(user_id):
-    settings = None  # await redis.get_value(user_id)
+    settings = {}  # await redis.get_value(user_id)
     athlete_id_1 = settings.get('id', None)
     athlete_id_2 = settings.get('compare_id', None)
-    if not athlete_id_1:
-        raise CallbackException('Вы не ввели свой parkrun ID.\n'
-                                'Перейдите в настройки и нажмите кнопку Выбрать участника')
     if not athlete_id_2:
         raise CallbackException('Вы не ввели parkrun ID участника для сравнения.\n'
                                 'Нажмите кнопку Ввести ID участника.')
@@ -73,15 +70,6 @@ async def get_compared_pages(user_id):
         raise CallbackException('Ваш parkrun ID не должен совпадать с parkrun ID, выбранного участника.')
     athlete_name_1 = await helpers.find_user_by('id', athlete_id_1)
     athlete_name_2 = await helpers.find_user_by('id', athlete_id_2)
-    # with Vedis(DB_FILE) as db:
-    #     try:
-    #         h = db.Hash(f'A{athlete_id_1}')
-    #         athlete_page_1 = h['athlete_page'].decode()
-    #         h = db.Hash(f'A{athlete_id_2}')
-    #         athlete_page_2 = h['athlete_page'].decode()
-    #     except Exception as e:
-    #         logger.error(e)
-    #         raise CallbackException('Что-то пошло не так. Проверьте настройки или попробуйте ввести ID-шники снова.')
     return athlete_name_1, athlete_name_2
 
 
@@ -165,8 +153,10 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
         await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id,
-                               'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(
+            callback_query.from_user.id,
+            'Не удалось построить диаграмму. Возможно, нет результатов.'
+        )
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_tourism')
@@ -179,8 +169,10 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
         await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id,
-                               'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(
+            callback_query.from_user.id,
+            'Не удалось построить диаграмму. Возможно, нет результатов.'
+        )
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_last')
@@ -193,8 +185,10 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
         await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
         pic.close()
     except Exception:
-        await bot.send_message(callback_query.from_user.id,
-                               'Не удалось построить диаграмму. Возможно, нет результатов.')
+        await bot.send_message(
+            callback_query.from_user.id,
+            'Не удалось построить диаграмму. Возможно, нет результатов.'
+        )
 
 
 # @dp.throttled(rate=5)
@@ -259,8 +253,7 @@ async def process_new_athlete_registration(callback_query: types.CallbackQuery):
     await bot.send_message(
         callback_query.from_user.id,
         t(language_code(callback_query), 'input_lastname'),
-        reply_markup=types.ReplyKeyboardRemove(),
-        parse_mode='Markdown'
+        reply_markup=types.ReplyKeyboardRemove()
     )
 
 
@@ -350,7 +343,7 @@ async def process_remove_home_event(callback_query: types.CallbackQuery):
         await bot.send_message(callback_query.from_user.id, 'Не удалось удалить домашний забег. Попробуйте снова')
 
 
-async def delete_message(callback_query: types.CallbackQuery) -> None:
+async def delete_message(callback_query: types.CallbackQuery):
     try:
         await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
     except Exception:

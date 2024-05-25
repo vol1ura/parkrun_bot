@@ -1,16 +1,6 @@
-# import csv
-# import os
-import re
-# import time
-from datetime import date, timedelta
-
-import aiohttp
 import matplotlib.pyplot as plt
 import pandas as pd
-from lxml.html import fromstring
 
-from bot_exceptions import ParsingException
-from s95.helpers import ParkrunSite
 from app import db_conn
 
 
@@ -19,46 +9,8 @@ async def find_club_by_id(club_id: int):
     return club.name if club else None
 
 
-async def get_participants(club_id: str):
-    async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
-        async with session.get(f'https://www.parkrun.com/results/consolidatedclub/?clubNum={club_id}') as resp:
-            html = await resp.text()
-    tree = fromstring(html)
-    head = tree.xpath('//div[@class="floatleft"]/p')[0].text_content()
-    data = re.search(r'(\d{4}-\d{2}-\d{2}). Of a total (\d+) members', head)
-    info_date = date.fromisoformat(data.group(1))
-    message = add_relevance_notification(info_date)
-    places = tree.xpath('//div[@class="floatleft"]/h2')
-    results_tables = tree.xpath('//table[contains(@id, "results")]')
-    counts = [len(table.xpath('.//tr/td[4]//a')) for table in results_tables]
-    links_to_results = tree.xpath('//div[@class="floatleft"]/p/a/@href')[1:-1]
-    message += f'Паркраны, где побывали одноклубники {data.group(1)}:\n'
-
-    for i, (p, l, count) in enumerate(zip(places, links_to_results, counts), 1):
-        p_num = re.search(r'runSeqNumber=(\d+)', l).group(1)
-        message += f"{i}. [{re.sub('parkrun', '', p.text_content()).strip()}\xa0№{p_num}]({l}) ({count}\xa0чел.)\n"
-    message += f'\nУчаствовало {sum(counts)} из {data.group(2)} чел.'
-    return message
-
-
-def add_relevance_notification(content_date: date) -> str:
-    notification = 'Извините, но результаты в системе parkrun ещё не обновились 😿 ' \
-                   'Всё, что могу предложить на данный момент - результаты за прошлую неделю.\n'
-    return notification if date.today() > content_date + timedelta(6) else ''
-
-
 async def get_club_table(parkrun: str, club_id: str):
-    async with aiohttp.ClientSession(headers=ParkrunSite().headers) as session:
-        async with session.get(f'https://www.parkrun.ru/{parkrun}/results/clubhistory/?clubNum={club_id}') as resp:
-            html_club_results = await resp.text()
-            if 'Случилось странное' in html_club_results:
-                raise ParsingException(f'Something strange happend on club id={club_id} history page for {parkrun}.')
-    try:
-        data = pd.read_html(html_club_results)[0]
-    except Exception:
-        raise ParsingException(f'Parsing club history page id={club_id} for {parkrun} is failed.')
-    data.drop(data.columns[[1, 5, 9, 12]], axis=1, inplace=True)
-    return data
+    return {}
 
 
 async def get_club_fans(parkrun: str, club_id: str):

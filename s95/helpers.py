@@ -1,5 +1,3 @@
-import csv
-import os
 import random
 from datetime import date, timedelta
 
@@ -58,23 +56,3 @@ def min_to_mmss(m) -> str:
 def time_conv(t):
     arr = list(map(lambda x: int(x), str(t).split(':')))
     return (arr[0] - 21) * 60 + arr[1] + arr[2] / 60
-
-
-def read_parkruns(file: str) -> list:
-    parkruns = []
-    if os.path.exists(file):
-        with open(file, newline='\n') as fd:
-            for line in fd:
-                parkruns.append(line.strip())
-    return parkruns
-
-
-def read_clubs(file: str) -> list:
-    clubs = []
-    if os.path.exists(file):
-        with open(file, encoding='utf-8', newline='\n') as fd:
-            fieldnames = ['id', 'name', 'participants', 'runs', 'link']
-            reader = csv.DictReader(fd, fieldnames=fieldnames)
-            for rec in reader:
-                clubs.append(rec)
-    return clubs

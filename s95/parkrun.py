@@ -1,5 +1,4 @@
 import pandas as pd
-# from s95.helpers import ParkrunSite, athlete_all_history_url
 
 
 def parse_personal_results(html_page: str):

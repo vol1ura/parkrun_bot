@@ -7,11 +7,11 @@ DEFAULT_LOCALE = 'en'
 
 translations = {DEFAULT_LOCALE: {}}
 for locale_file in os.listdir('locales'):
-    with open(os.path.join('locales', locale_file), 'r', encoding="utf8") as f:
+    with open(os.path.join('locales', locale_file), 'r', encoding='utf8') as f:
         translations = {**translations, **yaml.safe_load(f)}
 
 
-def t(locale, key):
+def t(locale: str, key: str) -> str:
     return (translations.get(locale) or translations[DEFAULT_LOCALE]).get(key) or \
            f"no translation in locale '{locale}' for key '{key}'"
 

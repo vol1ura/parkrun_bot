@@ -1,3 +1,4 @@
+import typing
 import asyncpg
 import logging
 
@@ -18,5 +19,5 @@ async def db_conn():
     return await asyncpg.connect(config.DATABASE_URL)
 
 
-def language_code(message: types.Message) -> str:
+def language_code(message: typing.Union[types.Message, types.CallbackQuery]) -> str:
     return message.from_user.language_code or 'ru'

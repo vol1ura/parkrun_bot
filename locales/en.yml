@@ -38,9 +38,9 @@ en:
 
   input_firstname_again: 'Just your first name, please! Letters only, no numbers'
 
-  input_lastname: 'Enter your last name'
+  input_lastname: 'Enter your Last Name'
 
-  input_lastname_again: 'Type in your last name, please. Letters, dash, space, and apostrophe are allowed'
+  input_lastname_again: 'Type in your Last Name, please. Letters, dash, space, and apostrophe are allowed'
 
   input_gender: 'Tap the button with your gender (male or female). It will be used for building leaderboards'
 
