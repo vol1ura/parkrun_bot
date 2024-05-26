@@ -14,4 +14,5 @@ def generate(athlete_code: int):
     yield file_obj
     if file_obj:
         file_obj.close()
+    if os.path.exists(qrcode_file):
         os.remove(qrcode_file)
