@@ -4,11 +4,11 @@ from aiogram.types.message import Message
 import keyboards
 
 
-async def test_main_kb(database) -> None:
-    message = Message(from_user=User(id=1))
+async def test_main_kb(database):
+    message = Message()
+    message.from_user = User(id=1, is_bot=False)
     main_kb = await keyboards.main(message)
     assert isinstance(main_kb, ReplyKeyboardMarkup)
-    print([main_kb.values['keyboard']])
 
 
 def test_set_home_event_kb():
@@ -36,7 +36,8 @@ def test_inline_personal_kb():
     assert isinstance(inline_personal_kb, InlineKeyboardMarkup)
 
 
-def test_inline_open_s95_kb():
-    message = Message(from_user=User(id=1, language_code='ru'))
-    inline_open_s95_kb = keyboards.inline_open_s95(message)
+async def test_inline_open_s95_kb():
+    message = Message()
+    message.from_user = User(id=1, language_code='ru')
+    inline_open_s95_kb = await keyboards.inline_open_s95(message)
     assert isinstance(inline_open_s95_kb, InlineKeyboardMarkup)

@@ -87,7 +87,6 @@ class PersonalResults:
             if os.path.exists(pic):
                 os.remove(pic)
 
-
     @asynccontextmanager
     async def tourism(self):
         await self._fetch_results()
