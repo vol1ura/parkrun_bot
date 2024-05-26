@@ -158,10 +158,10 @@ async def process_get_email(message: types.Message, state: FSMContext):
         await message.answer(t(language_code(message), 'user_exists_needs_linking'))
     await helpers.UserStates.next()
     async with state.proxy() as data:
-        data["email"] = email
-        data["attempt"] = 0
-        data["sent_at"] = int(time.time())
-        data["pin"] = randint(100, 999)
+        data['email'] = email
+        data['attempt'] = 0
+        data['sent_at'] = int(time.time())
+        data['pin'] = randint(100, 999)
         lang = message.from_user.language_code
         confirmation_mailer = mailer.EmailConfirmation(data['pin'], lang)
         confirmation_mailer.send(email, f'{data["first_name"]} {data["last_name"]}')

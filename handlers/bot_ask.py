@@ -12,7 +12,7 @@ from utils import content, vk, weather
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(handle_throttled_query, rate=5)
 async def ask_weather(message: types.Message):
     match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
     if match:
@@ -35,7 +35,7 @@ async def ask_weather(message: types.Message):
 
 
 @dp.message_handler(regexp=r'(?i)бот[, \w]+?диаграмма( \d+)?$')
-@dp.throttled(handle_throttled_query, rate=10)
+@dp.throttled(handle_throttled_query, rate=2)
 async def s95_personal_result(message: types.Message):
     await types.ChatActions.upload_photo()
     telegram_id = message.from_user.id
@@ -53,7 +53,7 @@ async def s95_personal_result(message: types.Message):
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (кузьминки|s95)')
-@dp.throttled(handle_throttled_query, rate=3)
+@dp.throttled(handle_throttled_query, rate=2)
 async def get_parkrun_picture(message: types.Message):
     token = getenv('VK_SERVICE_TOKEN')
     photo_url = await vk.get_random_photo(token)
@@ -62,7 +62,7 @@ async def get_parkrun_picture(message: types.Message):
 
 @dp.message_handler(lambda mes: mes.reply_to_message and mes.reply_to_message.from_user.is_bot)
 @dp.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
-@dp.throttled(handle_throttled_query, rate=2)
+@dp.throttled(handle_throttled_query, rate=1)
 async def simple_answers(message: types.Message):
     locale = language_code(message)
     if 'как' in message.text and re.search(r'\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
