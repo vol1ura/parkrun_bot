@@ -174,7 +174,12 @@ def athlete_code(athlete):
 
 
 async def handle_throttled_query(*args, **kwargs):
-    # kwargs will be updated with parameters given to .throttled (rate, key, user_id, chat_id)
-    logger.warning(f'Message was throttled with {kwargs}')
     message = args[0]  # as message was the first argument in the original handler
+    try:
+        telegram_id = message.from_user.id
+        action = message.data
+    except:
+        telegram_id = 'Unknown'
+        action = 'unknown'
+    logger.warning(f'Message was throttled on {action} action with rate={kwargs["rate"]} and id={telegram_id}')
     await message.answer(random.choice(content.throttled_messages))

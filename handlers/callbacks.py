@@ -14,7 +14,7 @@ from utils.content import t
 
 
 @dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
-@dp.throttled(helpers.handle_throttled_query, rate=6)
+@dp.throttled(helpers.handle_throttled_query, rate=3)
 async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
     pic = await records.top_records_count('gen_png/records.png')
@@ -23,7 +23,7 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'top_active_clubs')
-@dp.throttled(helpers.handle_throttled_query, rate=6)
+@dp.throttled(helpers.handle_throttled_query, rate=3)
 async def process_top_active_clubs(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
     pic = clubs.top_active_clubs_diagram('gen_png/top_clubs.png')

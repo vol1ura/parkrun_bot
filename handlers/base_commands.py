@@ -83,7 +83,7 @@ async def process_command_statistics(message: types.Message):
 
 
 @dp.message_handler(commands=['club'])
-@dp.throttled(rate=2)
+@dp.throttled(rate=1)
 async def process_command_club(message: types.Message):
     await helpers.delete_message(message)
     club = await helpers.find_club(message.from_user.id)
@@ -107,7 +107,7 @@ async def process_command_club(message: types.Message):
 
 
 @dp.message_handler(commands=['home'])
-@dp.throttled(rate=2)
+@dp.throttled(rate=1)
 async def process_command_home(message: types.Message):
     await helpers.delete_message(message)
     event = await helpers.find_home_event(message.from_user.id)
