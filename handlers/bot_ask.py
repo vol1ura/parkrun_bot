@@ -6,7 +6,6 @@ from aiogram import types
 from geopy import Nominatim
 
 from app import bot, language_code, logger, dp
-from handlers.helpers import handle_throttled_query
 from s95 import latest
 from utils import content, vk, weather
 

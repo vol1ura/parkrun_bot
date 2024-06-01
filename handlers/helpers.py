@@ -178,7 +178,7 @@ async def handle_throttled_query(*args, **kwargs):
     try:
         telegram_id = message.from_user.id
         action = message.data
-    except:
+    except Exception:
         telegram_id = 'Unknown'
         action = 'unknown'
     logger.warning(f'Message was throttled on {action} action with rate={kwargs["rate"]} and id={telegram_id}')
