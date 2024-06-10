@@ -39,10 +39,9 @@ async def commands(message: types.Message):
 @dp.message_handler(commands=['register'])
 async def process_command_settings(message: types.Message):
     await helpers.delete_message(message)
-    telegram_id = message.from_user.id
-    user = await helpers.find_user_by('telegram_id', telegram_id)
-    agreement_kbd = await kb.inline_agreement(message)
+    user = await helpers.find_user_by('telegram_id', message.from_user.id)
     if not user:
+        agreement_kbd = await kb.inline_agreement(message)
         return await message.answer(
             t(language_code(message), 'confirm_registration'),
             reply_markup=agreement_kbd,

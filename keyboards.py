@@ -82,21 +82,21 @@ inline_personal.insert(InlineKeyboardButton('График 10 рез.', callback_
 async def accept_athlete(message) -> ReplyKeyboardMarkup:
     accept_athlete_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
     lang = message.from_user.language_code
-    accept_athlete_kbd.add(t(lang, "btn_link"), t(lang, "btn_no_link"))
+    accept_athlete_kbd.add(t(lang, 'btn_link'), t(lang, 'btn_no_link'))
     return accept_athlete_kbd
 
 
 async def ask_for_new_athlete(message) -> ReplyKeyboardMarkup:
     ask_for_new_athlete_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
     lang = message.from_user.language_code
-    ask_for_new_athlete_kbd.add(t(lang, "btn_create"), t(lang, "btn_cancel"))
+    ask_for_new_athlete_kbd.add(t(lang, 'btn_create'), t(lang, 'btn_cancel'))
     return ask_for_new_athlete_kbd
 
 
 async def select_gender(message) -> ReplyKeyboardMarkup:
     select_gender_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
     lang = message.from_user.language_code
-    select_gender_kbd.add(t(lang, "btn_male"), t(lang, "btn_female"))
+    select_gender_kbd.add(t(lang, 'btn_male'), t(lang, 'btn_female'))
     return select_gender_kbd
 
 
@@ -111,14 +111,18 @@ async def inline_agreement(message) -> InlineKeyboardMarkup:
 async def inline_find_athlete_by_id(message) -> InlineKeyboardMarkup:
     inline_find_athlete_by_id_kbd = InlineKeyboardMarkup(row_width=2)
     lang = message.from_user.language_code
-    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_input_ID'),
-                                                              callback_data='athlete_code_search'))
-    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_dont_remember_ID'),
-                                                              callback_data='help_to_find_id'))
-    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_new_runner'),
-                                                              callback_data='create_new_athlete'))
-    inline_find_athlete_by_id_kbd.insert(InlineKeyboardButton(t(lang, 'btn_cancel'),
-                                                              callback_data='cancel_registration'))
+    inline_find_athlete_by_id_kbd.insert(
+        InlineKeyboardButton(t(lang, 'btn_new_runner'), callback_data='create_new_athlete')
+    )
+    inline_find_athlete_by_id_kbd.insert(
+        InlineKeyboardButton(t(lang, 'btn_cancel'), callback_data='cancel_registration')
+    )
+    inline_find_athlete_by_id_kbd.insert(
+        InlineKeyboardButton(t(lang, 'btn_input_ID'), callback_data='athlete_code_search')
+    )
+    inline_find_athlete_by_id_kbd.insert(
+        InlineKeyboardButton(t(lang, 'btn_dont_remember_ID'), callback_data='help_to_find_id')
+    )
     return inline_find_athlete_by_id_kbd
 
 

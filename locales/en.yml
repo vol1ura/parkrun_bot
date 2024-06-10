@@ -136,7 +136,7 @@ en:
 
   available_commands: 'All commands are available by tapping the menu button at the bottom left ↙️'
 
-  you_already_have_id: 'If you have ever participated in parkruns or S95 runs before, you already have a personal barcode'
+  you_already_have_id: 'If you have ever participated in parkruns or S95 runs before, you already have a personal barcode (a number after letter "A" on your personal token)'
 
   user_linked_successfully: 'The participant has been successfully linked'
 

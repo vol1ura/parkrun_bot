@@ -136,7 +136,7 @@ sr:
 
   available_commands: 'Sve komande dostupne su klikom na menu dugme u donjem levom uglu ↙️'
 
-  you_already_have_id: 'Ako ste barem jednom do sada učestvovali na parkrun ili S95 trkama, već imate lični barkod'
+  you_already_have_id: 'Ako ste barem jednom do sada učestvovali na parkrun ili S95 trkama, već imate lični barkod (број после слова "А")'
 
   user_linked_successfully: 'Učesnik je uspešno povezan'
 

@@ -224,7 +224,7 @@ async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FS
 async def process_cancel_registration(callback_query: types.CallbackQuery, state: FSMContext):
     if await state.get_state():
         await state.reset_state()
-    await bot.answer_callback_query(callback_query.id)
+    await bot.answer_callback_query(callback_query.id, 'Регистрация прервана')
     await delete_message(callback_query)
     kbd = await kb.main(callback_query)
     await bot.send_message(
@@ -236,7 +236,6 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
 
 @dp.callback_query_handler(lambda c: c.data == 'start_registration')
 async def process_start_registration(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
     find_athlete_kbd = await kb.inline_find_athlete_by_id(callback_query)
     await bot.send_message(
