@@ -27,15 +27,6 @@ async def main(message) -> ReplyKeyboardMarkup:
 # inline_stat.insert(InlineKeyboardButton('Рекордсмены', callback_data='most_records_parkruns'))
 
 
-# INFORMATION keyboard layout with additional information
-# inline_info = InlineKeyboardMarkup(row_width=2)
-# inline_info.insert(InlineKeyboardButton("Ближайшие старты", switch_inline_query_current_chat='events'))
-
-# info_btn1 = InlineKeyboardButton("Посмотреть погоду", switch_inline_query_current_chat='weather')
-# info_btn2 = InlineKeyboardButton("Загрязнение воздуха", switch_inline_query_current_chat='air')
-
-# inline_info.row(info_btn1, info_btn2)
-
 # CLUB ask to change
 change_club = InlineKeyboardMarkup(row_width=2)
 change_club.insert(InlineKeyboardButton('Сменить', callback_data='ask_club'))

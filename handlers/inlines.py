@@ -4,7 +4,7 @@ import time
 from aiogram import types
 
 from app import logger, bot, dp
-from utils import content, weather, news
+from utils import news
 # from s95 import helpers, records
 
 
@@ -40,38 +40,6 @@ from utils import content, weather, news
 #                                       next_offset=m_next_offset if m_next_offset else "", cache_time=0)
 #     except Exception as e:
 #         logger.error(e)
-
-
-@dp.inline_handler(lambda query: 'погода' in query.query or 'weather' in query.query)
-async def query_weather(inline_query: types.InlineQuery):
-    try:
-        data = []
-        for k, v in content.places.items():
-            w = await weather.get_weather(k, v.lat, v.lon)
-            data.append(w)
-        places_weather = [types.InlineQueryResultArticle(
-            id=f'{k}', title=k, description='погода сейчас',
-            input_message_content=types.InputTextMessageContent(w))
-            for (k, v), w in zip(content.places.items(), data)]
-        await bot.answer_inline_query(inline_query.id, places_weather, cache_time=3200)
-    except Exception as e:
-        logger.error(e)
-
-
-@dp.inline_handler(lambda query: 'воздух' in query.query or 'air' in query.query)
-async def query_air(inline_query: types.InlineQuery):
-    try:
-        data = []
-        for k, v in content.places.items():
-            aq = await weather.get_air_quality(k, v.lat, v.lon)
-            data.append(aq)
-        places_air = [types.InlineQueryResultArticle(
-            id=f'{k}', title=k, description='качество воздуха',
-            input_message_content=types.InputTextMessageContent(aq[1]))
-            for (k, v), aq in zip(content.places.items(), data)]
-        await bot.answer_inline_query(inline_query.id, places_air, cache_time=3200)
-    except Exception as e:
-        logger.error(e)
 
 
 @dp.inline_handler(lambda query: re.search(r'соревнован|старт|забег|events', query.query))

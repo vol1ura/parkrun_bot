@@ -3,33 +3,10 @@ import re
 from os import getenv
 
 from aiogram import types
-from geopy import Nominatim
 
 from app import bot, language_code, logger, dp
 from s95 import latest
-from utils import content, vk, weather
-
-
-@dp.message_handler(regexp=r'(?i)бот,? (?:покажи )?(погод\w|воздух)( \w+,?){1,3}$')
-async def ask_weather(message: types.Message):
-    match = re.search(r'бот,? (?:покажи )?(погод\w|воздух) ([\w, ]+)', message.text, re.I)
-    if match:
-        place = re.sub(r' в ', '', match.group(2)).strip()
-        nominatim = Nominatim(user_agent="s95-bot")
-        try:
-            location = nominatim.geocode(place).raw
-        except AttributeError:
-            logger.warning(f'Requesting location failed. No such place {place}.')
-            return await message.reply(f'Есть такой населённый пункт - {place}? ...не знаю. Введите запрос в в формате '
-                                       '"Бот, погода Город" или "Бот, воздух Название Область".')
-        if match.group(1).startswith('погод'):
-            await bot.send_chat_action(message.chat.id, 'typing')
-            weather_info = await weather.get_weather(place, location['lat'], location['lon'])
-            await message.answer(weather_info)
-        else:
-            await bot.send_chat_action(message.chat.id, 'typing')
-            air_info = await weather.get_air_quality(place, location['lat'], location['lon'])
-            await message.answer(air_info[1])
+from utils import content, vk
 
 
 @dp.message_handler(regexp=r'(?i)бот[, \w]+?диаграмма( \d+)?$')

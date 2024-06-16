@@ -1,7 +1,6 @@
 aiodns~=3.1
 aiogram~=2.12
 asyncpg~=0.26
-geopy==2.1
 lxml~=5.2
 openpyxl~=3.0.7
 Pillow~=10.1
