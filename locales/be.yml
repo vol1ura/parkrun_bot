@@ -102,8 +102,7 @@ be:
 
   incorrect_pin_code: 'Введите Ваш e-mail. На него будет выслан проверочный код.'
 
-  pincode_input_attempts: >
-    Неверный код. Попробуйте ввести ещё раз. Это {attempt} попытка из 3.
+  pincode_input_attempts: 'Неверный код. Попробуйте ввести ещё раз. Это {attempt} попытка из 3.'
 
   request_cancelled: 'Запрос отменён.'
 

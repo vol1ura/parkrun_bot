@@ -1,6 +1,5 @@
 import os
 import yaml
-from collections import namedtuple
 
 
 DEFAULT_LOCALE = 'en'
@@ -117,13 +116,6 @@ about_home_event = """Ваш домашний забег: *{0}*. Хотите е
 Если у вас есть награды _'Лучше дома'_, то они будут удалены. \
 Пересчёт этих наград для нового домашнего забега займёт некоторое время.
 """
-
-Coordinates = namedtuple('coordinates', 'lat lon')
-places = {
-    'Центр Москвы': Coordinates('55.738547', '37.611002'),
-    'Кузьминки': Coordinates('55.693191', '37.778019'),
-    'Олимпийская деревня': Coordinates('55.680273', '37.477918')
-}
 
 wait_diagram = 'Строю диаграмму. Подождите...'
 last_activity_caption = 'Распределение результатов на вашем последнем забеге.'

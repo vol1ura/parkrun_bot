@@ -26,7 +26,7 @@ async def s95_personal_result(message: types.Message):
         await message.reply('Что-то пошло не так.')
 
 
-@dp.message_handler(regexp=r'(?i)бот,? (кузьминки|s95)')
+@dp.message_handler(regexp=r'(?i)бот,? (кузьминки|s95|parkrun)')
 async def get_parkrun_picture(message: types.Message):
     token = getenv('VK_SERVICE_TOKEN')
     photo_url = await vk.get_random_photo(token)
@@ -37,17 +37,11 @@ async def get_parkrun_picture(message: types.Message):
 @dp.message_handler(regexp=r'(?i)^бот\b', content_types=['text'])
 async def simple_answers(message: types.Message):
     locale = language_code(message)
-    if 'как' in message.text and re.search(r'\bдела\b|жизнь|\bсам\b|поживаешь', message.text, re.I):
+    if re.search(r'как (\дела\b|жизнь|\bсам\b|поживаешь)', message.text, re.I):
         ans = content.t(locale, 'phrases_about_myself')
     elif re.search(r'привет|\bhi\b|hello|здравствуй', message.text, re.I):
         user = message.from_user.first_name
         ans = [s.format(user) for s in content.t(locale, 'greetings')]
-    elif 'погода' in message.text:
-        bot_info = await bot.get_me()
-        ans = ['Информацию о погоде можно получить через inline запрос: '
-               f'в строке сообщений наберите "@{bot_info.username} погода".'
-               'Либо, набрав сообщение, "Бот, погода Населённый пункт", '
-               'например, "Бот, погода Кузьминки Москва".']
     else:
         ans = content.phrases_about_running
 
