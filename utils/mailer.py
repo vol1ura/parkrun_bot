@@ -1,4 +1,3 @@
-import os
 import smtplib
 import ssl
 
@@ -43,13 +42,3 @@ class EmailConfirmation(Mailer):
         body = t(self.__lang, 'email_body') \
             .format(pin_code=self.__pin_code, webhost=config.HOST, email_sender=config.EMAIL_SENDER)
         super().send(receiver_email, receiver_name, subject, body)
-
-
-if __name__ == '__main__':
-    from dotenv import load_dotenv
-
-    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-    if os.path.exists(dotenv_path):
-        load_dotenv(dotenv_path)
-
-    EmailConfirmation(1111, 'ru').send('test@gmail.com', 'John Doe')

@@ -82,8 +82,8 @@ en:
 
   athlete_already_registered: 'You are already registered! Check out your user profile https://s95.rs/athletes/{}'
 
-  setup_running_club: >
-    Ready to set your running club? Press "OK" to continue
+  setup_running_club: Ready to set your running club? Press "OK" to continue
+  club_not_found: The club was not found. Try to enter the name again (to cancel enter /reset)
 
   setup_home_run: >
     Ready to set your home run? Press "OK" to continue

@@ -320,7 +320,7 @@ async def process_club_name(message: types.Message, state: FSMContext):
         return await message.answer('Введите название клуба немного точнее')
     club = await helpers.find_club_by_name(message.text)
     if not club:
-        return await message.answer('Клуб не найден. Попробуйте ещё раз')
+        return await message.answer(t(language_code(message), 'club_not_found'))
     await state.update_data(club_id=club['id'], club_name=club['name'])
     await helpers.ClubStates.next()
     await message.answer(

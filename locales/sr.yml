@@ -82,11 +82,10 @@ sr:
 
   athlete_already_registered: 'Već ste registrovani! Proverite svoj korisnički profil https://s95.rs/athletes/{}'
 
-  setup_running_club: >
-    Spremni ste da podesite svoj trkački klub? Pritisnite "OK" da nastavite.
+  setup_running_club: Spremni ste da podesite svoj trkački klub? Pritisnite "OK" da nastavite.
+  club_not_found: Klub nije pronađen. Pokušajte ponovo da unesete naslov (da biste otkazali otkucajte /reset)
 
-  setup_home_run: >
-    Spremni ste da podesite svoju osnovnu trku? Pritisnite "OK" da nastavite.
+  setup_home_run: Spremni ste da podesite svoju osnovnu trku? Pritisnite "OK" da nastavite.
 
   athlete_code_search: >
     Unesite svoj *parkrun* ili *S95* ID (samo brojevi, bez slova A)
