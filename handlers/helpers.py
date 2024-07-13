@@ -158,7 +158,7 @@ async def user_results(telegram_id: int) -> pd.DataFrame:
         INNER JOIN events ON events.id = activities.event_id
         INNER JOIN athletes ON athletes.id = results.athlete_id
         INNER JOIN users ON users.id = athletes.user_id
-        WHERE users.telegram_id = $1
+        WHERE users.telegram_id = $1 AND activities.published = TRUE
         ORDER BY activities.date DESC
     """
     data = await conn.fetch(query, telegram_id)
