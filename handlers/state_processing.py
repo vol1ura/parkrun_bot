@@ -16,10 +16,10 @@ from utils import mailer
 from utils.content import t, home_event_notice
 
 
-REGEXP_PROCEED = '(Всё верно, создать|Okay, proceed|Ok, nastavi)'
-REGEXP_LINK = '(Это я, привязать|Yes, it is me|Da, to sam ja)'
-ARRAY_GENDERS = ['мужской', 'женский', 'male', 'female', 'muški', 'ženski']
-ARRAY_MALE = ['мужской', 'male', 'muški']
+PROCEED_CREATION_REGEXP = '(Всё верно, создать|Okay, proceed|Ok, nastavi)'
+LINK_ATHLETE_REGEXP = '(Это я, привязать|Yes, it is me|Da, to sam ja)'
+GENDERS_LIST = ['мужской', 'женский', 'male', 'female', 'muški', 'ženski']
+MALE_LIST = ['мужской', 'male', 'muški']
 
 
 @dp.message_handler(state=helpers.UserStates.SEARCH_ATHLETE_CODE)
@@ -61,23 +61,17 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
 
 
 # Просим Почту сразу
-@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp=REGEXP_LINK)
+@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp=LINK_ATHLETE_REGEXP)
 async def process_save_with_parkrun_code(message: types.Message):
     await helpers.UserStates.EMAIL.set()
-    await message.reply(
-        t(language_code(message), 'ask_email'),
-        reply_markup=types.ReplyKeyboardRemove()
-    )
+    await message.reply(t(language_code(message), 'ask_email'), reply_markup=types.ReplyKeyboardRemove())
 
 
 # Запрашиваем Фамилию
-@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp=REGEXP_PROCEED)
+@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp=PROCEED_CREATION_REGEXP)
 async def process_ask_athlete_last_name(message: types.Message):
     await helpers.UserStates.next()
-    await message.answer(
-        t(language_code(message), 'input_lastname'),
-        reply_markup=types.ReplyKeyboardRemove()
-    )
+    await message.answer(t(language_code(message), 'input_lastname'), reply_markup=types.ReplyKeyboardRemove())
 
 
 @dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE)
@@ -98,10 +92,7 @@ async def process_get_athlete_last_name(message: types.Message, state: FSMContex
 
 @dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME)
 async def process_repeat_last_name(message: types.Message):
-    await message.answer(
-        t(language_code(message), 'input_lastname_again'),
-        reply_markup=types.ReplyKeyboardRemove()
-    )
+    await message.answer(t(language_code(message), 'input_lastname_again'), reply_markup=types.ReplyKeyboardRemove())
 
 
 # Сохраняем Имя
@@ -122,7 +113,7 @@ async def process_repeat_first_name(message: types.Message):
 
 # Запрашиваем Пол ещё раз
 @dp.message_handler(
-    lambda message: message.text.strip().lower() not in ARRAY_GENDERS,
+    lambda message: message.text.strip().lower() not in GENDERS_LIST,
     state=helpers.UserStates.GENDER
 )
 async def process_gender_invalid(message: types.Message):
@@ -134,7 +125,7 @@ async def process_gender_invalid(message: types.Message):
 # Просим Почту
 @dp.message_handler(state=helpers.UserStates.GENDER)
 async def process_gender(message: types.Message, state: FSMContext):
-    await state.update_data(male=(message.text.strip().lower() in ARRAY_MALE))
+    await state.update_data(male=(message.text.strip().lower() in MALE_LIST))
     await helpers.UserStates.next()
     await message.answer(t(language_code(message), 'ask_email'), reply_markup=types.ReplyKeyboardRemove())
 

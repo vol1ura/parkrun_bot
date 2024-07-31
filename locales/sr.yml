@@ -91,7 +91,7 @@ sr:
     Unesite svoj *parkrun* ili *S95* ID (samo brojevi, bez slova A)
 
   athlete_code_check: >
-    Nismo pronašli učesnika sa ID={athlete_id} u S95 trkama. Možda se još uvek niste pridružili S95 trkama.
+    Nismo pronašli učesnika sa ID=<b>{athlete_id}</b> u S95 trkama. Možda se još uvek niste pridružili S95 trkama.
 
     Uverite se da unosite samo brojeve (bez slova A) i proverite da li je vaš ID na sajtu.
 
@@ -170,5 +170,6 @@ sr:
   btn_dont_remember_ID: 'Ne sećam se S95 ID'
   btn_new_runner: 'Ja sam nov u parkrun'
   btn_open_website: 'Na sajt s95.rs'
+  btn_back: Back
 
   link_to_s95_website: 'https://s95.rs/'

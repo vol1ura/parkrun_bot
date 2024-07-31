@@ -120,5 +120,6 @@ async def inline_find_athlete_by_id(message) -> InlineKeyboardMarkup:
 async def inline_open_s95(message) -> InlineKeyboardMarkup:
     inline_open_s95_kbd = InlineKeyboardMarkup()
     lang = message.from_user.language_code
-    inline_open_s95_kbd.row(InlineKeyboardButton(t(lang, 'btn_open_website'), url=t(lang, 'link_to_s95_website')))
+    inline_open_s95_kbd.insert(InlineKeyboardButton(t(lang, 'btn_open_website'), url=t(lang, 'link_to_s95_website')))
+    inline_open_s95_kbd.insert(InlineKeyboardButton(t(lang, 'btn_back'), callback_data='start_registration'))
     return inline_open_s95_kbd

@@ -241,7 +241,8 @@ async def process_start_registration(callback_query: types.CallbackQuery):
     await bot.send_message(
         callback_query.from_user.id,
         t(language_code(callback_query), 'you_already_have_id'),
-        reply_markup=find_athlete_kbd
+        reply_markup=find_athlete_kbd,
+        parse_mode='Markdown'
     )
 
 

@@ -92,9 +92,9 @@ en:
     Enter your *parkrun* or *S95* ID (just numbers, no letter A)
 
   athlete_code_check: >
-    Couldn't find a participant with ID={athlete_id} in S95 runs. Perhaps, you haven't joined S95 runs yet.
+    Couldn't find a participant with ID=<b>{athlete_id}</b> in S95 runs. Perhaps, you haven't joined S95 runs yet.
 
-    Make sure to enter only numbers (no letter A) and check it's your ID on the website.
+    Make sure to enter only numbers (no letter A) and check it's your ID on the website. If all OK, clik <b>Okay</b>
 
   help_to_find_id: >
     Need help finding your S95 ID? Open s95.rs in your browser, tap the menu button in the top right, and enter you surname in the search field at the bottom right.
@@ -171,5 +171,6 @@ en:
   btn_dont_remember_ID: 'Forgot S95 ID'
   btn_new_runner: 'I am new to parkruns'
   btn_open_website: 'Go to website s95.rs'
+  btn_back: Back
 
   link_to_s95_website: 'https://s95.rs/'
