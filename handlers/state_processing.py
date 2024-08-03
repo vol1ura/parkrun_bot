@@ -39,9 +39,9 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
             return await message.answer(t(language_code(message), 'user_exists_linked'))
         async with state.proxy() as data:
             data['athlete_id'] = athlete['id']
-            names_list = re.split(r'\s', athlete['name'], maxsplit=1)
+            names_list = re.split(r'\s', athlete['name'] or '', maxsplit=1)
             if len(names_list) < 2:
-                names_list.insert(0, 'Товарищ')
+                names_list.insert(0, 'Noname')
             data['first_name'], data['last_name'] = names_list
             accept_athlete_kbd = await kb.accept_athlete(message)
         await message.answer(
