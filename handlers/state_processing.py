@@ -112,10 +112,7 @@ async def process_repeat_first_name(message: types.Message):
 
 
 # Запрашиваем Пол ещё раз
-@dp.message_handler(
-    lambda message: message.text.strip().lower() not in GENDERS_LIST,
-    state=helpers.UserStates.GENDER
-)
+@dp.message_handler(lambda m: m.text.strip().lower() not in GENDERS_LIST, state=helpers.UserStates.GENDER)
 async def process_gender_invalid(message: types.Message):
     gender_kbd = await kb.select_gender(message)
     await message.reply(t(language_code(message), 'define_your_gender'), reply_markup=gender_kbd)
@@ -171,7 +168,7 @@ async def process_email_validation(message: types.Message, state: FSMContext):
             await helpers.UserStates.previous()
             return await message.reply(t(language_code(message), 'pin_code_expired'))
         data['attempt'] += 1
-        if not message.text.isdigit() or data['pin'] != int(message.text.strip()):
+        if not message.text.isdecimal() or data['pin'] != int(message.text.strip()):
             return await message.reply(
                 t(language_code(message), 'pincode_input_attempts').format(attempt=data["attempt"])
             )
