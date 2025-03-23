@@ -170,7 +170,20 @@ en:
   btn_input_ID: 'Input ID'
   btn_dont_remember_ID: 'Forgot S95 ID'
   btn_new_runner: 'I am new to parkruns'
-  btn_open_website: 'Go to website s95.rs'
+  btn_open_website: 'Open s95.ru website'
   btn_back: Back
+  btn_share_phone: '📱 Share number'
 
-  link_to_s95_website: 'https://s95.rs/'
+  request_phone: >
+    Please share your phone number by clicking the *button below*.
+
+    Phone number is required for participation in partner programs. Consent to participate in specific programs will be requested separately.
+
+    By clicking the button, you give [consent to personal data processing](https://s95.ru/pages/privacy-policy).
+
+  phone_received: 'Thank you! Your phone number: +{}'
+  wrong_contact: 'Please share your own phone number'
+  phone_save_error: 'An error occurred while saving the phone number. Please try again later.'
+  phone_already_set: 'Your phone number is already set: +{}'
+
+  link_to_s95_website: 'https://s95.ru/'

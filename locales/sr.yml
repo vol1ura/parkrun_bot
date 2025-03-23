@@ -169,7 +169,20 @@ sr:
   btn_input_ID: 'Unesi ID'
   btn_dont_remember_ID: 'Ne sećam se S95 ID'
   btn_new_runner: 'Ja sam nov u parkrun'
-  btn_open_website: 'Na sajt s95.rs'
-  btn_back: Back
+  btn_open_website: 'Otvorite sajt s95.ru'
+  btn_back: Nazad
+  btn_share_phone: '📱 Podeli broj'
 
-  link_to_s95_website: 'https://s95.rs/'
+  request_phone: >
+    Molimo vas da podelite svoj broj telefona klikom na dugme ispod.
+
+    Broj telefona je potreban za učešće u partnerskim programima. Saglasnost za učešće u konkretnom programu će biti zatražena posebno.
+
+    Klikom na dugme, dajete [saglasnost za obradu ličnih podataka](https://s95.ru/pages/privacy-policy).
+
+  phone_received: 'Hvala! Vaš broj telefona: +{}'
+  wrong_contact: 'Molimo vas da podelite svoj sopstveni broj telefona'
+  phone_save_error: 'Došlo je do greške prilikom čuvanja broja telefona. Molimo vas pokušajte ponovo kasnije.'
+  phone_already_set: 'Vaš broj telefona je već postavljen: +{}'
+
+  link_to_s95_website: 'https://s95.ru/'

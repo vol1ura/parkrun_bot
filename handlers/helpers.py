@@ -183,3 +183,14 @@ async def handle_throttled_query(*args, **kwargs):
         action = 'unknown'
     logger.warning(f'Message was throttled on {action} action with rate={kwargs["rate"]} and id={telegram_id}')
     await message.answer(random.choice(content.throttled_messages))
+
+
+async def update_user_phone(telegram_id: int, phone: str) -> bool:
+    try:
+        conn = await db_conn()
+        await conn.execute('UPDATE users SET phone = $1 WHERE telegram_id = $2', phone, telegram_id)
+        await conn.close()
+        return True
+    except Exception:
+        logger.error(f'Error while updating phone for user with telegram_id={telegram_id}')
+        return False

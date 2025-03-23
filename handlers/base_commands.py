@@ -127,3 +127,57 @@ async def process_command_home(message: types.Message):
         reply_markup=kb.change_home_event,
         parse_mode='Markdown'
     )
+
+
+@dp.message_handler(commands=['phone'])
+async def process_command_phone(message: types.Message):
+    await helpers.delete_message(message)
+    user = await helpers.find_user_by('telegram_id', message.from_user.id)
+    if not user:
+        agreement_kbd = await kb.inline_agreement(message)
+        return await message.answer(
+            t(language_code(message), 'confirm_registration'),
+            reply_markup=agreement_kbd,
+            parse_mode='Markdown'
+        )
+    if user.get('phone'):
+        return await message.answer(
+            t(language_code(message), 'phone_already_set').format(user['phone']),
+            reply_markup=await kb.main(message)
+        )
+    phone_kbd = await kb.phone_keyboard(message)
+    await message.answer(
+        t(language_code(message), 'request_phone'),
+        disable_web_page_preview=True,
+        reply_markup=phone_kbd,
+        parse_mode='Markdown'
+    )
+
+
+@dp.message_handler(content_types=['contact'])
+async def process_contact(message: types.Message):
+    if message.contact.user_id == message.from_user.id:
+        phone = message.contact.phone_number
+        if await helpers.update_user_phone(message.from_user.id, phone):
+            await message.answer(
+                t(language_code(message), 'phone_received').format(phone),
+                reply_markup=await kb.main(message)
+            )
+        else:
+            await message.answer(
+                t(language_code(message), 'phone_save_error'),
+                reply_markup=await kb.main(message)
+            )
+    else:
+        await message.answer(
+            t(language_code(message), 'wrong_contact'),
+            reply_markup=await kb.main(message)
+        )
+
+
+@dp.message_handler(lambda message: message.text == t(message.from_user.language_code, 'btn_cancel'))
+async def process_cancel_phone(message: types.Message):
+    await message.answer(
+        t(language_code(message), 'request_cancelled'),
+        reply_markup=await kb.main(message)
+    )

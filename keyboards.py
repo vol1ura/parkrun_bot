@@ -123,3 +123,10 @@ async def inline_open_s95(message) -> InlineKeyboardMarkup:
     inline_open_s95_kbd.insert(InlineKeyboardButton(t(lang, 'btn_open_website'), url=t(lang, 'link_to_s95_website')))
     inline_open_s95_kbd.insert(InlineKeyboardButton(t(lang, 'btn_back'), callback_data='start_registration'))
     return inline_open_s95_kbd
+
+
+async def phone_keyboard(message) -> ReplyKeyboardMarkup:
+    phone_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
+    phone_kbd.insert(KeyboardButton(t(message.from_user.language_code, 'btn_share_phone'), request_contact=True))
+    phone_kbd.insert(KeyboardButton(t(message.from_user.language_code, 'btn_cancel')))
+    return phone_kbd
