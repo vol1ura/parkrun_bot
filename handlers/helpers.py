@@ -194,3 +194,17 @@ async def update_user_phone(telegram_id: int, phone: str) -> bool:
     except Exception:
         logger.error(f'Error while updating phone for user with telegram_id={telegram_id}')
         return False
+
+
+async def get_auth_link(user_id: int) -> Optional[str]:
+    try:
+        async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
+            async with session.post(f'{INTERNAL_API_URL}/user/auth_link', json={'user_id': user_id}) as response:
+                if not response.ok:
+                    logger.error(f'Failed to get auth link for user with id={user_id}')
+                    return None
+                data = await response.json()
+                return data['link']
+    except Exception as e:
+        logger.error(f'Error while getting auth link for user with id={user_id}: {e}')
+        return None

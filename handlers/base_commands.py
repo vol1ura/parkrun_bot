@@ -181,3 +181,22 @@ async def process_cancel_phone(message: types.Message):
         t(language_code(message), 'request_cancelled'),
         reply_markup=await kb.main(message)
     )
+
+
+@dp.message_handler(commands=['login'])
+async def process_command_login(message: types.Message):
+    user = await helpers.find_user_by('telegram_id', message.from_user.id)
+    if not user:
+        agreement_kbd = await kb.inline_agreement(message)
+        return await message.answer(t(language_code(message), 'login_not_registered'), reply_markup=agreement_kbd)
+
+    auth_link = await helpers.get_auth_link(user['id'])
+    if not auth_link:
+        return await message.answer(t(language_code(message), 'login_link_error'), reply_markup=await kb.main(message))
+
+    await message.answer(
+        t(language_code(message), 'your_login_link').format(link=auth_link),
+        reply_markup=await kb.main(message),
+        parse_mode='Markdown',
+        disable_web_page_preview=True
+    )

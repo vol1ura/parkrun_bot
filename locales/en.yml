@@ -187,3 +187,11 @@ en:
   phone_already_set: 'Your phone number is already set: +{}'
 
   link_to_s95_website: 'https://s95.ru/'
+
+  your_login_link: |
+    Link to S95 website: [LOGIN]({link})
+    Link is valid for 2 minutes
+    Please do not share it with other users!
+
+  login_link_error: 'An error occurred while getting the login link. Please try again later.'
+  login_not_registered: 'To get the login link, you need to register.'

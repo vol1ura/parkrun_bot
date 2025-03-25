@@ -186,3 +186,11 @@ sr:
   phone_already_set: 'Vaš broj telefona je već postavljen: +{}'
 
   link_to_s95_website: 'https://s95.ru/'
+
+  your_login_link: |
+    Link za prijavu na sajt S95: [PRIJAVI SE]({link})
+    Link je validan 2 minuta
+    Molimo vas ne delite ga sa drugim korisnicima!
+
+  login_link_error: 'Došlo je do greške prilikom dobijanja linka za prijavu. Molimo vas pokušajte ponovo kasnije.'
+  login_not_registered: 'Da biste dobili link za prijavu, morate se registrovanati.'
