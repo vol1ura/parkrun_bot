@@ -7,7 +7,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.exceptions import MessageToDeleteNotFound
 from typing import Optional
 
-from app import logger, db_conn
+from app import logger, get_pool
 from config import INTERNAL_API_URL
 from s95.athlete_code import AthleteCode
 from s95.helpers import time_conv
@@ -44,51 +44,47 @@ async def delete_message(message: types.Message) -> None:
 
 
 async def find_athlete_by(field: str, value):
-    conn = await db_conn()
-    athlete = await conn.fetchrow(f'SELECT * FROM athletes WHERE {field} = $1', value)
-    await conn.close()
-    return athlete
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow(f'SELECT * FROM athletes WHERE {field} = $1', value)
 
 
 async def find_user_by(field: str, value):
-    conn = await db_conn()
-    user = await conn.fetchrow(f'SELECT * FROM users WHERE {field} = $1', value)
-    await conn.close()
-    return user
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow(f'SELECT * FROM users WHERE {field} = $1', value)
 
 
 async def find_club(telegram_id: int):
-    conn = await db_conn()
-    club = await conn.fetchrow(
-        """SELECT athletes.*, clubs.name as club_name
-        FROM athletes
-        LEFT JOIN clubs ON athletes.club_id = clubs.id
-        INNER JOIN users ON users.id = athletes.user_id
-        WHERE users.telegram_id = $1""",
-        telegram_id
-    )
-    await conn.close()
-    return club
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow(
+            """SELECT athletes.*, clubs.name as club_name
+            FROM athletes
+            LEFT JOIN clubs ON athletes.club_id = clubs.id
+            INNER JOIN users ON users.id = athletes.user_id
+            WHERE users.telegram_id = $1""",
+            telegram_id
+        )
 
 
 async def find_club_by_name(name: str):
-    conn = await db_conn()
-    club = await conn.fetchrow('SELECT * FROM clubs WHERE name ILIKE $1', f'{name}%')
-    return club
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow('SELECT * FROM clubs WHERE name ILIKE $1', f'{name}%')
 
 
 async def find_home_event(telegram_id: int):
-    conn = await db_conn()
-    event = await conn.fetchrow(
-        """SELECT athletes.*, events.name as event_name
-        FROM athletes
-        INNER JOIN users ON users.id = athletes.user_id
-        LEFT JOIN events ON athletes.event_id = events.id
-        WHERE users.telegram_id = $1""",
-        telegram_id
-    )
-    await conn.close()
-    return event
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow(
+            """SELECT athletes.*, events.name as event_name
+            FROM athletes
+            INNER JOIN users ON users.id = athletes.user_id
+            LEFT JOIN events ON athletes.event_id = events.id
+            WHERE users.telegram_id = $1""",
+            telegram_id
+        )
 
 
 async def update_home_event(telegram_id: int, event_id: Optional[int] = None) -> bool:
@@ -102,8 +98,7 @@ async def update_home_event(telegram_id: int, event_id: Optional[int] = None) ->
     except Exception:
         logger.error(f'Error while update event_id={event_id} for user with telegram_id={telegram_id}')
         return False
-    else:
-        return True
+    return True
 
 
 async def update_club(telegram_id: int, club_id: Optional[int] = None) -> bool:
@@ -117,54 +112,50 @@ async def update_club(telegram_id: int, club_id: Optional[int] = None) -> bool:
     except Exception:
         logger.error(f'Error while update club_id={club_id} for user with telegram_id={telegram_id}')
         return False
-    else:
-        return True
+    return True
 
 
 async def find_user_by_email(email: str):
-    conn = await db_conn()
-    user = await conn.fetchrow('SELECT * FROM users WHERE LOWER(email) = $1', email.lower())
-    await conn.close()
-    return user
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow('SELECT * FROM users WHERE LOWER(email) = $1', email.lower())
 
 
 async def events():
-    conn = await db_conn()
-    events_list = await conn.fetch('SELECT * FROM events WHERE id != $1 ORDER BY id', FRIENDS_EVENT_ID)
-    await conn.close()
-    return events_list
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetch('SELECT * FROM events WHERE id != $1 ORDER BY id', FRIENDS_EVENT_ID)
 
 
 async def find_event_by_id(event_id: int):
     if event_id == FRIENDS_EVENT_ID:
         return
-    conn = await db_conn()
-    event = await conn.fetchrow('SELECT * FROM events WHERE id = $1', event_id)
-    await conn.close()
-    return event
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow('SELECT * FROM events WHERE id = $1', event_id)
 
 
 async def tg_channel_of_event(event_id: int):
-    conn = await db_conn()
-    link = await conn.fetchrow('SELECT link FROM contacts WHERE event_id = $1 AND contact_type = 3', event_id)
-    await conn.close()
-    return link and link['link']
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        link = await conn.fetchrow('SELECT link FROM contacts WHERE event_id = $1 AND contact_type = 3', event_id)
+        return link and link['link']
 
 
 async def user_results(telegram_id: int) -> pd.DataFrame:
-    conn = await db_conn()
-    query = """SELECT results.position, results.total_time, activities.date, events.name FROM results
-        INNER JOIN activities ON activities.id = results.activity_id
-        INNER JOIN events ON events.id = activities.event_id
-        INNER JOIN athletes ON athletes.id = results.athlete_id
-        INNER JOIN users ON users.id = athletes.user_id
-        WHERE users.telegram_id = $1 AND activities.published = TRUE
-        ORDER BY activities.date DESC
-    """
-    data = await conn.fetch(query, telegram_id)
+    pool = get_pool()
+    async with pool.acquire() as conn:
+        query = """SELECT results.position, results.total_time, activities.date, events.name FROM results
+            INNER JOIN activities ON activities.id = results.activity_id
+            INNER JOIN events ON events.id = activities.event_id
+            INNER JOIN athletes ON athletes.id = results.athlete_id
+            INNER JOIN users ON users.id = athletes.user_id
+            WHERE users.telegram_id = $1 AND activities.published = TRUE
+            ORDER BY activities.date DESC
+        """
+        data = await conn.fetch(query, telegram_id)
     df = pd.DataFrame(data, columns=['Pos', 'Time', 'Run Date', 'Event'])
     df['m'] = df['Time'].apply(lambda t: time_conv(t))
-    await conn.close()
     return df
 
 
@@ -174,7 +165,7 @@ def athlete_code(athlete):
 
 
 async def handle_throttled_query(*args, **kwargs):
-    message = args[0]  # as message was the first argument in the original handler
+    message = args[0]  # message was the first argument in the original handler
     try:
         telegram_id = message.from_user.id
         action = message.data
@@ -187,9 +178,9 @@ async def handle_throttled_query(*args, **kwargs):
 
 async def update_user_phone(telegram_id: int, phone: str) -> bool:
     try:
-        conn = await db_conn()
-        await conn.execute('UPDATE users SET phone = $1 WHERE telegram_id = $2', phone, telegram_id)
-        await conn.close()
+        pool = get_pool()
+        async with pool.acquire() as conn:
+            await conn.execute('UPDATE users SET phone = $1 WHERE telegram_id = $2', phone, telegram_id)
         return True
     except Exception:
         logger.error(f'Error while updating phone for user with telegram_id={telegram_id}')
