@@ -1,13 +1,12 @@
 aiodns~=3.1
-aiogram~=2.12
-asyncpg~=0.26
+aiogram~=2.25
+asyncpg~=0.30
 lxml~=5.2
-openpyxl~=3.0.7
-Pillow~=10.1
 pycparser~=2.20
+pypng==0.20220715.0
 python-dotenv>=0.17.0
 python-Levenshtein>=0.12.2
-qrcode~=7.4
+qrcode~=8.2
 rollbar~=1.0
 seaborn>=0.11.1
 pyyaml
