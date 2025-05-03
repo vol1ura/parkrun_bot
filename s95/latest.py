@@ -1,4 +1,7 @@
 import re
+import logging
+import asyncio
+from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
@@ -7,8 +10,24 @@ import pandas as pd
 from matplotlib.colors import Normalize, PowerNorm
 from matplotlib.ticker import MaxNLocator
 
-from app import db_conn
-from s95.helpers import min_to_mmss, time_conv
+from aiogram.utils.exceptions import TelegramAPIError
+
+from utils.mailer import send_email
+from utils.vk import post_to_vk
+from app import db
+
+logger = logging.getLogger(__name__)
+
+async def get_latest_results():
+    try:
+        results = await db.execute_many(
+            'SELECT * FROM results WHERE created_at >= $1 ORDER BY created_at DESC',
+            datetime.now() - timedelta(days=7)
+        )
+        return results
+    except Exception as e:
+        logger.error(f'Error getting latest results: {e}')
+        return []
 
 
 async def parse_latest_results(telegram_id: int):
@@ -155,7 +174,6 @@ async def review_table(parkrun: str):
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
-    import asyncio
     import os
 
     dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')

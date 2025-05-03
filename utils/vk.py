@@ -1,5 +1,9 @@
 import aiohttp
 import random
+import logging
+import config
+
+logger = logging.getLogger(__name__)
 
 VK_ALBUM_OWNER_ID = '-212432495'
 ALBUMS_ID = ['wall', 285307254]  # id of the best albums for this owner_id
@@ -12,16 +16,71 @@ def make_vk_api_url(token: str, method: str, owner_id=VK_ALBUM_OWNER_ID, album_i
 
 async def get_random_photo(token):
     async with aiohttp.ClientSession() as session:
+        # Получаем список альбомов
         base_url = make_vk_api_url(token, 'photos.getAlbums')
+        print(f"Albums URL: {base_url}")
         async with session.get(base_url) as resp:
             all_albums = await resp.json()
+            print(f"Albums response: {all_albums}")
+        
+        # Получаем ID последних альбомов
         last_albums = [album['id'] for album in all_albums['response']['items'][:2]]
-        album_id = random.choice(ALBUMS_ID + last_albums)
+        print(f"Last albums: {last_albums}")
+        all_albums_list = ALBUMS_ID + last_albums
+        print(f"All albums list: {all_albums_list}")
+        album_id = random.choice(all_albums_list)
+        print(f"Selected album_id: {album_id}")
+        
+        # Получаем фотографии из выбранного альбома
         base_url = make_vk_api_url(token, 'photos.get', album_id=album_id)
+        print(f"Photos URL: {base_url}")
         async with session.get(base_url) as resp:
-            photos_wall_parkrun_kuzminki = await resp.json()
-    random_photo = random.choice(photos_wall_parkrun_kuzminki['response']['items'])
-    return sorted(random_photo['sizes'], key=lambda x: -x['height'])[2]['url']
+            photos_response = await resp.json()
+            print(f"Photos response: {photos_response}")
+        
+        # Выбираем случайное фото и возвращаем URL третьей по размеру версии
+        if not photos_response.get('response', {}).get('items'):
+            logger.error(f"No photos found in album {album_id}")
+            return None
+            
+        random_photo = random.choice(photos_response['response']['items'])
+        print(f"Random photo: {random_photo}")
+        sorted_sizes = sorted(random_photo['sizes'], key=lambda x: -x['height'])
+        print(f"Sorted sizes: {sorted_sizes}")
+        
+        if len(sorted_sizes) < 3:
+            logger.error(f"Photo {random_photo['id']} has less than 3 sizes")
+            return sorted_sizes[0]['url'] if sorted_sizes else None
+            
+        return sorted_sizes[2]['url']
+
+
+async def post_to_vk(message: str, photo_url: str = None) -> bool:
+    """
+    Post a message to VK wall with optional photo
+    """
+    try:
+        params = {
+            'owner_id': VK_ALBUM_OWNER_ID,
+            'message': message,
+            'from_group': 1,
+            'access_token': config.VK_SERVICE_TOKEN,
+            'v': '5.130'
+        }
+        
+        if photo_url:
+            params['attachments'] = photo_url
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://api.vk.com/method/wall.post', data=params) as resp:
+                result = await resp.json()
+                if 'error' in result:
+                    logger.error(f'Error posting to VK: {result["error"]}')
+                    return False
+                return True
+    except Exception as e:
+        logger.error(f'Error posting to VK: {e}')
+        return False
 
 
 # if __name__ == '__main__':
