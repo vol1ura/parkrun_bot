@@ -4,7 +4,7 @@ from aiogram.utils import executor
 import config
 import handlers
 
-from app import bot, dp
+from app import bot, dp, setup_container
 
 
 async def setup_bot_commands(_: Dispatcher):
@@ -14,9 +14,10 @@ async def setup_bot_commands(_: Dispatcher):
     bot_commands = [
         types.BotCommand(command='/qrcode', description='Ваш QR-код в S95'),
         types.BotCommand(command='/register', description='Зарегистрироваться в S95'),
+        types.BotCommand(command='/login', description='Войти на сайт S95'),
         types.BotCommand(command='/statistics', description='Персональная статистика'),
         types.BotCommand(command='/help', description='Краткая справка'),
-        types.BotCommand(command='/phone', description='Поделиться номером'),
+        types.BotCommand(command='/phone', description='Привязать свой телефон к профилю'),
         types.BotCommand(command='/club', description='Установить клуб'),
         types.BotCommand(command='/home', description='Установить домашний забег'),
         types.BotCommand(command='/start', description='Перезапуск'),
@@ -27,6 +28,7 @@ async def setup_bot_commands(_: Dispatcher):
 
 # Run after startup
 async def on_startup(dispatcher: Dispatcher):
+    await setup_container()
     await bot.delete_webhook()
     await bot.set_webhook(config.WEBHOOK_URL)
     await setup_bot_commands(dispatcher)
@@ -53,4 +55,4 @@ if __name__ == '__main__':
         )
     else:
         handlers.print_info()
-        executor.start_polling(dp)
+        executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)

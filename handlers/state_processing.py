@@ -9,9 +9,13 @@ from random import randint
 
 import keyboards as kb
 
-from app import dp, language_code
+from app import dp, language_code, container
 from handlers import helpers
 from s95.athlete_code import AthleteCode
+from services.user_service import UserService
+from services.athlete_service import AthleteService
+from services.club_service import ClubService
+from services.event_service import EventService
 from utils import mailer
 from utils.content import t, home_event_notice
 
@@ -27,16 +31,26 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
     athlete_code = AthleteCode(message.text)
     if not athlete_code.is_valid:
         return await message.reply(t(language_code(message), 'input_athletes_id'))
+
+    # Get services from container
+    athlete_service = container.resolve(AthleteService)
+
+    # Update state with code information
     await helpers.UserStates.next()
     if athlete_code.key == 's95':
         await state.update_data(parkrun_code=None)
     else:
         await state.update_data(**{athlete_code.key: athlete_code.value})
-    athlete = await helpers.find_athlete_by(athlete_code.key, athlete_code.value)
+
+    # Find athlete by code
+    athlete = await athlete_service.find_athlete_by_code(athlete_code.key, athlete_code.value)
+
     if athlete:
         if athlete["user_id"]:
             await state.finish()
             return await message.answer(t(language_code(message), 'user_exists_linked'))
+
+        # Process found athlete
         async with state.proxy() as data:
             data['athlete_id'] = athlete['id']
             names_list = re.split(r'\s', athlete['name'] or '', maxsplit=1)
@@ -44,12 +58,14 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
                 names_list.insert(0, 'Noname')
             data['first_name'], data['last_name'] = names_list
             accept_athlete_kbd = await kb.accept_athlete(message)
+
         await message.answer(
             t(language_code(message), 'found_athlete_info').format(athlete_id=athlete['id'], name=athlete['name']),
             reply_markup=accept_athlete_kbd,
             parse_mode='html'
         )
     else:
+        # Athlete not found, offer to create new
         new_athlete_kbd = await kb.ask_for_new_athlete(message)
         await message.reply(
             t(language_code(message), 'athlete_code_check')
@@ -134,17 +150,29 @@ async def process_gender(message: types.Message, state: FSMContext):
 )
 async def process_get_email(message: types.Message, state: FSMContext):
     email = message.text.lower()
-    user = await helpers.find_user_by_email(email)
+
+    # Get services from container
+    user_service = container.resolve(UserService)
+    athlete_service = container.resolve(AthleteService)
+
+    # Check if user with this email exists
+    user = await user_service.find_user_by_email(email)
     if user:
-        # проверить, что у юзера с этой почтой не привязан участник
-        if await helpers.find_athlete_by('user_id', user['id']):
+        # Check if user already has an athlete linked
+        athlete = await athlete_service.find_athlete_by_user_id(user['id'])
+        if athlete:
             await state.finish()
-            # TODO: Залогировать эту ситуацию
+            # TODO: Log this situation
             return await message.reply(t(language_code(message), 'athlete_already_linked'))
-        # Если участник не привязан, то делаем привязку
+
+        # If no athlete is linked, proceed with linking
         await state.update_data(user_id=user['id'])
         await message.answer(t(language_code(message), 'user_exists_needs_linking'))
+
+    # Proceed to next state
     await helpers.UserStates.next()
+
+    # Set up email verification
     async with state.proxy() as data:
         data['email'] = email
         data['attempt'] = 0
@@ -153,6 +181,7 @@ async def process_get_email(message: types.Message, state: FSMContext):
         lang = message.from_user.language_code
         confirmation_mailer = mailer.EmailConfirmation(data['pin'], lang)
         confirmation_mailer.send(email, f'{data["first_name"]} {data["last_name"]}')
+
     await message.reply(t(language_code(message), 'input_pin_code'))
 
 
@@ -284,16 +313,28 @@ async def process_invalid_password(message: types.Message):
 @dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID, regexp=r'\A\d+\Z')
 async def process_input_event_id(message: types.Message, state: FSMContext):
     event_id = int(message.text)
+
+    # Get services from container
+    event_service = container.resolve(EventService)
+
+    # Check if event exists
+    event = await event_service.find_event_by_id(event_id)
+    if not event:
+        return await message.answer('Введён некорректный номер. Попробуйте ещё раз. Либо /reset для отмены')
+
+    # Update home event
     result = await helpers.update_home_event(message.from_user.id, event_id)
     if not result:
-        return await message.answer('Введён некорректный номер. Попробуйте ещё раз. Либо /reset для отмены')
-    else:
-        answer = 'Домашний забег установлен.'
-        link = await helpers.tg_channel_of_event(event_id)
-        if link:
-            answer += ' ' + home_event_notice.format(link)
-        await message.answer(answer, parse_mode='Markdown', disable_web_page_preview=True)
-        await state.finish()
+        return await message.answer('Произошла ошибка при установке домашнего забега. Попробуйте ещё раз.')
+
+    # Get Telegram channel link
+    answer = 'Домашний забег установлен.'
+    link = await event_service.find_telegram_channel(event_id)
+    if link:
+        answer += ' ' + home_event_notice.format(link)
+
+    await message.answer(answer, parse_mode='Markdown', disable_web_page_preview=True)
+    await state.finish()
 
 
 # Повторный запрос кода локации
@@ -306,11 +347,20 @@ async def process_incorrect_input_club_id(message: types.Message):
 async def process_club_name(message: types.Message, state: FSMContext):
     if len(message.text) < 3:
         return await message.answer('Введите название клуба немного точнее')
-    club = await helpers.find_club_by_name(message.text)
+
+    # Get services from container
+    club_service = container.resolve(ClubService)
+
+    # Find club by name
+    club = await club_service.find_club_by_name(message.text)
     if not club:
         return await message.answer(t(language_code(message), 'club_not_found'))
+
+    # Update state data
     await state.update_data(club_id=club['id'], club_name=club['name'])
     await helpers.ClubStates.next()
+
+    # Show confirmation message
     await message.answer(
         f'Найден клуб [{club["name"]}](https://s95.ru/clubs/{club["id"]}). Установить?',
         reply_markup=kb.confirm_set_club,

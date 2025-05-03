@@ -7,13 +7,14 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.exceptions import MessageToDeleteNotFound
 from typing import Optional
 
-from app import logger, db_conn
+from app import logger, container
 from config import INTERNAL_API_URL
-from s95.athlete_code import AthleteCode
-from s95.helpers import time_conv
+from services.user_service import UserService
+from services.athlete_service import AthleteService
+from services.club_service import ClubService
+from services.event_service import EventService
+from services.result_service import ResultService
 from utils import content
-
-FRIENDS_EVENT_ID = 4
 
 
 class UserStates(StatesGroup):
@@ -44,51 +45,51 @@ async def delete_message(message: types.Message) -> None:
 
 
 async def find_athlete_by(field: str, value):
-    conn = await db_conn()
-    athlete = await conn.fetchrow(f'SELECT * FROM athletes WHERE {field} = $1', value)
-    await conn.close()
-    return athlete
+    """Find an athlete by a specific field (legacy function)"""
+    athlete_service = container.resolve(AthleteService)
+
+    if field == 'user_id':
+        return await athlete_service.find_athlete_by_user_id(value)
+    elif field == 'id':
+        return await athlete_service.find_athlete_by_id(value)
+    elif field in ['parkrun_code', 'fiveverst_code', 'runpark_code', 'parkzhrun_code']:
+        return await athlete_service.find_athlete_by_code(field, value)
+    else:
+        # Generic fallback using repository's find_by method
+        return await athlete_service.athlete_repository.find_by(field, value)
 
 
 async def find_user_by(field: str, value):
-    conn = await db_conn()
-    user = await conn.fetchrow(f'SELECT * FROM users WHERE {field} = $1', value)
-    await conn.close()
-    return user
+    """Find a user by a specific field (legacy function)"""
+    user_service = container.resolve(UserService)
+
+    if field == 'telegram_id':
+        return await user_service.find_user_by_telegram_id(value)
+    elif field == 'id':
+        return await user_service.find_user_by_id(value)
+    elif field == 'email':
+        return await user_service.find_user_by_email(value)
+    else:
+        # Generic fallback using repository's find_by method
+        return await user_service.user_repository.find_by(field, value)
 
 
 async def find_club(telegram_id: int):
-    conn = await db_conn()
-    club = await conn.fetchrow(
-        """SELECT athletes.*, clubs.name as club_name
-        FROM athletes
-        LEFT JOIN clubs ON athletes.club_id = clubs.id
-        INNER JOIN users ON users.id = athletes.user_id
-        WHERE users.telegram_id = $1""",
-        telegram_id
-    )
-    await conn.close()
-    return club
+    """Find an athlete with club information by Telegram ID (legacy function)"""
+    athlete_service = container.resolve(AthleteService)
+    return await athlete_service.find_athlete_with_club(telegram_id)
 
 
 async def find_club_by_name(name: str):
-    conn = await db_conn()
-    club = await conn.fetchrow('SELECT * FROM clubs WHERE name ILIKE $1', f'{name}%')
-    return club
+    """Find a club by name (legacy function)"""
+    club_service = container.resolve(ClubService)
+    return await club_service.find_club_by_name(name)
 
 
 async def find_home_event(telegram_id: int):
-    conn = await db_conn()
-    event = await conn.fetchrow(
-        """SELECT athletes.*, events.name as event_name
-        FROM athletes
-        INNER JOIN users ON users.id = athletes.user_id
-        LEFT JOIN events ON athletes.event_id = events.id
-        WHERE users.telegram_id = $1""",
-        telegram_id
-    )
-    await conn.close()
-    return event
+    """Find an athlete with home event information by Telegram ID (legacy function)"""
+    athlete_service = container.resolve(AthleteService)
+    return await athlete_service.find_athlete_with_home_event(telegram_id)
 
 
 async def update_home_event(telegram_id: int, event_id: Optional[int] = None) -> bool:
@@ -122,55 +123,39 @@ async def update_club(telegram_id: int, club_id: Optional[int] = None) -> bool:
 
 
 async def find_user_by_email(email: str):
-    conn = await db_conn()
-    user = await conn.fetchrow('SELECT * FROM users WHERE LOWER(email) = $1', email.lower())
-    await conn.close()
-    return user
+    """Find a user by email (legacy function)"""
+    user_service = container.resolve(UserService)
+    return await user_service.find_user_by_email(email)
 
 
 async def events():
-    conn = await db_conn()
-    events_list = await conn.fetch('SELECT * FROM events WHERE id != $1 ORDER BY id', FRIENDS_EVENT_ID)
-    await conn.close()
-    return events_list
+    """Get all events except the 'friends' event (legacy function)"""
+    event_service = container.resolve(EventService)
+    return await event_service.find_all_events()
 
 
 async def find_event_by_id(event_id: int):
-    if event_id == FRIENDS_EVENT_ID:
-        return
-    conn = await db_conn()
-    event = await conn.fetchrow('SELECT * FROM events WHERE id = $1', event_id)
-    await conn.close()
-    return event
+    """Find an event by ID, excluding the 'friends' event (legacy function)"""
+    event_service = container.resolve(EventService)
+    return await event_service.find_event_by_id(event_id)
 
 
 async def tg_channel_of_event(event_id: int):
-    conn = await db_conn()
-    link = await conn.fetchrow('SELECT link FROM contacts WHERE event_id = $1 AND contact_type = 3', event_id)
-    await conn.close()
-    return link and link['link']
+    """Find the Telegram channel link for an event (legacy function)"""
+    event_service = container.resolve(EventService)
+    return await event_service.find_telegram_channel(event_id)
 
 
 async def user_results(telegram_id: int) -> pd.DataFrame:
-    conn = await db_conn()
-    query = """SELECT results.position, results.total_time, activities.date, events.name FROM results
-        INNER JOIN activities ON activities.id = results.activity_id
-        INNER JOIN events ON events.id = activities.event_id
-        INNER JOIN athletes ON athletes.id = results.athlete_id
-        INNER JOIN users ON users.id = athletes.user_id
-        WHERE users.telegram_id = $1 AND activities.published = TRUE
-        ORDER BY activities.date DESC
-    """
-    data = await conn.fetch(query, telegram_id)
-    df = pd.DataFrame(data, columns=['Pos', 'Time', 'Run Date', 'Event'])
-    df['m'] = df['Time'].apply(lambda t: time_conv(t))
-    await conn.close()
-    return df
+    """Get all results for a user by Telegram ID (legacy function)"""
+    result_service = container.resolve(ResultService)
+    return await result_service.get_user_results(telegram_id)
 
 
 def athlete_code(athlete):
-    return athlete["parkrun_code"] or athlete["fiveverst_code"] or athlete["runpark_code"] \
-        or athlete["parkzhrun_code"] or athlete["id"] + AthleteCode.SAT_5AM_9KM_BORDER
+    """Get the athlete code based on available codes (legacy function)"""
+    athlete_service = container.resolve(AthleteService)
+    return athlete_service.get_athlete_code(athlete)
 
 
 async def handle_throttled_query(*args, **kwargs):
@@ -186,13 +171,18 @@ async def handle_throttled_query(*args, **kwargs):
 
 
 async def update_user_phone(telegram_id: int, phone: str) -> bool:
+    """Update a user's phone number (legacy function)"""
     try:
-        conn = await db_conn()
-        await conn.execute('UPDATE users SET phone = $1 WHERE telegram_id = $2', phone, telegram_id)
-        await conn.close()
+        user_service = container.resolve(UserService)
+        user = await user_service.find_user_by_telegram_id(telegram_id)
+        if not user:
+            logger.error(f'User with telegram_id={telegram_id} not found')
+            return False
+
+        await user_service.update_user(user['id'], {'phone': phone})
         return True
-    except Exception:
-        logger.error(f'Error while updating phone for user with telegram_id={telegram_id}')
+    except Exception as e:
+        logger.error(f'Error while updating phone for user with telegram_id={telegram_id}: {e}')
         return False
 
 

@@ -1,13 +1,19 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 
-from handlers.helpers import find_user_by
+from app import container
+from services.user_service import UserService
 from utils.content import t
 
 
 async def main(message) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
     kbd = ReplyKeyboardMarkup(resize_keyboard=True)
-    user = await find_user_by('telegram_id', message.from_user.id)
+
+    # Get user service from container
+    user_service = container.resolve(UserService)
+
+    # Find user by Telegram ID
+    user = await user_service.find_user_by_telegram_id(message.from_user.id)
     lang = message.from_user.language_code
     btn_title = t(lang, 'btn_qr_code') if user else t(lang, 'btn_registration')
     kbd.add(KeyboardButton(btn_title), KeyboardButton(t(lang, 'btn_help')))
@@ -21,7 +27,6 @@ async def main(message) -> ReplyKeyboardMarkup:
 # inline_stat.row(InlineKeyboardButton('Последний паркран', switch_inline_query_current_chat='latestresults'))
 
 # inline_stat.row(InlineKeyboardButton('Одноклубники', switch_inline_query_current_chat='teammates'))
-# inline_stat.insert(InlineKeyboardButton('Top10 клубов', callback_data='top_active_clubs'))
 
 # inline_stat.insert(InlineKeyboardButton('Рекорды', switch_inline_query_current_chat='records'))
 # inline_stat.insert(InlineKeyboardButton('Рекордсмены', callback_data='most_records_parkruns'))

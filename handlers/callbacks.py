@@ -6,7 +6,7 @@ import keyboards as kb
 from app import dp, bot, logger, language_code
 from bot_exceptions import CallbackException
 from handlers import helpers
-from s95 import latest, records, clubs
+from s95 import latest, records
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
 from utils import content
@@ -20,29 +20,6 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     pic = await records.top_records_count('gen_png/records.png')
     await bot.send_photo(callback_query.from_user.id, pic)
     pic.close()
-
-
-@dp.callback_query_handler(lambda c: c.data == 'top_active_clubs')
-@dp.throttled(helpers.handle_throttled_query, rate=3)
-async def process_top_active_clubs(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
-    pic = clubs.top_active_clubs_diagram('gen_png/top_clubs.png')
-    await bot.send_photo(callback_query.from_user.id, pic)
-    pic.close()
-
-
-# @dp.callback_query_handler(lambda c: c.data == 'compare_results')
-# @dp.throttled(rate=2)
-# async def process_compare_results(callback_query: types.CallbackQuery):
-#     await bot.answer_callback_query(callback_query.id)
-#     await bot.send_message(
-#         callback_query.from_user.id,
-#         '*Сравнение персональных результатов.*\n'
-#         'Здесь можно сравнить свои результаты с результатами другого '
-#         'участника на тех паркранах, на которых вы когда-либо бежали вместе.\n'
-#         'Предварительно необходимо установить свой паркран ID (через меню настройки) '
-#         'и паркран ID участника для сравнения (кнопка Ввести ID участника)',
-#         reply_markup=kb.inline_compare, parse_mode='Markdown')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'personal_results')
