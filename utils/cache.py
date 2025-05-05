@@ -1,9 +1,7 @@
 from aioredis import Redis
 from typing import Optional, Any, Union
 import json
-import logging
-
-logger = logging.getLogger(__name__)
+from app import logger
 
 class Cache:
     def __init__(self, redis: Redis, prefix: str = "cache:"):

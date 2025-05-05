@@ -1,9 +1,7 @@
 from aioredis import Redis
 import time
-import logging
+from app import logger
 from typing import Optional
-
-logger = logging.getLogger(__name__)
 
 class RateLimiter:
     def __init__(self, redis: Redis, limit: int, window: int):

@@ -1,9 +1,7 @@
-import logging
+from app import logger
 from typing import Any, Dict, Optional
 from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
-
-logger = logging.getLogger(__name__)
 
 class BaseSecurityMiddleware(BaseMiddleware):
     """Базовый класс для middleware безопасности"""

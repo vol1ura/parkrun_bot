@@ -1,11 +1,9 @@
-import logging
 import re
 from typing import Any, Dict, Optional, Tuple
 from aiogram import types
 
 from .base_middleware import BaseSecurityMiddleware
-
-logger = logging.getLogger(__name__)
+from app import logger
 
 class InfernaselFastsec:
     def __init__(self):

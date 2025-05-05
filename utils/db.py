@@ -1,10 +1,8 @@
 import asyncpg
-import logging
+from app import logger
 from functools import wraps
 import json
 from typing import Optional, Dict, Any
-
-logger = logging.getLogger(__name__)
 
 # Кэш для часто используемых данных
 cache = {}

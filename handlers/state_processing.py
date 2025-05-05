@@ -19,21 +19,9 @@ from s95.athlete_code import AthleteCode
 from utils import mailer
 from utils.content import t, home_event_notice
 from utils.mailer import EmailConfirmation
+from handlers.helpers import PROCEED_CREATION_REGEXP, LINK_ATHLETE_REGEXP, GENDERS_LIST, MALE_LIST, Form
 
 logger = logging.getLogger(__name__)
-
-PROCEED_CREATION_REGEXP = '(Всё верно, создать|Okay, proceed|Ok, nastavi)'
-LINK_ATHLETE_REGEXP = '(Это я, привязать|Yes, it is me|Da, to sam ja)'
-GENDERS_LIST = ['мужской', 'женский', 'male', 'female', 'muški', 'ženski']
-MALE_LIST = ['мужской', 'male', 'muški']
-
-class Form(StatesGroup):
-    athlete_code = State()
-    email = State()
-    pin_code = State()
-    club = State()
-    home_event = State()
-    phone = State()
 
 @dp.message_handler(state=Form.athlete_code)
 async def process_athlete_code(message: types.Message, state: FSMContext):

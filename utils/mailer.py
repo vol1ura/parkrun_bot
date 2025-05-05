@@ -1,13 +1,11 @@
 import smtplib
 import ssl
-import logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from utils.content import t
 
 import config
-
-logger = logging.getLogger(__name__)
+from app import logger
 
 async def send_email(receiver_email: str, receiver_name: str, subject: str, body: str) -> bool:
     """

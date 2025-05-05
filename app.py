@@ -78,12 +78,6 @@ db = Database(
     cache=cache
 )
 
-async def init_db():
-    """Инициализация базы данных и создание необходимых таблиц"""
-    await db.connect()
-    await db.create_tables()
-    return db
-
 # Настройка антикрэш системы
 anticrash.setup()
 

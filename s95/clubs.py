@@ -1,11 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import logging
 from typing import Optional, Dict, Any
 
-from app import db
-
-logger = logging.getLogger(__name__)
+from app import db, logger
 
 
 async def get_club(club_id: int) -> Optional[Dict[str, Any]]:

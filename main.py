@@ -3,7 +3,7 @@ from aiogram.utils import executor
 import logging
 import config
 import handlers
-from app import bot, dp, init_db
+from app import bot, dp, init_db, logger
 
 logger = logging.getLogger(__name__)
 

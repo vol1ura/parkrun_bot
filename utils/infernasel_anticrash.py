@@ -5,8 +5,7 @@ import sys
 from typing import Callable, Any
 import psutil
 import gc
-
-logger = logging.getLogger(__name__)
+from app import logger
 
 class InfernaselAnticrash:
     def __init__(self, max_memory_percent: int = 80, max_cpu_percent: int = 90):
@@ -28,7 +27,6 @@ class InfernaselAnticrash:
                 
                 if cpu_percent > self.max_cpu_percent:
                     logger.warning(f"Высокая нагрузка на CPU: {cpu_percent}%")
-                    await self.reduce_cpu_load()
                 
                 await asyncio.sleep(5)
             except Exception as e:
@@ -41,14 +39,6 @@ class InfernaselAnticrash:
             logger.info("Выполнена очистка памяти")
         except Exception as e:
             logger.error(f"Ошибка очистки памяти: {e}")
-
-    async def reduce_cpu_load(self):
-        """Снижение нагрузки на CPU"""
-        try:
-            await asyncio.sleep(1)  # Даем процессору передышку
-            logger.info("Выполнено снижение нагрузки на CPU")
-        except Exception as e:
-            logger.error(f"Ошибка снижения нагрузки на CPU: {e}")
 
     def register_cleanup_task(self, task: Callable):
         """Регистрация задачи очистки"""

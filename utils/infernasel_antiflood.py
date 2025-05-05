@@ -1,12 +1,10 @@
-import logging
+from app import logger
 from typing import Dict, Any, Set
 from datetime import datetime, timedelta
 from aiogram import types
 from aiogram.dispatcher.handler import CancelHandler
 
 from .base_middleware import BaseSecurityMiddleware
-
-logger = logging.getLogger(__name__)
 
 class InfernaselAntiflood:
     def __init__(self, 

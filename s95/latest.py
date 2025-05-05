@@ -1,22 +1,10 @@
 import re
-import logging
 import asyncio
 from datetime import datetime, timedelta
 
-import matplotlib.pyplot as plt
-import matplotlib.patheffects as path_effects
-import pandas as pd
-
-from matplotlib.colors import Normalize, PowerNorm
-from matplotlib.ticker import MaxNLocator
-
 from aiogram.utils.exceptions import TelegramAPIError
 
-from utils.mailer import send_email
-from utils.vk import post_to_vk
-from app import db
-
-logger = logging.getLogger(__name__)
+from app import db, logger
 
 async def get_latest_results():
     try:

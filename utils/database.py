@@ -1,11 +1,9 @@
 from asyncpg import Pool, create_pool
 from typing import Optional, Dict, Any, List
-import logging
+from app import logger
 from functools import wraps
 import asyncio
 from .cache import Cache
-
-logger = logging.getLogger(__name__)
 
 class Database:
     def __init__(self, dsn: str, min_size: int = 5, max_size: int = 20, cache: Optional[Cache] = None):

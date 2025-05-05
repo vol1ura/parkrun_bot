@@ -1,9 +1,7 @@
 import aiohttp
 import random
-import logging
+from app import logger
 import config
-
-logger = logging.getLogger(__name__)
 
 VK_ALBUM_OWNER_ID = '-212432495'
 ALBUMS_ID = ['wall', 285307254]  # id of the best albums for this owner_id
