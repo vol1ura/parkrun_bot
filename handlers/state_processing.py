@@ -1,63 +1,111 @@
 import aiohttp
 import re
 import time
+import logging
+from datetime import datetime
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.exceptions import MessageToDeleteNotFound
 from config import INTERNAL_API_URL
 from random import randint
 
 import keyboards as kb
 
-from app import dp, language_code
+from app import dp, language_code, db
 from handlers import helpers
 from s95.athlete_code import AthleteCode
 from utils import mailer
 from utils.content import t, home_event_notice
+from utils.mailer import EmailConfirmation
+from handlers.helpers import PROCEED_CREATION_REGEXP, LINK_ATHLETE_REGEXP, GENDERS_LIST, MALE_LIST, Form
 
+logger = logging.getLogger(__name__)
 
-PROCEED_CREATION_REGEXP = '(Всё верно, создать|Okay, proceed|Ok, nastavi)'
-LINK_ATHLETE_REGEXP = '(Это я, привязать|Yes, it is me|Da, to sam ja)'
-GENDERS_LIST = ['мужской', 'женский', 'male', 'female', 'muški', 'ženski']
-MALE_LIST = ['мужской', 'male', 'muški']
+@dp.message_handler(state=Form.athlete_code)
+async def process_athlete_code(message: types.Message, state: FSMContext):
+    try:
+        await helpers.delete_message(message)
+        athlete_code = message.text.strip()
+        if not re.match(r'^[A-Z]?\d+$', athlete_code):
+            return await message.answer(t(language_code(message), 'wrong_athlete_code'))
+        
+        athlete = await db.execute('SELECT * FROM athletes WHERE code = $1', athlete_code)
+        if not athlete:
+            return await message.answer(t(language_code(message), 'athlete_not_found'))
+        
+        user = await db.execute('SELECT * FROM users WHERE athlete_id = $1', athlete['id'])
+        if user:
+            return await message.answer(t(language_code(message), 'athlete_already_registered').format(athlete['id']))
+        
+        await state.update_data(athlete_code=athlete_code)
+        await Form.email.set()
+        await message.answer(t(language_code(message), 'request_email'))
+    except Exception as e:
+        logger.error(f"Error in process_athlete_code: {e}")
+        await message.answer(t(language_code(message), 'error_occurred'))
 
+@dp.message_handler(state=Form.email)
+async def process_email(message: types.Message, state: FSMContext):
+    try:
+        await helpers.delete_message(message)
+        email = message.text.strip().lower()
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+            return await message.answer(t(language_code(message), 'wrong_email'))
+        
+        data = await state.get_data()
+        athlete_code = data.get('athlete_code')
+        athlete = await db.execute('SELECT * FROM athletes WHERE code = $1', athlete_code)
+        if not athlete:
+            return await message.answer(t(language_code(message), 'athlete_not_found'))
+        
+        pin_code = AthleteCode.generate_pin()
+        await state.update_data(email=email, pin_code=pin_code)
+        
+        email_confirmation = EmailConfirmation(pin_code, language_code(message))
+        email_confirmation.send(email, athlete['name'])
+        
+        await Form.pin_code.set()
+        await message.answer(t(language_code(message), 'pin_code_sent'))
+    except Exception as e:
+        logger.error(f"Error in process_email: {e}")
+        await message.answer(t(language_code(message), 'error_occurred'))
 
-@dp.message_handler(state=helpers.UserStates.SEARCH_ATHLETE_CODE)
-async def process_user_enter_parkrun_code(message: types.Message, state: FSMContext):
-    athlete_code = AthleteCode(message.text)
-    if not athlete_code.is_valid:
-        return await message.reply(t(language_code(message), 'input_athletes_id'))
-    await helpers.UserStates.next()
-    if athlete_code.key == 's95':
-        await state.update_data(parkrun_code=None)
-    else:
-        await state.update_data(**{athlete_code.key: athlete_code.value})
-    athlete = await helpers.find_athlete_by(athlete_code.key, athlete_code.value)
-    if athlete:
-        if athlete["user_id"]:
-            await state.finish()
-            return await message.answer(t(language_code(message), 'user_exists_linked'))
-        async with state.proxy() as data:
-            data['athlete_id'] = athlete['id']
-            names_list = re.split(r'\s', athlete['name'] or '', maxsplit=1)
-            if len(names_list) < 2:
-                names_list.insert(0, 'Noname')
-            data['first_name'], data['last_name'] = names_list
-            accept_athlete_kbd = await kb.accept_athlete(message)
+@dp.message_handler(state=Form.pin_code)
+async def process_pin_code(message: types.Message, state: FSMContext):
+    try:
+        await helpers.delete_message(message)
+        pin_code = message.text.strip()
+        data = await state.get_data()
+        if pin_code != str(data.get('pin_code')):
+            return await message.answer(t(language_code(message), 'wrong_pin_code'))
+        
+        athlete_code = data.get('athlete_code')
+        email = data.get('email')
+        athlete = await db.execute('SELECT * FROM athletes WHERE code = $1', athlete_code)
+        if not athlete:
+            return await message.answer(t(language_code(message), 'athlete_not_found'))
+        
+        user_data = {
+            'telegram_id': message.from_user.id,
+            'athlete_id': athlete['id'],
+            'email': email,
+            'created_at': datetime.now()
+        }
+        await db.execute(
+            'INSERT INTO users (telegram_id, athlete_id, email, created_at) VALUES ($1, $2, $3, $4)',
+            user_data['telegram_id'], user_data['athlete_id'], user_data['email'], user_data['created_at']
+        )
+        
+        await state.finish()
         await message.answer(
-            t(language_code(message), 'found_athlete_info').format(athlete_id=athlete['id'], name=athlete['name']),
-            reply_markup=accept_athlete_kbd,
-            parse_mode='html'
+            t(language_code(message), 'registration_complete'),
+            reply_markup=await kb.main(message)
         )
-    else:
-        new_athlete_kbd = await kb.ask_for_new_athlete(message)
-        await message.reply(
-            t(language_code(message), 'athlete_code_check')
-            .format(athlete_id=athlete_code.value, url=athlete_code.url),
-            reply_markup=new_athlete_kbd,
-            parse_mode='html',
-            disable_web_page_preview=True
-        )
+    except Exception as e:
+        logger.error(f"Error in process_pin_code: {e}")
+        await message.answer(t(language_code(message), 'error_occurred'))
 
 
 # Просим Почту сразу

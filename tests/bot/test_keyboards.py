@@ -1,13 +1,16 @@
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, User
 from aiogram.types.message import Message
+import pytest
+from keyboards import main
 
 import keyboards
 
 
-async def test_main_kb(database):
+@pytest.mark.asyncio
+async def test_main_kb(db, loop):
     message = Message()
     message.from_user = User(id=1, is_bot=False)
-    main_kb = await keyboards.main(message)
+    main_kb = await main(message)
     assert isinstance(main_kb, ReplyKeyboardMarkup)
 
 

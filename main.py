@@ -1,10 +1,11 @@
 from aiogram import Dispatcher, types
 from aiogram.utils import executor
-
+import logging
 import config
 import handlers
+from app import bot, dp, init_db, logger
 
-from app import bot, dp
+logger = logging.getLogger(__name__)
 
 
 async def setup_bot_commands(_: Dispatcher):
@@ -27,21 +28,41 @@ async def setup_bot_commands(_: Dispatcher):
 
 # Run after startup
 async def on_startup(dispatcher: Dispatcher):
-    await bot.delete_webhook()
-    await bot.set_webhook(config.WEBHOOK_URL)
+    logger.info("Starting up...")
+    
+    # Initialize database connection pool
+    await init_db()
+    
+    if config.PRODUCTION_ENV:
+        await bot.delete_webhook()
+        await bot.set_webhook(config.WEBHOOK_URL)
+    
     await setup_bot_commands(dispatcher)
+    logger.info("Bot started successfully")
 
 
 # Run before shutdown
 async def on_shutdown(dispatcher: Dispatcher):
-    print('Shutting down..')
+    logger.info("Shutting down...")
+    
+    # Close database connections
+    pool = await dispatcher.bot.get('db_pool')
+    if pool:
+        await pool.close()
+    
+    # Close storage
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
-    print('Bot down')
+    
+    # Close bot session
+    session = await dispatcher.bot.get_session()
+    await session.close()
+    
+    logger.info("Bot shut down successfully")
 
 
 if __name__ == '__main__':
-    if False:  # config.PRODUCTION_ENV
+    if config.PRODUCTION_ENV:
         executor.start_webhook(
             dispatcher=dp,
             webhook_path=config.WEBHOOK_PATH,
@@ -53,4 +74,9 @@ if __name__ == '__main__':
         )
     else:
         handlers.print_info()
-        executor.start_polling(dp)
+        executor.start_polling(
+            dp,
+            on_startup=on_startup,
+            on_shutdown=on_shutdown,
+            skip_updates=True
+        )

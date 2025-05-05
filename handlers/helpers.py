@@ -1,13 +1,16 @@
 import aiohttp
 import pandas as pd
 import random
+import logging
+from typing import Optional, Dict, Any, List, Union
+from datetime import datetime
 
 from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.utils.exceptions import MessageToDeleteNotFound
+from aiogram.utils.exceptions import MessageToDeleteNotFound, TelegramAPIError
 from typing import Optional
 
-from app import logger, db_conn
+from app import logger, db
 from config import INTERNAL_API_URL
 from s95.athlete_code import AthleteCode
 from s95.helpers import time_conv
@@ -44,17 +47,21 @@ async def delete_message(message: types.Message) -> None:
 
 
 async def find_athlete_by(field: str, value):
-    conn = await db_conn()
-    athlete = await conn.fetchrow(f'SELECT * FROM athletes WHERE {field} = $1', value)
-    await conn.close()
-    return athlete
+    try:
+        athlete = await db.execute(f'SELECT * FROM athletes WHERE {field} = $1', value)
+        return athlete
+    except Exception as e:
+        logger.error(f'Error finding athlete by {field}={value}: {e}')
+        return None
 
 
 async def find_user_by(field: str, value):
-    conn = await db_conn()
-    user = await conn.fetchrow(f'SELECT * FROM users WHERE {field} = $1', value)
-    await conn.close()
-    return user
+    try:
+        user = await db.execute(f'SELECT * FROM users WHERE {field} = $1', value)
+        return user
+    except Exception as e:
+        logger.error(f'Error finding user by {field}={value}: {e}')
+        return None
 
 
 async def find_club(telegram_id: int):
@@ -207,4 +214,13 @@ async def get_auth_link(user_id: int) -> Optional[str]:
                 return data['link']
     except Exception as e:
         logger.error(f'Error while getting auth link for user with id={user_id}: {e}')
+        return None
+
+
+async def find_user_by_telegram_id(telegram_id: int) -> Optional[Dict[str, Any]]:
+    try:
+        user = await db.execute('SELECT * FROM users WHERE telegram_id = $1', telegram_id)
+        return user
+    except Exception as e:
+        logger.error(f'Error finding user by telegram_id {telegram_id}: {e}')
         return None

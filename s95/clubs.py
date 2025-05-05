@@ -1,11 +1,21 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+from typing import Optional, Dict, Any
 
-from app import db_conn
+from app import db, logger
+
+
+async def get_club(club_id: int) -> Optional[Dict[str, Any]]:
+    try:
+        club = await db.execute('SELECT * FROM clubs WHERE id = $1', club_id)
+        return club
+    except Exception as e:
+        logger.error(f'Error getting club {club_id}: {e}')
+        return None
 
 
 async def find_club_by_id(club_id: int):
-    club = await db_conn.fetchrow('SELECT * FROM clubs WHERE id = $1', club_id)
+    club = await get_club(club_id)
     return club.name if club else None
 
 
