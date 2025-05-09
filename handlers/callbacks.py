@@ -178,7 +178,8 @@ async def process_athlete_code_search(callback_query: types.CallbackQuery):
     await bot.send_message(
         callback_query.from_user.id,
         t(language_code(callback_query), 'athlete_code_search'),
-        parse_mode='Markdown'
+        parse_mode='Markdown',
+        reply_markup=types.ReplyKeyboardRemove()
     )
 
 

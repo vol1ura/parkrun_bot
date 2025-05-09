@@ -23,9 +23,7 @@ class UserStates(StatesGroup):
     ATHLETE_LAST_NAME = State()
     ATHLETE_FIRST_NAME = State()
     GENDER = State()
-    EMAIL = State()
-    VALIDATE_EMAIL = State()
-    PASSWORD = State()
+    CONFIRM = State()
 
 
 class ClubStates(StatesGroup):

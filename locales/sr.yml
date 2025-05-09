@@ -15,7 +15,11 @@ sr:
     - 'Хорошо, бегаю тут потихоньку'
     - '"Занимаюсь ресинтезом гликогена". Такой ответ на вопрос "Что делаешь?" звучит куда научнее и солиднее, чем "Пью сладкий чай с вафлями и пряниками после бега на пятьдесят километров". Сразу ясно, что человек не просто лежит на диване, вытянув свои убегавшиеся ноги, а занят серьезным делом.'
   help_message: >
-    Dobrodošli u S95 bot! Pogledajte dostupne opcije pritiskom na menu dugme dole ↙️
+    To get your QR код, use command /qrcode
+
+    To get login link for S95 site, use command /login
+
+    Pogledajte dostupne opcije pritiskom na menu dugme dole ↙️
 
     Imate pitanja ili predloge? Podelite ih sa @vol1ura (Yura Volodin).
 
@@ -46,39 +50,10 @@ sr:
 
   define_your_gender: '👇Molimo pritisnite dugme ispod sa vašim polom!'
 
-  ask_email: >
-    Unesite svoju e-mail adresu. Potrebna nam je vaša e-mail adresa kako bismo vam poslali verifikacioni kod.
-
-    Nakon registracije, moći ćete da ga koristite za prijavu na svoj profil na sajtu S95.
-
   found_athlete_info: >
     Bot je pronašao učesnika {name}.
 
     Proverite <a href="https://s95.rs/athletes/{athlete_id}">profil učesnika</a>.
-
-  input_pin_code: >
-    Poslali smo vam pin kod na mejl za verifikaciju. Proverite vaše prijemno sanduče (ili nepoželjnu poštu/spam).
-
-    Kopirjate pin kod i pošaljite ga botu.
-
-  pin_code_expired: >
-    Izgleda da ste iskoristili sve pokušaje ili je vreme za verifikaciju isteklo.
-
-    Bez brige! Samo unesite vašu e-mail adresu ponovo ili pokušajte sa drugom e-mail adresom.
-
-  athlete_already_linked: >
-    Izgleda da je sportista sa ovom e-mail adresom već povezan. Registracija je skoro gotova!
-
-    Bot je poslao informacije o ovom problemu S95 administratorima.
-
-  password_requirements: >
-    trebalo bi da sadrži kombinaciju VELIKIH i malih slova, kao i najmanje jednu cifru. Uverite se da ima najmanje 6 karatkera.
-
-  input_password: 'Unesite lozinku. Možete je koristiti za prijavu na svoj korisnički profil na sajtu S95.
-
-    Lozinka '
-
-  invalid_password: 'Molimo unesite lozinku ponovo. Lozinka '
 
   athlete_already_registered: 'Već ste registrovani! Proverite svoj korisnički profil https://s95.rs/athletes/{}'
 
@@ -100,33 +75,20 @@ sr:
 
     Možete pronaći svoj ID pritiskom na dugme *barcode* na vašem profilu.
 
-  user_exists_needs_linking: >
-    Nalog sa ovom e-mail adresom već postoji. Hajde da povežemo vaše podatke sa njim!
+  confirm_personal_data: >
+    Proverite svoje podatke:
 
-  incorrect_pin_code: 'Podelite svoj e-mail sa nama! Prosledićemo vam identifikacioni kod na ovu adresu.'
+    - Ime: *{first_name}*
 
-  pincode_input_attempts: >
-    Izgleda da ste uneli pogrešan identifikacioni kod.
+    - Prezime: *{last_name}*
 
-    Molimo pokušajte ponovo. Iskoristili ste {attempt} pokušaja od 3.
+    - Pol: *{gender}*
+
+    Pritisnite dugme za potvrdu registracije
 
   request_cancelled: 'Vaš zahtev je poništen.'
 
   user_exists_linked: 'Nalog sa ovim ID-jem je već kreiran.'
-
-  password_erased: 'Vaša lozinka je izbrisana iz sigurnosnih razloga'
-
-  password_erased_again: 'Vaša lozinka je izbrisana iz sigurnosnih razloga. Unesite novu lozinku ponovo'
-
-  try_password: >
-    Došlo je do greške.
-
-    Molimo ponovo unesite svoju šifru ili otkažite svoju registraciju slanjem komande /reset
-
-  try_pin_code: >
-    Došlo je do greške.
-
-    Molimo ponovo unesite pin kod koji vam je poslat na e-mail ili otkažite svoju registraciju slanjem komande /reset
 
   subscription_suggestion: >
     Ostanite u kontaktu sa nama!
@@ -137,23 +99,9 @@ sr:
 
   you_already_have_id: 'Ako ste barem jednom do sada učestvovali na parkrun ili S95 trkama, već imate lični barkod (број после слова "А")'
 
-  user_linked_successfully: 'Učesnik je uspešno povezan'
-
   successful_registration: '🎉 Vaša registracija na S95 je završena!'
-
-  email_subject: 'Registracija na S95 je skoro završena!'
-
-  email_body: |
-      Zdravo!
-
-      Vaš pin kod je {pin_code}
-      Molimo vas, pošajite ovaj pin kod botu S95. Zapamite, ovaj pin kod važi 30 minuta.
-
-      Dobli ste ovu poruku jer je vaša e-mail adresa korišćena za registraciju na https://{webhost}/
-      Ukoliko niste pokrenuli registraciju, slobodno ignorišite ovu poruku.
-
-      Želimo vam aktivan dan!
-      {email_sender} tim
+  something_wrong: 'Что-то пошло не так, попробуйте ещё раз'
+  home_event_suggestion: 'Setup also your home event using command /home'
 
   btn_qr_code: 'ℹ️ QR-kod'
   btn_registration: '⚙️ registracija'

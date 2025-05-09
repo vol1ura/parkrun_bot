@@ -15,6 +15,10 @@ en:
     - 'Хорошо, бегаю тут потихоньку'
     - '"Занимаюсь ресинтезом гликогена". Такой ответ на вопрос "Что делаешь?" звучит куда научнее и солиднее, чем "Пью сладкий чай с вафлями и пряниками после бега на пятьдесят километров". Сразу ясно, что человек не просто лежит на диване, вытянув свои убегавшиеся ноги, а занят серьезным делом.'
   help_message: >
+    To get your QR код, use command /qrcode
+
+    To get login link for S95 site, use command /login
+
     Welcome to S95 bot! See what it can do for you by pressing menu button down there ↙️
 
     Got questions or ideas? Share them with @vol1ura (Yura Volodin).
@@ -46,39 +50,21 @@ en:
 
   define_your_gender: '👇Tap the button below with your gender, please!'
 
-  ask_email: >
-    Enter your email. We need your email to send you a verification pin.
-
-    Once registered, you can use it to log into your profile on the S95 website.
-
   found_athlete_info: >
     Bot found participant {name}.
 
     Check out <a href="https://s95.rs/athletes/{athlete_id}">participant's profile</a>.
 
-  input_pin_code: >
-    We've sent a pin code to your email for verification. Check your inbox (or spam folder).
+  confirm_personal_data: >
+    Check your data:
 
-    Copy the pin code and send it to the bot.
+    - First Name: *{first_name}*
 
-  pin_code_expired: >
-    Looks like you've used up all your attempts or the verification time has run out.
+    - Last Name: *{last_name}*
 
-    No worries! Just enter your email again or try using another email address.
+    - Gender: *{gender}*
 
-  athlete_already_linked: >
-    It seems an athlete with this email is already linked. The registration is almost completed!
-
-    Bot has sent information about this issue to S95 administrators.
-
-  password_requirements: >
-    should be a mix of UPPERCASE and lowercase letters, plus at least one digit. Make sure it's at least 6 characters long.
-
-  input_password: 'Type in a password. You can use it to log into your user profile on the S95 website.
-
-    The password '
-
-  invalid_password: 'Please enter the password again. It '
+    Press the registration confirmation button
 
   athlete_already_registered: 'You are already registered! Check out your user profile https://s95.rs/athletes/{}'
 
@@ -101,33 +87,9 @@ en:
 
     You can find your ID by tapping the *barcode* button in your profile.
 
-  user_exists_needs_linking: >
-    An account with this email already exists. Let's link your data with it!
-
-  incorrect_pin_code: 'Share your email with us! We will send a verification code to this email'
-
-  pincode_input_attempts: >
-    Looks like you've entered the wrong verification pin.
-
-    Please try again. You've used {attempt} attempts of 3.
-
   request_cancelled: 'Your request has been cancelled'
 
   user_exists_linked: 'An account with this ID has already been created'
-
-  password_erased: 'Your password was erased for safety reasons'
-
-  password_erased_again: 'Your password was erased for safety reasons. Enter a new password again'
-
-  try_password: >
-    Something went wrong.
-
-    Please re-enter your password, or cancel your registration by sending the /reset command
-
-  try_pin_code: >
-    Something went wrong.
-
-    Please re-enter the pin code from an email sent to you, or cancel your registration by sending the /reset command
 
   subscription_suggestion: >
     Stay in touch with us!
@@ -138,23 +100,9 @@ en:
 
   you_already_have_id: 'If you have ever participated in parkruns or S95 runs before, you already have a personal barcode (a number after letter "A" on your personal token)'
 
-  user_linked_successfully: 'The participant has been successfully linked'
-
   successful_registration: '🎉 Your registration in S95 is completed!'
-
-  email_subject: 'Registration in S95 almost done!'
-
-  email_body: |
-      Hi!
-
-      Your pin code is {pin_code}
-      Please send this pin code to S95 bot. Remember, this pin code is valid for 30 minutes.
-
-      You're receiving this message because your email was used for registration in https://{webhost}/
-      If you didn't initiate registration, feel free to ignore this message.
-
-      Wishing you an active day ahead!
-      {email_sender} team
+  something_wrong: 'Something wrong, please try again'
+  home_event_suggestion: 'Setup also your home event using command /home'
 
   btn_qr_code: 'ℹ️ QR-code'
   btn_registration: '⚙️ registration'

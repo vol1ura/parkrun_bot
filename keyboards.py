@@ -9,10 +9,7 @@ async def main(message) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
     kbd = ReplyKeyboardMarkup(resize_keyboard=True)
 
-    # Get user service from container
     user_service = container.resolve(UserService)
-
-    # Find user by Telegram ID
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     lang = message.from_user.language_code
     btn_title = t(lang, 'btn_qr_code') if user else t(lang, 'btn_registration')
@@ -80,6 +77,14 @@ async def accept_athlete(message) -> ReplyKeyboardMarkup:
     lang = message.from_user.language_code
     accept_athlete_kbd.add(t(lang, 'btn_link'), t(lang, 'btn_no_link'))
     return accept_athlete_kbd
+
+
+# Confirm REGISTRATION
+async def confirm_registration(message) -> ReplyKeyboardMarkup:
+    confirm_registration_kbd = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, selective=True)
+    lang = message.from_user.language_code
+    confirm_registration_kbd.add(t(lang, 'btn_create'), t(lang, 'btn_cancel'))
+    return confirm_registration_kbd
 
 
 async def ask_for_new_athlete(message) -> ReplyKeyboardMarkup:
