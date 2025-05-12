@@ -1,4 +1,4 @@
-aiodns~=3.1
+aiodns~=3.4
 aiogram~=2.25
 asyncpg~=0.30
 lxml~=5.2
