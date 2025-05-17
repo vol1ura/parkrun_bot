@@ -100,10 +100,10 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
     try:
         await bot.answer_callback_query(callback_query.id, content.wait_diagram)
         telegram_id = callback_query.from_user.id
-        pic = await latest.make_latest_results_diagram(telegram_id, 'gen_png/results.png')
-        await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
-        pic.close()
-    except Exception:
+        async with latest.make_latest_results_diagram(telegram_id, f'gen_png/results_{telegram_id}.png') as pic:
+            await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
+    except Exception as e:
+        logger.info(f'Failed to generate last activity diagram for {callback_query.from_user.id}: {e}')
         await bot.send_message(
             callback_query.from_user.id,
             'Не удалось построить диаграмму. Возможно, нет результатов.'
@@ -118,7 +118,8 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).history() as pic:
             await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
-    except Exception:
+    except Exception as e:
+        logger.info(f'Failed to generate personal history diagram for {callback_query.from_user.id}: {e}')
         await bot.send_message(
             callback_query.from_user.id,
             'Не удалось построить диаграмму. Возможно, нет результатов.'
@@ -133,7 +134,8 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).personal_bests() as pic:
             await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
-    except Exception:
+    except Exception as e:
+        logger.info(f'Failed to generate personal bests diagram for {callback_query.from_user.id}: {e}')
         await bot.send_message(
             callback_query.from_user.id,
             'Не удалось построить диаграмму. Возможно, нет результатов.'
@@ -148,7 +150,8 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).tourism() as pic:
             await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
-    except Exception:
+    except Exception as e:
+        logger.info(f'Failed to generate personal tourism diagram for {callback_query.from_user.id}: {e}')
         await bot.send_message(
             callback_query.from_user.id,
             'Не удалось построить диаграмму. Возможно, нет результатов.'
@@ -163,7 +166,8 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).last_runs() as pic:
             await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
-    except Exception:
+    except Exception as e:
+        logger.info(f'Failed to generate personal last parkruns diagram for {callback_query.from_user.id}: {e}')
         await bot.send_message(
             callback_query.from_user.id,
             'Не удалось построить диаграмму. Возможно, нет результатов.'

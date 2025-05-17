@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+import os
 import pandas as pd
 
+from contextlib import asynccontextmanager
 from matplotlib.colors import Normalize
 from matplotlib.ticker import MaxNLocator
 
@@ -25,10 +27,11 @@ async def parse_latest_results(telegram_id: int):
     return df, last_activity['date'], last_activity['name'], last_activity['athlete_id']
 
 
+@asynccontextmanager
 async def make_latest_results_diagram(telegram_id: int, pic: str, turn=0):
     result = await parse_latest_results(telegram_id)
     if result is None:
-        return None
+        return
 
     df, activity_date, event_name, athlete_id = result
     number_runners = len(df)
@@ -80,8 +83,16 @@ async def make_latest_results_diagram(telegram_id: int, pic: str, turn=0):
     ax.set_ylabel("Результатов в диапазоне")
     plt.title(f'Результаты забега {event_name} {activity_date}', size=10, fontweight='bold')
     plt.tight_layout()
-    plt.savefig(pic)
-    return open(pic, 'rb')
+    try:
+        plt.savefig(pic)
+        pic_file = open(pic, 'rb')
+        yield pic_file
+        plt.close()
+    finally:
+        if pic_file:
+            pic_file.close()
+        if os.path.exists(pic):
+            os.remove(pic)
 
 
 if __name__ == '__main__':
