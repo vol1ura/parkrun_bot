@@ -97,8 +97,9 @@ async def process_excel_table(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'last_activity_diagram')
 @dp.throttled(helpers.handle_throttled_query, rate=2)
 async def process_last_activity_diagram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    await delete_message(callback_query)
     try:
-        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
         telegram_id = callback_query.from_user.id
         async with latest.make_latest_results_diagram(telegram_id, f'gen_png/results_{telegram_id}.png') as pic:
             await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
@@ -113,8 +114,9 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_history')
 @dp.throttled(helpers.handle_throttled_query, rate=2)
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    await delete_message(callback_query)
     try:
-        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).history() as pic:
             await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
@@ -129,8 +131,9 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_bests')
 @dp.throttled(helpers.handle_throttled_query, rate=2)
 async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    await delete_message(callback_query)
     try:
-        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).personal_bests() as pic:
             await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
@@ -145,8 +148,9 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_tourism')
 @dp.throttled(helpers.handle_throttled_query, rate=2)
 async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    await delete_message(callback_query)
     try:
-        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).tourism() as pic:
             await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
@@ -161,8 +165,9 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_last')
 @dp.throttled(helpers.handle_throttled_query, rate=1)
 async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    await delete_message(callback_query)
     try:
-        await bot.answer_callback_query(callback_query.id, content.wait_diagram)
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).last_runs() as pic:
             await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
