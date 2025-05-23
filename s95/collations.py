@@ -94,6 +94,7 @@ class CollationMaker:
 
         plt.tight_layout()
         plt.savefig(pic)
+        # TODO: Add plt.close() after each plt.savefig() call
         return open(pic, 'rb')
 
     def table(self):

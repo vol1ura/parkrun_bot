@@ -54,6 +54,7 @@ class PersonalResults:
             pic_file = open(pic, 'rb')
             yield pic_file
         finally:
+            plt.close()
             if pic_file:
                 pic_file.close()
             if os.path.exists(pic):
@@ -82,6 +83,7 @@ class PersonalResults:
             pic_file = open(pic, 'rb')
             yield pic_file
         finally:
+            plt.close()
             if pic_file:
                 pic_file.close()
             if os.path.exists(pic):
@@ -125,6 +127,7 @@ class PersonalResults:
             pic_file = open(pic, 'rb')
             yield pic_file
         finally:
+            plt.close()
             if pic_file:
                 pic_file.close()
             if os.path.exists(pic):
@@ -157,6 +160,7 @@ class PersonalResults:
             pic_file = open(pic, 'rb')
             yield pic_file
         finally:
+            plt.close()
             if pic_file:
                 pic_file.close()
             if os.path.exists(pic):

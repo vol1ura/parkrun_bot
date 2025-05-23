@@ -51,4 +51,5 @@ async def top_records_count(pic: str):
     plt.title('Участники с наибольшим количеством рекордов\nна различных паркранах', size=11, fontweight='bold')
     plt.tight_layout()
     plt.savefig(pic)
+    # TODO: Add plt.close() after each plt.savefig() call
     return open(pic, 'rb')
