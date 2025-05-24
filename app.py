@@ -20,10 +20,16 @@ logger = logging.getLogger(__name__)
 
 async def setup_container():
     """Set up dependency injection container with all services and repositories"""
-    # Create database connection pool
-    pool = await asyncpg.create_pool(config.DATABASE_URL)
-    if pool is None:
-        raise Exception('Database connection pool is not created')
+    try:
+        pool = await asyncpg.create_pool(config.DATABASE_URL, max_size=25)
+        if pool is None:
+            raise Exception('Database connection pool is not created')
+    except asyncio.TimeoutError:
+        logger.error('Database connection timeout during startup')
+        raise
+    except Exception as e:
+        logger.error(f"Failed to setup container: {e}")
+        raise
 
     # Import repositories
     from repositories.user_repository import UserRepository
