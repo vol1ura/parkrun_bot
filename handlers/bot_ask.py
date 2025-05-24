@@ -22,8 +22,8 @@ async def s95_personal_result(message: types.Message):
             await message.answer(content.t(language_code(message), 'how_to_rotate_labels'), disable_notification=True)
         pic.close()
     except Exception as e:
-        logger.warning(f'Attempt to generate personal diagram failed. Query: {message.text}. Error: {e}')
-        await message.reply('Что-то пошло не так.')
+        logger.warning(f"Diagram request failed. Query: '{message.text}', telegram_id: {telegram_id}. Error: {e}")
+        await message.reply('Не удалось построить диаграмму. Убедитесь, что в вашем профиле есть забеги')
 
 
 @dp.message_handler(regexp=r'(?i)бот,? (кузьминки|s95|parkrun)')

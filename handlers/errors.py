@@ -48,12 +48,12 @@ async def invalid_query_id_handler(update, error):
     message = 'Извините, запуск бота занял много времени. Теперь бот готов отвечать. Повторите запрос.'
     if update.callback_query:
         await bot.send_message(update.callback_query.from_user.id, message)
+        logger.error(f"Callback data: {update.callback_query}")
     elif update.message:
         await bot.send_message(update.message.chat.id, message)
     else:
         logger.warning(f'{update} update object was not processed')
-    # We collect some info about an exception and write them to log
-    logger.error(f"Bot started too long. Error: {error}")
+    logger.error(f"InvalidQueryID error. Update type: {type(update)}, Error: {error}")
     notify_in_rollbar(error)
     return True
 
