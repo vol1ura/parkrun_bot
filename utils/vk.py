@@ -2,7 +2,7 @@ import aiohttp
 import random
 
 VK_ALBUM_OWNER_ID = '-212432495'
-ALBUMS_ID = ['wall', 285307254]  # id of the best albums for this owner_id
+ALBUMS_ID = ['wall', 303697978]  # id of the best albums for this owner_id
 
 
 def make_vk_api_url(token: str, method: str, owner_id=VK_ALBUM_OWNER_ID, album_id=None):
@@ -24,17 +24,17 @@ async def get_random_photo(token):
     return sorted(random_photo['sizes'], key=lambda x: -x['height'])[2]['url']
 
 
-# if __name__ == '__main__':
-#     from dotenv import load_dotenv
-#     import asyncio
-#     import os
-#
-#     dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
-#     if os.path.exists(dotenv_path):
-#         load_dotenv(dotenv_path)
-#
-#     loop = asyncio.new_event_loop()
-#     asyncio.set_event_loop(loop)
-#     link = loop.run_until_complete(get_random_photo(os.getenv('VK_SERVICE_TOKEN')))
-#     print(link)
-#     loop.close()
+if __name__ == '__main__':
+    from dotenv import load_dotenv
+    import asyncio
+    import os
+
+    dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
+    if os.path.exists(dotenv_path):
+        load_dotenv(dotenv_path)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    link = loop.run_until_complete(get_random_photo(os.getenv('VK_SERVICE_TOKEN')))
+    print(link)
+    loop.close()
