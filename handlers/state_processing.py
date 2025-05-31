@@ -187,14 +187,14 @@ async def confirm_registration(message: types.Message, state: FSMContext):
                 resp = await response.json()
                 if response.ok:
                     await state.finish()
-                    kbd = await kb.main(message)
-                    await message.answer(t(language_code(message), 'successful_registration'), reply_markup=kbd)
+                    await message.answer(t(language_code(message), 'successful_registration'))
                     await message.answer(
                         t(language_code(message), 'subscription_suggestion'),
                         parse_mode='Markdown',
                         disable_web_page_preview=True
                     )
-                    await message.answer(t(language_code(message), 'home_event_suggestion'))
+                    kbd = await kb.main(message)
+                    await message.answer(t(language_code(message), 'home_event_suggestion'), reply_markup=kbd)
                 else:
                     if 'user' in resp['errors']:
                         await message.answer('Ошибки в данных пользователя: ' + ', '.join(resp['errors']['user']))

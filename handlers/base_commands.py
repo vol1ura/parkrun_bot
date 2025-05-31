@@ -90,7 +90,7 @@ async def process_command_qrcode(message: types.Message):
 
     code = athlete_service.get_athlete_code(athlete)
     with qrcode.generate(code) as pic:
-        await bot.send_photo(message.chat.id, pic, caption=f'{athlete["name"]} (A{code})')
+        await bot.send_photo(message.chat.id, pic, caption=f'{athlete["name"]} (A{code})', reply_markup=await kb.main(message))
 
 
 @dp.message_handler(commands=['statistics'])

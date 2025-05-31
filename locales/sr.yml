@@ -100,7 +100,7 @@ sr:
   you_already_have_id: 'Ako ste barem jednom do sada učestvovali na parkrun ili S95 trkama, već imate lični barkod (број после слова "А")'
 
   successful_registration: '🎉 Vaša registracija na S95 je završena!'
-  something_wrong: 'Что-то пошло не так, попробуйте ещё раз'
+  something_wrong: 'Nešto nije u redu, pokušajte ponovo ili prekinite proces komandom /reset'
   home_event_suggestion: 'Setup also your home event using command /home'
 
   btn_qr_code: 'ℹ️ QR-kod'

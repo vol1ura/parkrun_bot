@@ -101,7 +101,7 @@ en:
   you_already_have_id: 'If you have ever participated in parkruns or S95 runs before, you already have a personal barcode (a number after letter "A" on your personal token)'
 
   successful_registration: '🎉 Your registration in S95 is completed!'
-  something_wrong: 'Something wrong, please try again'
+  something_wrong: 'Something wrong, please try again, or try /reset command'
   home_event_suggestion: 'Setup also your home event using command /home'
 
   btn_qr_code: 'ℹ️ QR-code'
