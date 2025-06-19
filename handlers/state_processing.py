@@ -243,7 +243,7 @@ async def process_incorrect_input_club_id(message: types.Message):
 
 @dp.message_handler(state=helpers.ClubStates.INPUT_NAME)
 async def process_club_name(message: types.Message, state: FSMContext):
-    if len(message.text) < 3:
+    if len(message.text) < 2:
         return await message.answer('Введите название клуба немного точнее')
 
     club_service = container.resolve(ClubService)
