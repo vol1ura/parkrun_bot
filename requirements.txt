@@ -1,5 +1,5 @@
 aiodns~=3.1
-aiogram~=2.25
+aiogram~=3.21
 asyncpg~=0.30
 lxml~=5.2
 pycparser~=2.22
