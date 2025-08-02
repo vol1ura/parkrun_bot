@@ -16,11 +16,10 @@ async def s95_personal_result(message: types.Message):
     try:
         turn = re.search(r'\d+$', message.text)
         turn = int(turn[0]) % 360 if turn else 0
-        pic = await make_latest_results_diagram(telegram_id, f'gen_png/results_{telegram_id}.png', turn)
-        await bot.send_photo(message.chat.id, pic)
+        async with make_latest_results_diagram(telegram_id, f'gen_png/results_{telegram_id}.png', turn) as pic:
+            await bot.send_photo(message.chat.id, pic)
         if turn == 0:
             await message.answer(content.t(language_code(message), 'how_to_rotate_labels'), disable_notification=True)
-        pic.close()
     except Exception as e:
         logger.warning(f"Diagram request failed. Query: '{message.text}', telegram_id: {telegram_id}. Error: {e}")
         await message.reply('Не удалось построить диаграмму. Убедитесь, что в вашем профиле есть забеги')
