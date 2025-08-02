@@ -9,7 +9,7 @@ from s95.latest import make_latest_results_diagram
 from utils import content, vk
 
 
-@dp.message_handler(regexp=r'(?i)бот[, \w]+?диаграмма( \d+)?$')
+@dp.message_handler(regexp=r'(?i)бот[, \w]+?(диаграмма|статистика)( \d+)?$')
 async def s95_personal_result(message: types.Message):
     await types.ChatActions.upload_photo()
     telegram_id = message.from_user.id
