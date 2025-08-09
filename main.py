@@ -30,7 +30,7 @@ async def setup_bot_commands(_: Dispatcher):
 async def on_startup(dispatcher: Dispatcher):
     await setup_container()
     await bot.delete_webhook()
-    await bot.set_webhook(config.WEBHOOK_URL)
+    await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
     await setup_bot_commands(dispatcher)
 
 
@@ -55,4 +55,9 @@ if __name__ == '__main__':
         )
     else:
         handlers.print_info()
-        executor.start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown)
+        executor.start_polling(
+            dp,
+            on_startup=on_startup,
+            on_shutdown=on_shutdown,
+            skip_updates=True  # drop pending updates to avoid InvalidQueryID for stale callbacks
+        )

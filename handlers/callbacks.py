@@ -25,8 +25,8 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
 @dp.callback_query_handler(lambda c: c.data == 'personal_results')
 @dp.throttled(rate=2)
 async def process_personal_results(callback_query: types.CallbackQuery):
-    await delete_message(callback_query)
     await bot.answer_callback_query(callback_query.id)
+    await delete_message(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
         '*Представление ваших результатов.*\n'
@@ -188,15 +188,15 @@ async def process_athlete_code_search(callback_query: types.CallbackQuery):
         callback_query.from_user.id,
         t(language_code(callback_query), 'athlete_code_search'),
         parse_mode='Markdown',
-        reply_markup=types.ReplyKeyboardRemove()
+        reply_markup=types.ReplyKeyboardRemove(selective=False)
     )
 
 
 @dp.callback_query_handler(lambda c: c.data == 'help_to_find_id')
 async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
     if await state.get_state():
         await state.reset_state()
-    await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
     s95_kbd = await kb.inline_open_s95(callback_query)
     await bot.send_message(
@@ -209,9 +209,9 @@ async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FS
 
 @dp.callback_query_handler(lambda c: c.data == 'cancel_registration')
 async def process_cancel_registration(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id, 'Регистрация прервана')
     if await state.get_state():
         await state.reset_state()
-    await bot.answer_callback_query(callback_query.id, 'Регистрация прервана')
     await delete_message(callback_query)
     kbd = await kb.main(callback_query)
     await bot.send_message(
@@ -223,6 +223,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
 
 @dp.callback_query_handler(lambda c: c.data == 'start_registration')
 async def process_start_registration(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id, 'Начинаем регистрацию')
     await delete_message(callback_query)
     find_athlete_kbd = await kb.inline_find_athlete_by_id(callback_query)
     await bot.send_message(
@@ -241,7 +242,7 @@ async def process_new_athlete_registration(callback_query: types.CallbackQuery):
     await bot.send_message(
         callback_query.from_user.id,
         t(language_code(callback_query), 'input_lastname'),
-        reply_markup=types.ReplyKeyboardRemove()
+        reply_markup=types.ReplyKeyboardRemove(selective=False)
     )
 
 

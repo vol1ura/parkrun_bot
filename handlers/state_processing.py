@@ -94,7 +94,10 @@ async def process_save_with_parkrun_code(message: types.Message, state: FSMConte
 @dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp=PROCEED_CREATION_REGEXP)
 async def process_ask_athlete_last_name(message: types.Message):
     await helpers.UserStates.next()
-    await message.answer(t(language_code(message), 'input_lastname'), reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(
+        t(language_code(message), 'input_lastname'),
+        reply_markup=types.ReplyKeyboardRemove(selective=False)
+    )
 
 
 @dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE)
@@ -115,7 +118,10 @@ async def process_get_athlete_last_name(message: types.Message, state: FSMContex
 
 @dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME)
 async def process_repeat_last_name(message: types.Message):
-    await message.answer(t(language_code(message), 'input_lastname_again'), reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(
+        t(language_code(message), 'input_lastname_again'),
+        reply_markup=types.ReplyKeyboardRemove(selective=False)
+    )
 
 
 # Сохраняем Имя
