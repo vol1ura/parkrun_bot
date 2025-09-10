@@ -1,6 +1,7 @@
-import typing
+import asyncio
 import asyncpg
 import logging
+import typing
 
 from aiogram import Bot, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage

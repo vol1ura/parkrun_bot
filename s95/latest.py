@@ -1,3 +1,4 @@
+import asyncio
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
@@ -34,6 +35,19 @@ async def make_latest_results_diagram(telegram_id: int, pic: str, turn=0):
         return
 
     df, activity_date, event_name, athlete_id = result
+    pic_file = await asyncio.to_thread(
+        _build_latest_results_diagram_sync, df, activity_date, event_name, athlete_id, pic, turn
+    )
+    try:
+        yield pic_file
+    finally:
+        if pic_file:
+            pic_file.close()
+        if os.path.exists(pic):
+            os.remove(pic)
+
+
+def _build_latest_results_diagram_sync(df, activity_date, event_name, athlete_id, pic: str, turn=0):
     number_runners = len(df)
     plt.figure(figsize=(5.5, 4), dpi=300)
     ax = df['Время'].hist(bins=32)
@@ -83,22 +97,14 @@ async def make_latest_results_diagram(telegram_id: int, pic: str, turn=0):
     ax.set_ylabel("Результатов в диапазоне")
     plt.title(f'Результаты забега {event_name} {activity_date}', size=10, fontweight='bold')
     plt.tight_layout()
-    try:
-        plt.savefig(pic)
-        pic_file = open(pic, 'rb')
-        yield pic_file
-        plt.close()
-    finally:
-        if pic_file:
-            pic_file.close()
-        if os.path.exists(pic):
-            os.remove(pic)
+    plt.savefig(pic)
+    pic_file = open(pic, 'rb')
+    plt.close()
+    return pic_file
 
 
 if __name__ == '__main__':
     from dotenv import load_dotenv
-    import asyncio
-    import os
 
     dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
     if os.path.exists(dotenv_path):

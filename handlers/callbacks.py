@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
@@ -56,7 +57,7 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    pic = CollationMaker(*pages).bars('gen_png/battle.png')
+    pic = await asyncio.to_thread(lambda: CollationMaker(*pages).bars('gen_png/battle.png'))
     await bot.send_photo(user_id, pic, caption='Трактовка: чем меньше по высоте столбцы, тем ближе ваши результаты.')
     pic.close()
 
@@ -67,7 +68,7 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю график. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    pic = CollationMaker(*pages).scatter('gen_png/scatter.png')
+    pic = await asyncio.to_thread(lambda: CollationMaker(*pages).scatter('gen_png/scatter.png'))
     await bot.send_photo(user_id, pic, caption=content.battle_scatter_caption)
     pic.close()
 
@@ -78,7 +79,8 @@ async def process_battle_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    await bot.send_message(callback_query.from_user.id, CollationMaker(*pages).table(), parse_mode='Markdown')
+    table_text = await asyncio.to_thread(lambda: CollationMaker(*pages).table())
+    await bot.send_message(callback_query.from_user.id, table_text, parse_mode='Markdown')
 
 
 @dp.callback_query_handler(lambda c: c.data == 'excel_table')
@@ -87,7 +89,8 @@ async def process_excel_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Создаю файл. Подождите...')
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
-    CollationMaker(*pages).to_excel('compare_parkrun.xlsx').close()
+    file_obj = await asyncio.to_thread(lambda: CollationMaker(*pages).to_excel('compare_parkrun.xlsx'))
+    file_obj.close()
     await bot.send_document(
         user_id, types.InputFile('compare_parkrun.xlsx'),
         caption='Сравнительная таблица для анализа в Excel'

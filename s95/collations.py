@@ -73,6 +73,7 @@ class CollationMaker:
         ax.legend(handles=legend_elements)
         plt.tight_layout()
         plt.savefig(pic)
+        plt.close(fig)
         return open(pic, 'rb')
 
     def scatter(self, pic: str):
@@ -94,7 +95,7 @@ class CollationMaker:
 
         plt.tight_layout()
         plt.savefig(pic)
-        # TODO: Add plt.close() after each plt.savefig() call
+        plt.close(fig)
         return open(pic, 'rb')
 
     def table(self):

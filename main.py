@@ -30,7 +30,8 @@ async def setup_bot_commands(_: Dispatcher):
 async def on_startup(dispatcher: Dispatcher):
     await setup_container()
     await bot.delete_webhook()
-    await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
+    if config.PRODUCTION_ENV:
+        await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
     await setup_bot_commands(dispatcher)
 
 
