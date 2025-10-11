@@ -5,7 +5,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.ticker import MultipleLocator
 
-from s95 import helpers, parkrun
+from s95 import helpers
 from bot_exceptions import NoCollationRuns
 
 
@@ -13,8 +13,8 @@ class CollationMaker:
     def __init__(self, athlete_name_1, athlete_page_1, athlete_name_2, athlete_page_2):
         self.__name_1 = athlete_name_1
         self.__name_2 = athlete_name_2
-        df1 = parkrun.parse_personal_results(athlete_page_1)
-        df2 = parkrun.parse_personal_results(athlete_page_2)
+        df1 = pd.DataFrame()
+        df2 = pd.DataFrame()
 
         self.__df = pd.merge(df1, df2, on=['Run Date', 'Event'])
         self.__joint_races = len(self.__df)

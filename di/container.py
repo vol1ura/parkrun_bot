@@ -14,6 +14,6 @@ class Container:
     def resolve(self, service_type: Type[T]) -> T:
         """Resolve a service by type"""
         service_name = service_type.__name__
-        if service_name in self._services:
-            return cast(T, self._services[service_name])
-        raise KeyError(f"Service {service_name} not registered")
+        if service_name not in self._services:
+            raise KeyError(f"Service {service_name} not registered")
+        return cast(T, self._services[service_name])
