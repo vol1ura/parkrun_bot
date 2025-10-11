@@ -31,3 +31,12 @@ class EventRepository(PostgresRepository):
                 event_id
             )
             return link and link['link']
+
+    async def find_by_country(self, country_id: int) -> List[Dict[str, Any]]:
+        """Find all events in a specific country, excluding the 'friends' event"""
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(
+                'SELECT * FROM events WHERE country_id = $1 AND id != ALL($2) ORDER BY name',
+                country_id,
+                self.FRIENDS_EVENT_IDS
+            )

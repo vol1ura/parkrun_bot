@@ -12,8 +12,9 @@ from handlers import helpers
 from s95.athlete_code import AthleteCode
 from services.athlete_service import AthleteService
 from services.club_service import ClubService
+from services.country_service import CountryService
 from services.event_service import EventService
-from utils.content import t, home_event_notice
+from utils.content import t, home_event_notice, country_name
 
 
 PROCEED_CREATION_REGEXP = '(Всё верно, создать|Okay, proceed|Ok, nastavi)'
@@ -218,6 +219,40 @@ async def cancel_registration(message: types.Message, state: FSMContext):
     await state.finish()
     kbd = await kb.main(message)
     await message.reply(t(language_code(message), 'request_cancelled'), reply_markup=kbd)
+
+
+@dp.message_handler(state=helpers.HomeEventStates.SELECT_COUNTRY, regexp=r'\A\d+\Z')
+async def process_select_country(message: types.Message, state: FSMContext):
+    country_id = int(message.text)
+    country_service = container.resolve(CountryService)
+    country = await country_service.find_country_by_id(country_id)
+
+    if not country:
+        return await message.answer('Введён некорректный номер страны. Попробуйте ещё раз. Либо /reset для отмены')
+
+    await state.update_data(country_id=country_id)
+
+    event_service = container.resolve(EventService)
+    events_list = await event_service.find_events_by_country(country_id)
+
+    lang = language_code(message)
+    localized_country_name = country_name(lang, country['code'])
+
+    if not events_list:
+        await state.finish()
+        return await message.answer(f'В стране "{localized_country_name}" нет доступных мероприятий.')
+
+    message_text = f'Выберите мероприятие в стране *{localized_country_name}*:\n\n'
+    for event in events_list:
+        message_text += f'*{event["id"]}* - {event["name"]}\n'
+
+    await message.answer(message_text, parse_mode='Markdown')
+    await helpers.HomeEventStates.next()
+
+
+@dp.message_handler(state=helpers.HomeEventStates.SELECT_COUNTRY)
+async def process_incorrect_country_id(message: types.Message):
+    await message.answer('Введите число из приведённого выше списка стран. Либо /reset для отмены')
 
 
 @dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID, regexp=r'\A\d+\Z')

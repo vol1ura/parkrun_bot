@@ -143,3 +143,7 @@ en:
 
   login_link_error: 'An error occurred while getting the login link. Please try again later.'
   login_not_registered: 'To get the login link, you need to register.'
+
+  ru: Russia
+  by: Belarus
+  rs: Serbia

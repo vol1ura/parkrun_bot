@@ -26,3 +26,7 @@ class EventService:
     async def update_event(self, event_id: int, event_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Update an existing event"""
         return await self.event_repository.update(event_id, event_data)
+
+    async def find_events_by_country(self, country_id: int) -> List[Dict[str, Any]]:
+        """Find all events in a specific country"""
+        return await self.event_repository.find_by_country(country_id)

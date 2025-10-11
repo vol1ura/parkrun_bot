@@ -4,14 +4,15 @@ from aiogram.dispatcher import FSMContext
 
 import keyboards as kb
 
-from app import dp, bot, logger, language_code
+from app import dp, bot, logger, language_code, container
 from bot_exceptions import CallbackException
 from handlers import helpers
 from s95 import latest, records
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
+from services.country_service import CountryService
 from utils import content
-from utils.content import t
+from utils.content import t, country_name
 
 
 @dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
@@ -315,13 +316,20 @@ async def process_set_club(callback_query: types.CallbackQuery, state: FSMContex
 @dp.callback_query_handler(lambda c: c.data == 'ask_home_event')
 async def process_ask_home_event(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
-    await delete_message(callback_query)
-    events_list = await helpers.events()
-    message = content.ask_home_event
-    for event in events_list:
-        message += f'\n*{event["id"]}* - {event["name"]}'
+
+    country_service = container.resolve(CountryService)
+    countries_list = await country_service.find_all_countries()
+
+    lang = language_code(callback_query)
+    message = 'Выберите страну вашего домашнего забега:\n\n'
+    for country in countries_list:
+        localized_name = country_name(lang, country["code"])
+        message += f'*{country["id"]}* - {localized_name}\n'
+    message += '\n*Введите число* из приведённого выше списка, либо /reset для отмены'
+
     await bot.send_message(callback_query.from_user.id, message, parse_mode='Markdown')
-    await helpers.HomeEventStates.INPUT_EVENT_ID.set()
+    await helpers.HomeEventStates.SELECT_COUNTRY.set()
+    await delete_message(callback_query)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'remove_home_event')

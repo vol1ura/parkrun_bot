@@ -36,6 +36,7 @@ async def setup_container():
     from repositories.user_repository import UserRepository
     from repositories.athlete_repository import AthleteRepository
     from repositories.club_repository import ClubRepository
+    from repositories.country_repository import CountryRepository
     from repositories.event_repository import EventRepository
     from repositories.activity_repository import ActivityRepository
     from repositories.result_repository import ResultRepository
@@ -45,6 +46,7 @@ async def setup_container():
     from services.activity_service import ActivityService
     from services.athlete_service import AthleteService
     from services.club_service import ClubService
+    from services.country_service import CountryService
     from services.event_service import EventService
     from services.result_service import ResultService
     from services.statistics_service import StatisticsService
@@ -53,6 +55,7 @@ async def setup_container():
     user_repo = UserRepository(pool)
     athlete_repo = AthleteRepository(pool)
     club_repo = ClubRepository(pool)
+    country_repo = CountryRepository(pool)
     event_repo = EventRepository(pool)
     activity_repo = ActivityRepository(pool)
     result_repo = ResultRepository(pool)
@@ -60,6 +63,7 @@ async def setup_container():
     container.register(UserRepository, user_repo)
     container.register(AthleteRepository, athlete_repo)
     container.register(ClubRepository, club_repo)
+    container.register(CountryRepository, country_repo)
     container.register(EventRepository, event_repo)
     container.register(ActivityRepository, activity_repo)
     container.register(ResultRepository, result_repo)
@@ -69,6 +73,7 @@ async def setup_container():
     activity_service = ActivityService(activity_repo, result_repo)
     athlete_service = AthleteService(athlete_repo)
     club_service = ClubService(club_repo)
+    country_service = CountryService(country_repo)
     event_service = EventService(event_repo)
     result_service = ResultService(result_repo)
     statistics_service = StatisticsService(user_repo, result_repo)
@@ -77,6 +82,7 @@ async def setup_container():
     container.register(ActivityService, activity_service)
     container.register(AthleteService, athlete_service)
     container.register(ClubService, club_service)
+    container.register(CountryService, country_service)
     container.register(EventService, event_service)
     container.register(ResultService, result_service)
     container.register(StatisticsService, statistics_service)

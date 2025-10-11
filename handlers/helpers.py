@@ -32,6 +32,7 @@ class ClubStates(StatesGroup):
 
 
 class HomeEventStates(StatesGroup):
+    SELECT_COUNTRY = State()
     INPUT_EVENT_ID = State()
 
 
