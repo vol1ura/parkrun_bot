@@ -2,12 +2,12 @@ import aiohttp
 import random
 
 VK_ALBUM_OWNER_ID = '-212432495'
-ALBUMS_ID = ['wall', 303697978]  # id of the best albums for this owner_id
+ALBUMS_ID = [284793506, 303697978]  # id of the best albums for this owner_id
 
 
 def make_vk_api_url(token: str, method: str, owner_id=VK_ALBUM_OWNER_ID, album_id=None):
     album_param = f'&album_id={album_id}' if album_id else ''
-    return f'https://api.vk.ru/method/{method}?owner_id={owner_id}{album_param}&access_token={token}&v=5.130'
+    return f'https://api.vk.ru/method/{method}?owner_id={owner_id}{album_param}&access_token={token}&v=5.199'
 
 
 async def get_random_photo(token):

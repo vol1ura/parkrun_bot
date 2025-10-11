@@ -14,4 +14,4 @@ async def test_get_random_photo():
 def test_make_vk_api_url():
     url = vk.make_vk_api_url('test_token', 'test_method', '-1234567890', '111')
     assert re.fullmatch(r'https://api\.vk\.ru/method/test_method\?owner_id=-1234567890'
-                        r'&album_id=111&access_token=test_token&v=5.130', url)
+                        r'&album_id=111&access_token=test_token&v=5.199', url)

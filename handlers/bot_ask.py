@@ -25,7 +25,7 @@ async def s95_personal_result(message: types.Message):
         await message.reply('Не удалось построить диаграмму. Убедитесь, что в вашем профиле есть забеги')
 
 
-@dp.message_handler(regexp=r'(?i)бот,? (кузьминки|s95|parkrun)')
+@dp.message_handler(regexp=r'(?i)бот,? (с95|паркран|s95|parkrun)')
 async def get_parkrun_picture(message: types.Message):
     token = getenv('VK_SERVICE_TOKEN')
     photo_url = await vk.get_random_photo(token)
