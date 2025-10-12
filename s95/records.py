@@ -2,6 +2,7 @@ import asyncio
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from aiogram.types import BufferedInputFile
 
 
 async def top_parkruns():
@@ -38,7 +39,9 @@ def _build_top_records_count_sync(data: pd.DataFrame, pic: str):
     plt.tight_layout()
     plt.savefig(pic)
     plt.close(fig)
-    return open(pic, 'rb')
+    with open(pic, 'rb') as f:
+        file_content = f.read()
+    return BufferedInputFile(file_content, filename=pic.split('/')[-1])
 
 
 async def top_records_count(pic: str):

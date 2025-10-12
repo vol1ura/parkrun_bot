@@ -6,6 +6,7 @@ import pandas as pd
 from contextlib import asynccontextmanager
 from matplotlib.colors import Normalize
 from matplotlib.ticker import MaxNLocator
+from aiogram.types import BufferedInputFile
 
 from app import container
 from repositories.activity_repository import ActivityRepository
@@ -41,8 +42,6 @@ async def make_latest_results_diagram(telegram_id: int, pic: str, turn=0):
     try:
         yield pic_file
     finally:
-        if pic_file:
-            pic_file.close()
         if os.path.exists(pic):
             os.remove(pic)
 
@@ -98,7 +97,10 @@ def _build_latest_results_diagram_sync(df, activity_date, event_name, athlete_id
     plt.title(f'Результаты забега {event_name} {activity_date}', size=10, fontweight='bold')
     plt.tight_layout()
     plt.savefig(pic)
-    pic_file = open(pic, 'rb')
+    with open(pic, 'rb') as f:
+        file_content = f.read()
+    pic_file = BufferedInputFile(file_content, filename=os.path.basename(pic))
+
     plt.close()
     return pic_file
 

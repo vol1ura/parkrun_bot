@@ -38,15 +38,15 @@ sr:
 
   input_athletes_id: 'Unesite svoj ID (samo brojevi, bez slova A) ili pritisnite /reset da otkažete registraciju'
 
-  input_firstname: 'Unesite svoje ime'
+  input_firstname: 'Unesite svoje *Ime*'
 
-  input_firstname_again: 'Molimo unestite samo svoje ime! Samo slova, bez brojeva'
+  input_firstname_again: 'Molimo unestite samo svoje *Ime*! Samo slova, bez brojeva'
 
-  input_lastname: 'Unesite svoje prezime'
+  input_lastname: 'Unesite svoje *Prezime*'
 
-  input_lastname_again: 'Molimo unestite svoje prezime! Dozvoljena su slova, crta, razmak i apostrof'
+  input_lastname_again: 'Molimo unestite svoje *Prezime*! Dozvoljena su slova, crta, razmak i apostrof'
 
-  input_gender: 'Pritisnite dugme sa vašim polom (muški ili ženski). Koristiće se za izradu rang-liste sa rezultatima'
+  input_gender: 'Pritisnite dugme sa vašim polom (muški ili ženski)'
 
   define_your_gender: '👇Molimo pritisnite dugme ispod sa vašim polom!'
 
@@ -141,7 +141,6 @@ sr:
     Molimo vas ne delite ga sa drugim korisnicima!
 
   login_link_error: 'Došlo je do greške prilikom dobijanja linka za prijavu. Molimo vas pokušajte ponovo kasnije.'
-  login_not_registered: 'Da biste dobili link za prijavu, morate se registrovanati.'
 
   ru: Rusija
   by: Belorusija
