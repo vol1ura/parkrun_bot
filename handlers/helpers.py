@@ -3,8 +3,8 @@ import pandas as pd
 import random
 
 from aiogram import types
-from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.utils.exceptions import MessageToDeleteNotFound
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.exceptions import TelegramBadRequest
 from typing import Optional
 
 from app import logger, container
@@ -39,7 +39,7 @@ class HomeEventStates(StatesGroup):
 async def delete_message(message: types.Message) -> None:
     try:
         await message.delete()
-    except MessageToDeleteNotFound:
+    except TelegramBadRequest:
         pass
 
 

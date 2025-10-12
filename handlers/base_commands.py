@@ -1,4 +1,5 @@
-from aiogram import types
+from aiogram import types, F
+from aiogram.filters import Command, CommandStart
 from config import VERSION
 
 import keyboards as kb
@@ -15,7 +16,7 @@ REGEXP_REGISTRATION = '⚙️ (регистрация|registration|registracija)
 REGEXP_HELP = '❓ (справка|help|pomoć)'
 
 
-@dp.message_handler(commands=['start'])
+@dp.message(CommandStart())
 async def send_welcome(message: types.Message):
     kbd = await kb.main(message)
     await message.answer(
@@ -25,8 +26,8 @@ async def send_welcome(message: types.Message):
     )
 
 
-@dp.message_handler(regexp=REGEXP_HELP)
-@dp.message_handler(commands=['help'])
+@dp.message(F.text.regexp(REGEXP_HELP))
+@dp.message(Command('help'))
 async def commands(message: types.Message):
     await helpers.delete_message(message)
     await message.answer(
@@ -37,8 +38,8 @@ async def commands(message: types.Message):
     )
 
 
-@dp.message_handler(regexp=REGEXP_REGISTRATION)
-@dp.message_handler(commands=['register'])
+@dp.message(F.text.regexp(REGEXP_REGISTRATION))
+@dp.message(Command('register'))
 async def process_command_settings(message: types.Message):
     await helpers.delete_message(message)
 
@@ -64,8 +65,8 @@ async def process_command_settings(message: types.Message):
     await message.answer(t(language_code(message), 'athlete_already_registered').format(athlete['id']))
 
 
-@dp.message_handler(regexp=REGEXP_QR)
-@dp.message_handler(commands=['qrcode'])
+@dp.message(F.text.regexp(REGEXP_QR))
+@dp.message(Command('qrcode'))
 async def process_command_qrcode(message: types.Message):
     await helpers.delete_message(message)
 
@@ -93,8 +94,7 @@ async def process_command_qrcode(message: types.Message):
         await bot.send_photo(message.chat.id, pic, caption=f'{athlete["name"]} (A{code})', reply_markup=await kb.main(message))
 
 
-@dp.message_handler(commands=['statistics'])
-@dp.throttled(rate=2)
+@dp.message(Command('statistics'))
 async def process_command_statistics(message: types.Message):
     await helpers.delete_message(message)
 
@@ -114,8 +114,7 @@ async def process_command_statistics(message: types.Message):
     await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_personal)
 
 
-@dp.message_handler(commands=['club'])
-@dp.throttled(rate=1)
+@dp.message(Command('club'))
 async def process_command_club(message: types.Message):
     await helpers.delete_message(message)
 
@@ -146,8 +145,7 @@ async def process_command_club(message: types.Message):
     )
 
 
-@dp.message_handler(commands=['home'])
-@dp.throttled(rate=1)
+@dp.message(Command('home'))
 async def process_command_home(message: types.Message):
     await helpers.delete_message(message)
 
@@ -178,7 +176,7 @@ async def process_command_home(message: types.Message):
     )
 
 
-@dp.message_handler(commands=['phone'])
+@dp.message(Command('phone'))
 async def process_command_phone(message: types.Message):
     await helpers.delete_message(message)
 
@@ -210,7 +208,7 @@ async def process_command_phone(message: types.Message):
     )
 
 
-@dp.message_handler(content_types=['contact'])
+@dp.message(F.contact)
 async def process_contact(message: types.Message):
     if message.contact.user_id == message.from_user.id:
         phone = message.contact.phone_number
@@ -220,18 +218,12 @@ async def process_contact(message: types.Message):
                 reply_markup=await kb.main(message)
             )
         else:
-            await message.answer(
-                t(language_code(message), 'phone_save_error'),
-                reply_markup=await kb.main(message)
-            )
+            await message.answer(t(language_code(message), 'phone_save_error'), reply_markup=await kb.main(message))
     else:
-        await message.answer(
-            t(language_code(message), 'wrong_contact'),
-            reply_markup=await kb.main(message)
-        )
+        await message.answer(t(language_code(message), 'wrong_contact'), reply_markup=await kb.main(message))
 
 
-@dp.message_handler(lambda message: message.text == t(message.from_user.language_code, 'btn_cancel'))
+@dp.message(lambda message: message.text == t(message.from_user.language_code, 'btn_cancel'))
 async def process_cancel_phone(message: types.Message):
     await message.answer(
         t(language_code(message), 'request_cancelled'),
@@ -239,16 +231,16 @@ async def process_cancel_phone(message: types.Message):
     )
 
 
-@dp.message_handler(commands=['login'])
+@dp.message(Command('login'))
 async def process_command_login(message: types.Message):
-    # Get services from container
     user_service = container.resolve(UserService)
-
-    # Find user by Telegram ID
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
-        agreement_kbd = await kb.inline_agreement(message)
-        return await message.answer(t(language_code(message), 'login_not_registered'), reply_markup=agreement_kbd)
+        return await message.answer(
+            t(language_code(message), 'confirm_registration'),
+            reply_markup=await kb.inline_agreement(message),
+            parse_mode='Markdown'
+        )
 
     auth_link = await helpers.get_auth_link(user['id'])
     if not auth_link:

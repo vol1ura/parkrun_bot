@@ -1,6 +1,7 @@
 import asyncio
-from aiogram import types
-from aiogram.dispatcher import FSMContext
+from aiogram import types, F
+from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile
 
 import keyboards as kb
 
@@ -15,8 +16,7 @@ from utils import content
 from utils.content import t, country_name
 
 
-@dp.callback_query_handler(lambda c: c.data == 'most_records_parkruns')
-@dp.throttled(helpers.handle_throttled_query, rate=3)
+@dp.callback_query(F.data == 'most_records_parkruns')
 async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
     pic = await records.top_records_count('gen_png/records.png')
@@ -24,8 +24,7 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
     pic.close()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'personal_results')
-@dp.throttled(rate=2)
+@dp.callback_query(F.data == 'personal_results')
 async def process_personal_results(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
@@ -52,8 +51,7 @@ async def get_compared_pages(user_id):
     return athlete_name_1, athlete_name_2
 
 
-@dp.callback_query_handler(lambda c: c.data == 'battle_diagram')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'battle_diagram')
 async def process_battle_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     user_id = callback_query.from_user.id
@@ -63,8 +61,7 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
     pic.close()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'battle_scatter')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'battle_scatter')
 async def process_battle_scatter(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Строю график. Подождите...')
     user_id = callback_query.from_user.id
@@ -74,8 +71,7 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
     pic.close()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'battle_table')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'battle_table')
 async def process_battle_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
     user_id = callback_query.from_user.id
@@ -84,8 +80,7 @@ async def process_battle_table(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, table_text, parse_mode='Markdown')
 
 
-@dp.callback_query_handler(lambda c: c.data == 'excel_table')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'excel_table')
 async def process_excel_table(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Создаю файл. Подождите...')
     user_id = callback_query.from_user.id
@@ -93,13 +88,12 @@ async def process_excel_table(callback_query: types.CallbackQuery):
     file_obj = await asyncio.to_thread(lambda: CollationMaker(*pages).to_excel('compare_parkrun.xlsx'))
     file_obj.close()
     await bot.send_document(
-        user_id, types.InputFile('compare_parkrun.xlsx'),
+        user_id, FSInputFile('compare_parkrun.xlsx'),
         caption='Сравнительная таблица для анализа в Excel'
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'last_activity_diagram')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'last_activity_diagram')
 async def process_last_activity_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     await delete_message(callback_query)
@@ -115,8 +109,7 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'personal_history')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'personal_history')
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     await delete_message(callback_query)
@@ -132,8 +125,7 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'personal_bests')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'personal_bests')
 async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     await delete_message(callback_query)
@@ -149,8 +141,7 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'personal_tourism')
-@dp.throttled(helpers.handle_throttled_query, rate=2)
+@dp.callback_query(F.data == 'personal_tourism')
 async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     await delete_message(callback_query)
@@ -166,8 +157,7 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
         )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'personal_last')
-@dp.throttled(helpers.handle_throttled_query, rate=1)
+@dp.callback_query(F.data == 'personal_last')
 async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, content.wait_diagram)
     await delete_message(callback_query)
@@ -183,10 +173,10 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
         )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'athlete_code_search')
-async def process_athlete_code_search(callback_query: types.CallbackQuery):
+@dp.callback_query(F.data == 'athlete_code_search')
+async def process_athlete_code_search(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
-    await helpers.UserStates.SEARCH_ATHLETE_CODE.set()
+    await state.set_state(helpers.UserStates.SEARCH_ATHLETE_CODE)
     await delete_message(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
@@ -196,11 +186,11 @@ async def process_athlete_code_search(callback_query: types.CallbackQuery):
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'help_to_find_id')
+@dp.callback_query(F.data == 'help_to_find_id')
 async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     if await state.get_state():
-        await state.reset_state()
+        await state.clear()
     await delete_message(callback_query)
     s95_kbd = await kb.inline_open_s95(callback_query)
     await bot.send_message(
@@ -211,11 +201,11 @@ async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FS
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'cancel_registration')
+@dp.callback_query(F.data == 'cancel_registration')
 async def process_cancel_registration(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id, 'Регистрация прервана')
     if await state.get_state():
-        await state.reset_state()
+        await state.clear()
     await delete_message(callback_query)
     kbd = await kb.main(callback_query)
     await bot.send_message(
@@ -225,7 +215,7 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'start_registration')
+@dp.callback_query(F.data == 'start_registration')
 async def process_start_registration(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, 'Начинаем регистрацию')
     await delete_message(callback_query)
@@ -238,19 +228,20 @@ async def process_start_registration(callback_query: types.CallbackQuery):
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'create_new_athlete')
-async def process_new_athlete_registration(callback_query: types.CallbackQuery):
+@dp.callback_query(F.data == 'create_new_athlete')
+async def process_new_athlete_registration(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
-    await helpers.UserStates.ATHLETE_LAST_NAME.set()
+    await state.set_state(helpers.UserStates.ATHLETE_LAST_NAME)
     await bot.send_message(
         callback_query.from_user.id,
         t(language_code(callback_query), 'input_lastname'),
-        reply_markup=types.ReplyKeyboardRemove(selective=False)
+        reply_markup=types.ReplyKeyboardRemove(selective=False),
+        parse_mode='Markdown'
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'cancel_action')
+@dp.callback_query(F.data == 'cancel_action')
 async def process_cancel_action(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
@@ -260,18 +251,18 @@ async def process_cancel_action(callback_query: types.CallbackQuery):
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'cancel_action', state=helpers.ClubStates)
+@dp.callback_query(helpers.ClubStates(), F.data == 'cancel_action')
 async def process_cancel_action_with_state(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
-    await state.finish()
+    await state.clear()
     await bot.send_message(
         callback_query.from_user.id,
         t(language_code(callback_query), 'request_cancelled')
     )
 
 
-@dp.callback_query_handler(lambda c: c.data == 'remove_club')
+@dp.callback_query(F.data == 'remove_club')
 async def process_remove_club(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
@@ -282,8 +273,8 @@ async def process_remove_club(callback_query: types.CallbackQuery):
         await bot.send_message(callback_query.from_user.id, 'Не удалось удалить клуб. Попробуйте снова')
 
 
-@dp.callback_query_handler(lambda c: c.data == 'ask_club')
-async def process_ask_club(callback_query: types.CallbackQuery):
+@dp.callback_query(F.data == 'ask_club')
+async def process_ask_club(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
     await bot.send_message(
@@ -292,29 +283,29 @@ async def process_ask_club(callback_query: types.CallbackQuery):
         parse_mode='Markdown',
         disable_web_page_preview=True
     )
-    await helpers.ClubStates.INPUT_NAME.set()
+    await state.set_state(helpers.ClubStates.INPUT_NAME)
 
 
-@dp.callback_query_handler(lambda c: c.data == 'set_club', state=helpers.ClubStates.CONFIRM_NAME)
+@dp.callback_query(helpers.ClubStates.CONFIRM_NAME, F.data == 'set_club')
 async def process_set_club(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
-    async with state.proxy() as data:
-        result = await helpers.update_club(callback_query.from_user.id, data['club_id'])
-        if result:
-            await bot.send_message(
-                callback_query.from_user.id,
-                f'Клуб [{data["club_name"]}](https://s95.ru/clubs/{data["club_id"]}) установлен',
-                parse_mode='Markdown',
-                disable_web_page_preview=False
-            )
-        else:
-            await bot.send_message(callback_query.from_user.id, 'Не удалось установить клуб. Попробуйте снова')
-    await state.finish()
+    data = await state.get_data()
+    result = await helpers.update_club(callback_query.from_user.id, data['club_id'])
+    if result:
+        await bot.send_message(
+            callback_query.from_user.id,
+            f'Клуб [{data["club_name"]}](https://s95.ru/clubs/{data["club_id"]}) установлен',
+            parse_mode='Markdown',
+            disable_web_page_preview=False
+        )
+    else:
+        await bot.send_message(callback_query.from_user.id, 'Не удалось установить клуб. Попробуйте снова')
+    await state.clear()
 
 
-@dp.callback_query_handler(lambda c: c.data == 'ask_home_event')
-async def process_ask_home_event(callback_query: types.CallbackQuery):
+@dp.callback_query(F.data == 'ask_home_event')
+async def process_ask_home_event(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
 
     country_service = container.resolve(CountryService)
@@ -328,11 +319,11 @@ async def process_ask_home_event(callback_query: types.CallbackQuery):
     message += '\n*Введите число* из приведённого выше списка, либо /reset для отмены'
 
     await bot.send_message(callback_query.from_user.id, message, parse_mode='Markdown')
-    await helpers.HomeEventStates.SELECT_COUNTRY.set()
+    await state.set_state(helpers.HomeEventStates.SELECT_COUNTRY)
     await delete_message(callback_query)
 
 
-@dp.callback_query_handler(lambda c: c.data == 'remove_home_event')
+@dp.callback_query(F.data == 'remove_home_event')
 async def process_remove_home_event(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)

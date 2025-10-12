@@ -6,6 +6,7 @@ import seaborn as sns
 
 from contextlib import asynccontextmanager
 from matplotlib.ticker import MultipleLocator, NullLocator
+from aiogram.types import BufferedInputFile
 
 from handlers.helpers import find_user_by, user_results
 
@@ -51,12 +52,12 @@ class PersonalResults:
         pic = f'gen_png/participate_{self.__telegram_id}.png'
         try:
             plt.savefig(pic)
-            pic_file = open(pic, 'rb')
+            with open(pic, 'rb') as f:
+                file_content = f.read()
+            pic_file = BufferedInputFile(file_content, filename=os.path.basename(pic))
             yield pic_file
         finally:
             plt.close()
-            if pic_file:
-                pic_file.close()
             if os.path.exists(pic):
                 os.remove(pic)
 
@@ -80,12 +81,12 @@ class PersonalResults:
         pic = f'gen_png/pb_{self.__telegram_id}.png'
         try:
             plt.savefig(pic)
-            pic_file = open(pic, 'rb')
+            with open(pic, 'rb') as f:
+                file_content = f.read()
+            pic_file = BufferedInputFile(file_content, filename=os.path.basename(pic))
             yield pic_file
         finally:
             plt.close()
-            if pic_file:
-                pic_file.close()
             if os.path.exists(pic):
                 os.remove(pic)
 
@@ -124,12 +125,12 @@ class PersonalResults:
         pic = f'gen_png/tourism_{self.__telegram_id}.png'
         try:
             plt.savefig(pic)
-            pic_file = open(pic, 'rb')
+            with open(pic, 'rb') as f:
+                file_content = f.read()
+            pic_file = BufferedInputFile(file_content, filename=os.path.basename(pic))
             yield pic_file
         finally:
             plt.close()
-            if pic_file:
-                pic_file.close()
             if os.path.exists(pic):
                 os.remove(pic)
 
@@ -157,11 +158,11 @@ class PersonalResults:
         pic = f'gen_png/last_runs_{self.__telegram_id}.png'
         try:
             plt.savefig(pic)
-            pic_file = open(pic, 'rb')
+            with open(pic, 'rb') as f:
+                file_content = f.read()
+            pic_file = BufferedInputFile(file_content, filename=os.path.basename(pic))
             yield pic_file
         finally:
             plt.close()
-            if pic_file:
-                pic_file.close()
             if os.path.exists(pic):
                 os.remove(pic)

@@ -3,17 +3,17 @@ import asyncpg
 import logging
 import typing
 
-from aiogram import Bot, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher import Dispatcher
+from aiogram import Bot, Dispatcher, types
+from aiogram.fsm.storage.memory import MemoryStorage
 
 import config
 from di.container import Container
 
 container = Container()
 
-bot = Bot(config.TOKEN_BOT)
-dp = Dispatcher(bot, storage=MemoryStorage())
+bot = Bot(token=config.TOKEN_BOT)
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
 
 logging.basicConfig(format=u'%(levelname)s [ %(filename)s:%(lineno)s ]: %(message)s', level=logging.WARN)
 logger = logging.getLogger(__name__)

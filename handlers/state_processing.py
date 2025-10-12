@@ -1,8 +1,8 @@
 import aiohttp
 import re
 
-from aiogram import types
-from aiogram.dispatcher import FSMContext
+from aiogram import types, F
+from aiogram.fsm.context import FSMContext
 from config import INTERNAL_API_URL
 
 import keyboards as kb
@@ -24,7 +24,7 @@ GENDERS_LIST = ['мужской', 'женский', 'male', 'female', 'muški', 
 MALE_LIST = ['мужской', 'male', 'muški']
 
 
-@dp.message_handler(state=helpers.UserStates.SEARCH_ATHLETE_CODE)
+@dp.message(helpers.UserStates.SEARCH_ATHLETE_CODE)
 async def process_user_enter_parkrun_code(message: types.Message, state: FSMContext):
     athlete_code = AthleteCode(message.text)
     if not athlete_code.is_valid:
@@ -33,7 +33,8 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
     athlete_service = container.resolve(AthleteService)
 
     # Update state with code information
-    await helpers.UserStates.next()
+    await state.set_state(helpers.UserStates.SAVE_WITH_PARKRUN_CODE)
+
     if athlete_code.key == 's95':
         await state.update_data(parkrun_code=None)
     else:
@@ -44,17 +45,20 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
 
     if athlete:
         if athlete["user_id"]:
-            await state.finish()
+            await state.clear()
             return await message.answer(t(language_code(message), 'user_exists_linked'))
 
         # Process found athlete
-        async with state.proxy() as data:
-            data['athlete_id'] = athlete['id']
-            names_list = re.split(r'\s', athlete['name'] or '', maxsplit=1)
-            if len(names_list) < 2:
-                names_list.insert(0, 'Noname')
-            data['first_name'], data['last_name'] = names_list
-            data['male'] = athlete['male']
+        names_list = re.split(r'\s', athlete['name'] or '', maxsplit=1)
+        if len(names_list) < 2:
+            names_list.insert(0, 'Noname')
+
+        await state.update_data(
+            athlete_id=athlete['id'],
+            first_name=names_list[1],
+            last_name=names_list[0],
+            male=athlete['male']
+        )
 
         accept_athlete_kbd = await kb.accept_athlete(message)
         await message.answer(
@@ -75,74 +79,75 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
 
 
 # Сразу переходим к подтверждению
-@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp=LINK_ATHLETE_REGEXP)
+@dp.message(helpers.UserStates.SAVE_WITH_PARKRUN_CODE, F.text.regexp(LINK_ATHLETE_REGEXP))
 async def process_save_with_parkrun_code(message: types.Message, state: FSMContext):
     confirm_kbd = await kb.confirm_registration(message)
-    async with state.proxy() as data:
-        await message.answer(
-            t(language_code(message), 'confirm_personal_data').format(
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                gender=t(language_code(message), 'btn_male' if data['male'] else 'btn_female')
-            ),
-            parse_mode='Markdown',
-            reply_markup=confirm_kbd
-        )
-    await helpers.UserStates.CONFIRM.set()
+    data = await state.get_data()
+    await message.answer(
+        t(language_code(message), 'confirm_personal_data').format(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            gender=t(language_code(message), 'btn_male' if data['male'] else 'btn_female')
+        ),
+        parse_mode='Markdown',
+        reply_markup=confirm_kbd
+    )
+    await state.set_state(helpers.UserStates.CONFIRM)
 
 
 # Запрашиваем Фамилию
-@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE, regexp=PROCEED_CREATION_REGEXP)
-async def process_ask_athlete_last_name(message: types.Message):
-    await helpers.UserStates.next()
+@dp.message(helpers.UserStates.SAVE_WITH_PARKRUN_CODE, F.text.regexp(PROCEED_CREATION_REGEXP))
+async def process_ask_athlete_last_name(message: types.Message, state: FSMContext):
+    await state.set_state(helpers.UserStates.ATHLETE_LAST_NAME)
     await message.answer(
         t(language_code(message), 'input_lastname'),
         reply_markup=types.ReplyKeyboardRemove(selective=False)
     )
 
 
-@dp.message_handler(state=helpers.UserStates.SAVE_WITH_PARKRUN_CODE)
+@dp.message(helpers.UserStates.SAVE_WITH_PARKRUN_CODE)
 async def process_cancel_parkrun_code(message: types.Message, state: FSMContext):
-    await state.finish()
+    await state.clear()
     kbd = await kb.main(message)
     await message.reply(t(language_code(message), 'request_cancelled'), reply_markup=kbd)
 
 
 # Получаем Фамилию
 # Запрашиваем Имя
-@dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME, regexp=r'\A[^\W\d_]+([-\'][^\W\d_]{2,})?\Z')
+@dp.message(helpers.UserStates.ATHLETE_LAST_NAME, F.text.regexp(r'\A[^\W\d_]+([-\'][^\W\d_]{2,})?\Z'))
 async def process_get_athlete_last_name(message: types.Message, state: FSMContext):
-    await helpers.UserStates.next()
+    await state.set_state(helpers.UserStates.ATHLETE_FIRST_NAME)
     await state.update_data(last_name=message.text.upper())
-    await message.answer(t(language_code(message), 'input_firstname'))
+    await message.answer(t(language_code(message), 'input_firstname'), parse_mode='Markdown')
 
 
-@dp.message_handler(state=helpers.UserStates.ATHLETE_LAST_NAME)
+@dp.message(helpers.UserStates.ATHLETE_LAST_NAME)
 async def process_repeat_last_name(message: types.Message):
     await message.answer(
         t(language_code(message), 'input_lastname_again'),
-        reply_markup=types.ReplyKeyboardRemove(selective=False)
+        reply_markup=types.ReplyKeyboardRemove(selective=False),
+        parse_mode='Markdown'
     )
 
 
 # Сохраняем Имя
 # Запрашиваем Пол
-@dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME, regexp=r'\A[^\W\d_]+(?:-[^\W\d_]{2,})?\Z')
+@dp.message(helpers.UserStates.ATHLETE_FIRST_NAME, F.text.regexp(r'\A[^\W\d_]+(?:-[^\W\d_]{2,})?\Z'))
 async def process_get_athlete_first_name(message: types.Message, state: FSMContext):
-    await helpers.UserStates.next()
+    await state.set_state(helpers.UserStates.GENDER)
     await state.update_data(first_name=message.text)
     gender_kbd = await kb.select_gender(message)
     await message.answer(t(language_code(message), 'input_gender'), reply_markup=gender_kbd)
 
 
 # Повторно запрашиваем имя, если не сработала регулярка
-@dp.message_handler(state=helpers.UserStates.ATHLETE_FIRST_NAME)
+@dp.message(helpers.UserStates.ATHLETE_FIRST_NAME)
 async def process_repeat_first_name(message: types.Message):
-    await message.answer(t(language_code(message), 'input_firstname_again'))
+    await message.answer(t(language_code(message), 'input_firstname_again'), parse_mode='Markdown')
 
 
 # Запрашиваем Пол ещё раз
-@dp.message_handler(lambda m: m.text.strip().lower() not in GENDERS_LIST, state=helpers.UserStates.GENDER)
+@dp.message(helpers.UserStates.GENDER, lambda m: m.text.strip().lower() not in GENDERS_LIST)
 async def process_gender_invalid(message: types.Message):
     gender_kbd = await kb.select_gender(message)
     await message.reply(t(language_code(message), 'define_your_gender'), reply_markup=gender_kbd)
@@ -150,50 +155,52 @@ async def process_gender_invalid(message: types.Message):
 
 # Сохраняем Пол
 # Просим подтвердить все данные
-@dp.message_handler(state=helpers.UserStates.GENDER)
+@dp.message(helpers.UserStates.GENDER)
 async def process_gender(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['male'] = message.text.strip().lower() in MALE_LIST
-        confirm_kbd = await kb.confirm_registration(message)
-        await message.answer(
-            t(language_code(message), 'confirm_personal_data').format(
-                first_name=data['first_name'],
-                last_name=data['last_name'],
-                gender=t(language_code(message), 'btn_male' if data['male'] else 'btn_female')
-            ),
-            parse_mode='Markdown',
-            reply_markup=confirm_kbd
-        )
-    await helpers.UserStates.next()
+    data = await state.get_data()
+    male = message.text.strip().lower() in MALE_LIST
+    await state.update_data(male=male)
+
+    confirm_kbd = await kb.confirm_registration(message)
+    await message.answer(
+        t(language_code(message), 'confirm_personal_data').format(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            gender=t(language_code(message), 'btn_male' if male else 'btn_female')
+        ),
+        parse_mode='Markdown',
+        reply_markup=confirm_kbd
+    )
+    await state.set_state(helpers.UserStates.CONFIRM)
 
 
-@dp.message_handler(state=helpers.UserStates.CONFIRM, regexp=PROCEED_CREATION_REGEXP)
+@dp.message(helpers.UserStates.CONFIRM, F.text.regexp(PROCEED_CREATION_REGEXP))
 async def confirm_registration(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        payload = {
-            'user': {
-                'first_name': data['first_name'],
-                'last_name': data['last_name'],
-                'telegram_id': message.from_user.id,
-                'telegram_user': message.from_user.username
-            }
+    data = await state.get_data()
+    payload = {
+        'user': {
+            'first_name': data['first_name'],
+            'last_name': data['last_name'],
+            'telegram_id': message.from_user.id,
+            'telegram_user': message.from_user.username
         }
-        if 'athlete_id' in data:
-            payload['athlete_id'] = data['athlete_id']
-        else:
-            payload['athlete'] = {
-                'name': f'{data["first_name"]} {data["last_name"]}',
-                'male': data['male'],
-                'parkrun_code': data['parkrun_code'] if 'parkrun_code' in data else None,
-                'fiveverst_code': data['fiveverst_code'] if 'fiveverst_code' in data else None,
-                'runpark_code': data['runpark_code'] if 'runpark_code' in data else None
-            }
+    }
+    if 'athlete_id' in data:
+        payload['athlete_id'] = data['athlete_id']
+    else:
+        payload['athlete'] = {
+            'name': f'{data["first_name"]} {data["last_name"]}',
+            'male': data['male'],
+            'parkrun_code': data.get('parkrun_code'),
+            'fiveverst_code': data.get('fiveverst_code'),
+            'runpark_code': data.get('runpark_code')
+        }
     try:
         async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
             async with session.post(f'{INTERNAL_API_URL}/user', json=payload) as response:
                 resp = await response.json()
                 if response.ok:
-                    await state.finish()
+                    await state.clear()
                     await message.answer(t(language_code(message), 'successful_registration'))
                     await message.answer(
                         t(language_code(message), 'subscription_suggestion'),
@@ -214,14 +221,14 @@ async def confirm_registration(message: types.Message, state: FSMContext):
         await message.delete()
 
 
-@dp.message_handler(state=helpers.UserStates.CONFIRM, regexp=CANCEL_REGEXP)
+@dp.message(helpers.UserStates.CONFIRM, F.text.regexp(CANCEL_REGEXP))
 async def cancel_registration(message: types.Message, state: FSMContext):
-    await state.finish()
+    await state.clear()
     kbd = await kb.main(message)
     await message.reply(t(language_code(message), 'request_cancelled'), reply_markup=kbd)
 
 
-@dp.message_handler(state=helpers.HomeEventStates.SELECT_COUNTRY, regexp=r'\A\d+\Z')
+@dp.message(helpers.HomeEventStates.SELECT_COUNTRY, F.text.regexp(r'\A\d+\Z'))
 async def process_select_country(message: types.Message, state: FSMContext):
     country_id = int(message.text)
     country_service = container.resolve(CountryService)
@@ -239,7 +246,7 @@ async def process_select_country(message: types.Message, state: FSMContext):
     localized_country_name = country_name(lang, country['code'])
 
     if not events_list:
-        await state.finish()
+        await state.clear()
         return await message.answer(f'В стране "{localized_country_name}" нет доступных мероприятий.')
 
     message_text = f'Выберите мероприятие в стране *{localized_country_name}*:\n\n'
@@ -247,15 +254,15 @@ async def process_select_country(message: types.Message, state: FSMContext):
         message_text += f'*{event["id"]}* - {event["name"]}\n'
 
     await message.answer(message_text, parse_mode='Markdown')
-    await helpers.HomeEventStates.next()
+    await state.set_state(helpers.HomeEventStates.INPUT_EVENT_ID)
 
 
-@dp.message_handler(state=helpers.HomeEventStates.SELECT_COUNTRY)
+@dp.message(helpers.HomeEventStates.SELECT_COUNTRY)
 async def process_incorrect_country_id(message: types.Message):
     await message.answer('Введите число из приведённого выше списка стран. Либо /reset для отмены')
 
 
-@dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID, regexp=r'\A\d+\Z')
+@dp.message(helpers.HomeEventStates.INPUT_EVENT_ID, F.text.regexp(r'\A\d+\Z'))
 async def process_input_event_id(message: types.Message, state: FSMContext):
     event_id = int(message.text)
     event_service = container.resolve(EventService)
@@ -273,16 +280,16 @@ async def process_input_event_id(message: types.Message, state: FSMContext):
         answer += ' ' + home_event_notice.format(link)
 
     await message.answer(answer, parse_mode='Markdown', disable_web_page_preview=True)
-    await state.finish()
+    await state.clear()
 
 
 # Повторный запрос кода локации
-@dp.message_handler(state=helpers.HomeEventStates.INPUT_EVENT_ID)
+@dp.message(helpers.HomeEventStates.INPUT_EVENT_ID)
 async def process_incorrect_input_club_id(message: types.Message):
     await message.answer('Введите число из приведённого выше списка. Либо /reset для отмены')
 
 
-@dp.message_handler(state=helpers.ClubStates.INPUT_NAME)
+@dp.message(helpers.ClubStates.INPUT_NAME)
 async def process_club_name(message: types.Message, state: FSMContext):
     if len(message.text) < 2:
         return await message.answer('Введите название клуба немного точнее')
@@ -293,7 +300,7 @@ async def process_club_name(message: types.Message, state: FSMContext):
         return await message.answer(t(language_code(message), 'club_not_found'))
 
     await state.update_data(club_id=club['id'], club_name=club['name'])
-    await helpers.ClubStates.next()
+    await state.set_state(helpers.ClubStates.CONFIRM_NAME)
 
     await message.answer(
         f'Найден клуб [{club["name"]}](https://s95.ru/clubs/{club["id"]}). Установить?',

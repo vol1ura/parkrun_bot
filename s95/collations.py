@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.ticker import MultipleLocator
+from aiogram.types import BufferedInputFile
 
 from s95 import helpers
 from bot_exceptions import NoCollationRuns
@@ -74,7 +75,9 @@ class CollationMaker:
         plt.tight_layout()
         plt.savefig(pic)
         plt.close(fig)
-        return open(pic, 'rb')
+        with open(pic, 'rb') as f:
+            file_content = f.read()
+        return BufferedInputFile(file_content, filename=pic.split('/')[-1])
 
     def scatter(self, pic: str):
         fig = plt.figure(figsize=(5, 5), dpi=150)
@@ -96,7 +99,10 @@ class CollationMaker:
         plt.tight_layout()
         plt.savefig(pic)
         plt.close(fig)
-        return open(pic, 'rb')
+
+        with open(pic, 'rb') as f:
+            file_content = f.read()
+        return BufferedInputFile(file_content, filename=pic.split('/')[-1])
 
     def table(self):
         self.__df['time_diff'] = self.__df['m_x'] - self.__df['m_y']
@@ -119,4 +125,5 @@ class CollationMaker:
         df.rename(columns={'Место_x': 'Ваше место', 'Время_x': 'Ваше время', 'ЛР?_x': 'Личник?', 'ЛР?_y': 'Личник',
                            'Место_y': f'Место ({vizavi})', 'Время_y': f'Время ({vizavi})'}, inplace=True)
         df.to_excel(file_name, index=False, sheet_name='Сравнение результатов')
+
         return open(file_name)
