@@ -7,21 +7,22 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
-PRODUCTION_ENV = os.getenv('PRODUCTION')
+PRODUCTION_ENV = os.getenv('PRODUCTION', '').lower() in ('true', '1', 'yes')
 
-VERSION = '1.9.6'
+VERSION = '1.9.7'
 
 TOKEN_BOT = os.getenv('API_BOT_TOKEN', '123456:123456test')
 
+HOST = os.getenv('HOST')
+
 WEBHOOK_PATH = f'/bot/{os.getenv("WEBHOOK", "webhook")}'
-WEBHOOK_URL = f'{os.getenv("HOST")}{WEBHOOK_PATH}'
+WEBHOOK_URL = f'{HOST}{WEBHOOK_PATH}' if HOST else ''
 
 WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = int(os.getenv('PORT', 5000))
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-HOST = os.getenv('HOST')
 
 INTERNAL_API_KEY = os.getenv('INTERNAL_API_KEY')
 INTERNAL_API_URL = os.getenv('INTERNAL_API_URL')

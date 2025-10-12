@@ -31,8 +31,8 @@ async def setup_bot_commands():
 async def on_startup():
     await setup_container()
     await bot.delete_webhook(drop_pending_updates=True)
-    # if config.PRODUCTION_ENV:
-    #     await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
+    if config.PRODUCTION_ENV:
+        await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True)
     await setup_bot_commands()
 
 
@@ -52,21 +52,29 @@ async def main():
     # Register shutdown hook
     dp.shutdown.register(on_shutdown)
 
-    if False:  # config.PRODUCTION_ENV
-        # Webhook mode (not fully implemented here, needs aiohttp app setup)
+    if config.PRODUCTION_ENV:
         from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+        from aiohttp.web import AppRunner, TCPSite
 
         app = web.Application()
-        webhook_requests_handler = SimpleRequestHandler(
-            dispatcher=dp,
-            bot=bot,
-        )
+        webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
         webhook_requests_handler.register(app, path=config.WEBHOOK_PATH)
         setup_application(app, dp, bot=bot)
 
-        web.run_app(app, host=config.WEBAPP_HOST, port=config.WEBAPP_PORT)
+        # Use AppRunner instead of web.run_app() to work within existing event loop
+        runner = AppRunner(app)
+        await runner.setup()
+        site = TCPSite(runner, host=config.WEBAPP_HOST, port=config.WEBAPP_PORT)
+        await site.start()
+
+        print(f'Webhook server started on {config.WEBAPP_HOST}:{config.WEBAPP_PORT}')
+
+        # Keep the application running
+        try:
+            await asyncio.Event().wait()
+        finally:
+            await runner.cleanup()
     else:
-        # Polling mode
         await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
