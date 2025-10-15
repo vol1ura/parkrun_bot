@@ -8,6 +8,8 @@
 deploy/*
 !deploy/s95-bot.service.example
 !deploy/requirements.txt
+!deploy/check_webhook.sh
+!deploy/diagnose_production.sh
 
 # CACHES
 *__pycache__/
