@@ -55,8 +55,8 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
 
         await state.update_data(
             athlete_id=athlete['id'],
-            first_name=names_list[1],
-            last_name=names_list[0],
+            first_name=names_list[0],
+            last_name=names_list[1],
             male=athlete['male']
         )
 
