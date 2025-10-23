@@ -91,7 +91,14 @@ async def process_command_qrcode(message: types.Message):
 
     code = athlete_service.get_athlete_code(athlete)
     with qrcode.generate(code) as pic:
-        await bot.send_photo(message.chat.id, pic, caption=f'{athlete["name"]} (A{code})', reply_markup=await kb.main(message))
+        await bot.send_photo(
+            message.chat.id,
+            pic,
+            caption=f'{athlete["name"]} (A`{code}`)',
+            reply_markup=await kb.main(message),
+            disable_notification=True,
+            parse_mode='Markdown'
+        )
 
 
 @dp.message(Command('statistics'))
@@ -242,7 +249,7 @@ async def process_command_login(message: types.Message):
             parse_mode='Markdown'
         )
 
-    auth_link = await helpers.get_auth_link(user['id'])
+    auth_link = await helpers.get_auth_link(user['id'], language_code(message))
     if not auth_link:
         return await message.answer(t(language_code(message), 'login_link_error'), reply_markup=await kb.main(message))
 
