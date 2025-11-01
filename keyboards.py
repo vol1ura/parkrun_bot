@@ -5,6 +5,17 @@ from services.user_service import UserService
 from utils.content import t
 
 
+LOCALE_TO_DOMAIN_MAPPING = {
+    'be': 'by',
+    'sr': 'rs',
+}
+DOMAIN_TO_BUTTON_MAPPING = {
+    'ru': InlineKeyboardButton(text='🇷🇺 s95.ru', callback_data='domain_ru'),
+    'rs': InlineKeyboardButton(text='🇷🇸 s95.rs', callback_data='domain_rs'),
+    'by': InlineKeyboardButton(text='🇧🇾 s95.by', callback_data='domain_by'),
+}
+
+
 async def main(message) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
     user_service = container.resolve(UserService)
@@ -170,3 +181,24 @@ async def phone_keyboard(message) -> ReplyKeyboardMarkup:
         one_time_keyboard=True
     )
     return phone_kbd
+
+
+def inline_select_domain(language_code: str = 'ru') -> InlineKeyboardMarkup:
+    """Inline keyboard for selecting S95 domain.
+
+    The order of buttons depends on user's language code.
+    The preferred domain for the user's locale is shown first.
+    """
+    preferred_domain = LOCALE_TO_DOMAIN_MAPPING.get(language_code, 'ru')
+    buttons = [preferred_domain]
+    for domain in ['ru', 'rs', 'by']:
+        if domain != preferred_domain:
+            buttons.append(domain)
+
+    inline_select_domain_kbd = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [DOMAIN_TO_BUTTON_MAPPING[domain] for domain in buttons],
+            [InlineKeyboardButton(text=t(language_code, 'btn_cancel'), callback_data='cancel_action')]
+        ]
+    )
+    return inline_select_domain_kbd

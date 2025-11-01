@@ -136,6 +136,8 @@ en:
 
   link_to_s95_website: 'https://s95.ru/'
 
+  select_domain: 'Select the website you want to login to:'
+
   your_login_link: |
     Link to S95 website: [LOGIN]({link})
     Link is valid for 2 minutes

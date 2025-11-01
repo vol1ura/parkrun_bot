@@ -1,5 +1,6 @@
 from aiogram import types, F
 from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
 from config import VERSION
 
 import keyboards as kb
@@ -239,7 +240,7 @@ async def process_cancel_phone(message: types.Message):
 
 
 @dp.message(Command('login'))
-async def process_command_login(message: types.Message):
+async def process_command_login(message: types.Message, state: FSMContext):
     user_service = container.resolve(UserService)
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
@@ -249,13 +250,10 @@ async def process_command_login(message: types.Message):
             parse_mode='Markdown'
         )
 
-    auth_link = await helpers.get_auth_link(user['id'], language_code(message))
-    if not auth_link:
-        return await message.answer(t(language_code(message), 'login_link_error'), reply_markup=await kb.main(message))
+    await state.set_state(helpers.LoginStates.SELECT_DOMAIN)
+    await state.update_data(user_id=user['id'])
 
     await message.answer(
-        t(language_code(message), 'your_login_link').format(link=auth_link),
-        reply_markup=await kb.main(message),
-        parse_mode='Markdown',
-        disable_web_page_preview=True
+        t(language_code(message), 'select_domain'),
+        reply_markup=kb.inline_select_domain(language_code(message))
     )

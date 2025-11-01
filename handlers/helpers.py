@@ -36,6 +36,10 @@ class HomeEventStates(StatesGroup):
     INPUT_EVENT_ID = State()
 
 
+class LoginStates(StatesGroup):
+    SELECT_DOMAIN = State()
+
+
 async def delete_message(message: types.Message) -> None:
     try:
         await message.delete()
@@ -185,8 +189,8 @@ async def update_user_phone(telegram_id: int, phone: str) -> bool:
         return False
 
 
-async def get_auth_link(user_id: int, locale: str) -> Optional[str]:
-    payload = {'user_id': user_id, 'locale': 'rs' if locale == 'sr' else 'ru'}
+async def get_auth_link(user_id: int, domain: str) -> Optional[str]:
+    payload = {'user_id': user_id, 'domain': domain}
     try:
         async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
             async with session.post(f'{INTERNAL_API_URL}/user/auth_link', json=payload) as response:

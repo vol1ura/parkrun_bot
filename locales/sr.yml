@@ -135,6 +135,8 @@ sr:
 
   link_to_s95_website: 'https://s95.ru/'
 
+  select_domain: 'Izaberite sajt na koji želite da se prijavite:'
+
   your_login_link: |
     Link za prijavu na sajt S95: [PRIJAVI SE]({link})
     Link je validan 2 minuta

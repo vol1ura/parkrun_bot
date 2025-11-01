@@ -251,6 +251,41 @@ async def process_cancel_action(callback_query: types.CallbackQuery):
     )
 
 
+@dp.callback_query(helpers.LoginStates.SELECT_DOMAIN, F.data.startswith('domain_'))
+async def process_domain_selection(callback_query: types.CallbackQuery, state: FSMContext):
+    await bot.answer_callback_query(callback_query.id)
+
+    domain = callback_query.data.split('_')[1]  # domain_ru -> ru
+    data = await state.get_data()
+    user_id = data.get('user_id')
+
+    if not user_id:
+        await state.clear()
+        return await bot.send_message(
+            callback_query.from_user.id,
+            t(language_code(callback_query), 'something_wrong')
+        )
+
+    auth_link = await helpers.get_auth_link(user_id, domain)
+    await state.clear()
+    await delete_message(callback_query)
+
+    if not auth_link:
+        return await bot.send_message(
+            callback_query.from_user.id,
+            t(language_code(callback_query), 'login_link_error'),
+            reply_markup=await kb.main(callback_query)
+        )
+
+    await bot.send_message(
+        callback_query.from_user.id,
+        t(language_code(callback_query), 'your_login_link').format(link=auth_link),
+        reply_markup=await kb.main(callback_query),
+        parse_mode='Markdown',
+        disable_web_page_preview=True
+    )
+
+
 @dp.callback_query(helpers.ClubStates(), F.data == 'cancel_action')
 async def process_cancel_action_with_state(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
