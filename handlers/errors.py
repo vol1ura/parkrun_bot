@@ -3,7 +3,8 @@ import rollbar
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import ErrorEvent
 
-from app import dp, logger, bot
+from app import dp, logger, bot, language_code
+from utils.content import t
 from bot_exceptions import ParsingException, CallbackException, NoCollationRuns
 from config import ROLLBAR_TOKEN, PRODUCTION_ENV
 
@@ -22,8 +23,6 @@ async def error_handler(event: ErrorEvent):
     # Handle ParsingException
     if isinstance(exception, ParsingException):
         if update.message:
-            from utils.content import t
-            from app import language_code
             lang = language_code(update.message)
             error_msg = f"Exception of type {type(exception)}. Chat ID: {update.message.chat.id}. " \
                         f"User ID: {update.message.from_user.id}. Error: {exception}"
@@ -37,8 +36,6 @@ async def error_handler(event: ErrorEvent):
     # Handle CallbackException
     if isinstance(exception, CallbackException):
         if update.callback_query:
-            from utils.content import t
-            from app import language_code
             lang = language_code(update.callback_query)
             error_msg = f"Exception of type {type(exception)}. UserName: {update.callback_query.from_user.username}. " \
                         f"User ID: {update.callback_query.from_user.id}. Error: {exception}"

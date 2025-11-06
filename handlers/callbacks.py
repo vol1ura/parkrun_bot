@@ -12,13 +12,14 @@ from s95 import latest, records
 from s95.collations import CollationMaker
 from s95.personal import PersonalResults
 from services.country_service import CountryService
-from utils import content
+
 from utils.content import t, country_name
 
 
 @dp.callback_query(F.data == 'most_records_parkruns')
 async def process_most_records_parkruns(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Подождите, идёт построение диаграммы...')
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
     pic = await records.top_records_count('gen_png/records.png')
     await bot.send_photo(callback_query.from_user.id, pic)
     pic.close()
@@ -53,7 +54,8 @@ async def get_compared_pages(user_id):
 
 @dp.callback_query(F.data == 'battle_diagram')
 async def process_battle_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     pic = await asyncio.to_thread(lambda: CollationMaker(*pages).bars('gen_png/battle.png'))
@@ -63,7 +65,8 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'battle_scatter')
 async def process_battle_scatter(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Строю график. Подождите...')
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     pic = await asyncio.to_thread(lambda: CollationMaker(*pages).scatter('gen_png/scatter.png'))
@@ -73,7 +76,8 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'battle_table')
 async def process_battle_table(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Рассчитываю таблицу. Подождите...')
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     table_text = await asyncio.to_thread(lambda: CollationMaker(*pages).table())
@@ -82,7 +86,8 @@ async def process_battle_table(callback_query: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'excel_table')
 async def process_excel_table(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Создаю файл. Подождите...')
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     file_obj = await asyncio.to_thread(lambda: CollationMaker(*pages).to_excel('compare_parkrun.xlsx'))
@@ -155,7 +160,8 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'personal_tourism')
 async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
     await delete_message(callback_query)
     try:
         telegram_id = callback_query.from_user.id
@@ -163,9 +169,11 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
     except Exception as e:
         logger.info(f'Failed to generate personal tourism diagram for {callback_query.from_user.id}: {e}')
+        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
         await bot.send_message(
             callback_query.from_user.id,
-            'Не удалось построить диаграмму. Возможно, нет результатов.'
+            error_msg,
+            parse_mode='Markdown'
         )
 
 

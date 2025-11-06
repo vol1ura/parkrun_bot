@@ -75,10 +75,11 @@ async def process_command_settings(message: types.Message):
 
     # Find user by Telegram ID
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
+    lang = language_code(message)
     if not user:
         agreement_kbd = await kb.inline_agreement(message)
         return await message.answer(
-            t(language_code(message), 'confirm_registration'),
+            t(lang, 'confirm_registration'),
             reply_markup=agreement_kbd,
             parse_mode='Markdown'
         )
@@ -86,7 +87,7 @@ async def process_command_settings(message: types.Message):
     # Find athlete by user ID
     athlete = await athlete_service.find_athlete_by_user_id(user['id'])
     if not athlete:
-        return await message.answer(t(language_code(message), 'user_without_athlete'))
+        return await message.answer(t(lang, 'user_without_athlete'))
 
     await message.answer(t(language_code(message), 'athlete_already_registered').format(athlete['id']))
 
@@ -164,11 +165,12 @@ async def process_command_club(message: types.Message):
 
     # Find athlete with club information
     club = await athlete_service.find_athlete_with_club(message.from_user.id)
+    lang = language_code(message)
     agreement_kbd = await kb.inline_agreement(message)
 
     if not club:
         return await message.answer(
-            t(language_code(message), 'confirm_registration'),
+            t(lang, 'confirm_registration'),
             reply_markup=agreement_kbd,
             parse_mode='Markdown'
         )
@@ -195,11 +197,12 @@ async def process_command_home(message: types.Message):
 
     # Find athlete with home event information
     event = await athlete_service.find_athlete_with_home_event(message.from_user.id)
+    lang = language_code(message)
     agreement_kbd = await kb.inline_agreement(message)
 
     if not event:
         return await message.answer(
-            t(language_code(message), 'confirm_registration'),
+            t(lang, 'confirm_registration'),
             reply_markup=agreement_kbd,
             parse_mode='Markdown'
         )
@@ -229,7 +232,7 @@ async def process_command_phone(message: types.Message):
     if not user:
         agreement_kbd = await kb.inline_agreement(message)
         return await message.answer(
-            t(language_code(message), 'confirm_registration'),
+            t(lang, 'confirm_registration'),
             reply_markup=agreement_kbd,
             parse_mode='Markdown'
         )

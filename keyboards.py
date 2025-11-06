@@ -20,7 +20,7 @@ async def main(message) -> ReplyKeyboardMarkup:
     """MAIN bot keyboard layout"""
     user_service = container.resolve(UserService)
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     
     if user:
         # Расширенная клавиатура для зарегистрированных пользователей
@@ -107,7 +107,7 @@ def inline_personal(language_code: str = 'ru') -> InlineKeyboardMarkup:
 
 # ATHLETE REGISTRATION
 async def accept_athlete(message) -> ReplyKeyboardMarkup:
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     accept_athlete_kbd = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text=t(lang, 'btn_link')), KeyboardButton(text=t(lang, 'btn_no_link'))]
@@ -120,7 +120,7 @@ async def accept_athlete(message) -> ReplyKeyboardMarkup:
 
 # Confirm REGISTRATION
 async def confirm_registration(message) -> ReplyKeyboardMarkup:
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     confirm_registration_kbd = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text=t(lang, 'btn_create')), KeyboardButton(text=t(lang, 'btn_cancel'))]
@@ -132,7 +132,7 @@ async def confirm_registration(message) -> ReplyKeyboardMarkup:
 
 
 async def ask_for_new_athlete(message) -> ReplyKeyboardMarkup:
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     ask_for_new_athlete_kbd = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text=t(lang, 'btn_create')), KeyboardButton(text=t(lang, 'btn_cancel'))]
@@ -144,7 +144,7 @@ async def ask_for_new_athlete(message) -> ReplyKeyboardMarkup:
 
 
 async def select_gender(message) -> ReplyKeyboardMarkup:
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     select_gender_kbd = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text=t(lang, 'btn_male')), KeyboardButton(text=t(lang, 'btn_female'))]
@@ -156,7 +156,7 @@ async def select_gender(message) -> ReplyKeyboardMarkup:
 
 
 async def inline_agreement(message) -> InlineKeyboardMarkup:
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     inline_agreement_kbd = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text='✅ ' + t(lang, 'btn_agree'), callback_data='start_registration'),
          InlineKeyboardButton(text='❌ ' + t(lang, 'btn_disagree'), callback_data='cancel_registration')]
@@ -165,7 +165,7 @@ async def inline_agreement(message) -> InlineKeyboardMarkup:
 
 
 async def inline_find_athlete_by_id(message) -> InlineKeyboardMarkup:
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     inline_find_athlete_by_id_kbd = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=t(lang, 'btn_new_runner'), callback_data='create_new_athlete'),
          InlineKeyboardButton(text=t(lang, 'btn_cancel'), callback_data='cancel_registration')],
@@ -176,7 +176,7 @@ async def inline_find_athlete_by_id(message) -> InlineKeyboardMarkup:
 
 
 async def inline_open_s95(message) -> InlineKeyboardMarkup:
-    lang = message.from_user.language_code
+    lang = message.from_user.language_code or 'ru'
     inline_open_s95_kbd = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=t(lang, 'btn_open_website'), url=t(lang, 'link_to_s95_website'))],
         [InlineKeyboardButton(text=t(lang, 'btn_back'), callback_data='start_registration')]
