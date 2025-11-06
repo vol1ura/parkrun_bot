@@ -1,6 +1,7 @@
 from aiogram import types, F
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import VERSION
 
 import keyboards as kb
@@ -19,11 +20,24 @@ REGEXP_HELP = '❓ (справка|help|pomoć)'
 
 @dp.message(CommandStart())
 async def send_welcome(message: types.Message):
+    user_service = container.resolve(UserService)
+    user = await user_service.find_user_by_telegram_id(message.from_user.id)
+    lang = language_code(message)
+    
     kbd = await kb.main(message)
+    
+    if user:
+        # Персонализированное приветствие для зарегистрированных пользователей
+        name = message.from_user.first_name or 'друг'
+        welcome_text = t(lang, 'welcome_back').format(name=name)
+    else:
+        welcome_text = t(lang, 'start_message')
+    
     await message.answer(
-        t(language_code(message), 'start_message'),
+        welcome_text,
         reply_markup=kbd,
-        disable_notification=True
+        disable_notification=True,
+        parse_mode='Markdown'
     )
 
 
@@ -31,11 +45,22 @@ async def send_welcome(message: types.Message):
 @dp.message(Command('help'))
 async def commands(message: types.Message):
     await helpers.delete_message(message)
+    lang = language_code(message)
+    
+    # Создаём интерактивную справку с inline-кнопками
+    help_kbd = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='📱 QR-код', callback_data='help_qr'),
+         InlineKeyboardButton(text='📊 Статистика', callback_data='help_stats')],
+        [InlineKeyboardButton(text='⚙️ Настройки', callback_data='help_settings'),
+         InlineKeyboardButton(text='❓ Общая справка', callback_data='help_general')],
+        [InlineKeyboardButton(text='🔙 Назад', callback_data='help_back')]
+    ])
+    
     await message.answer(
-        t(language_code(message), 'help_message').format(VERSION),
+        t(lang, 'help_interactive'),
         disable_notification=True,
         parse_mode='Markdown',
-        reply_markup=await kb.main(message)
+        reply_markup=help_kbd
     )
 
 
@@ -70,6 +95,7 @@ async def process_command_settings(message: types.Message):
 @dp.message(Command('qrcode'))
 async def process_command_qrcode(message: types.Message):
     await helpers.delete_message(message)
+    await bot.send_chat_action(chat_id=message.chat.id, action=types.ChatAction.UPLOAD_PHOTO)
 
     # Get services from container
     user_service = container.resolve(UserService)
@@ -77,31 +103,35 @@ async def process_command_qrcode(message: types.Message):
 
     telegram_id = message.from_user.id
     user = await user_service.find_user_by_telegram_id(telegram_id)
+    lang = language_code(message)
     agreement_kbd = await kb.inline_agreement(message)
 
     if not user:
         return await message.answer(
-            t(language_code(message), 'confirm_registration'),
+            t(lang, 'confirm_registration'),
             reply_markup=agreement_kbd,
             parse_mode='Markdown'
         )
 
     athlete = await athlete_service.find_athlete_by_user_id(user['id'])
     if not athlete:
-        return await message.answer(t(language_code(message), 'user_without_athlete'))
+        return await message.answer(t(lang, 'user_without_athlete'))
 
     code = athlete_service.get_athlete_code(athlete)
+    qr_info = t(lang, 'qr_code_info').format(name=athlete["name"], code=code)
+    
     with qrcode.generate(code) as pic:
         await bot.send_photo(
             message.chat.id,
             pic,
-            caption=f'{athlete["name"]} (A`{code}`)',
+            caption=qr_info,
             reply_markup=await kb.main(message),
             disable_notification=True,
             parse_mode='Markdown'
         )
 
 
+@dp.message(F.text.regexp(r'📊 (Статистика|Statistics)'))
 @dp.message(Command('statistics'))
 async def process_command_statistics(message: types.Message):
     await helpers.delete_message(message)
@@ -111,15 +141,18 @@ async def process_command_statistics(message: types.Message):
 
     # Check if user exists
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
+    lang = language_code(message)
+    
     if not user:
         agreement_kbd = await kb.inline_agreement(message)
         return await message.answer(
-            t(language_code(message), 'confirm_registration'),
+            t(lang, 'confirm_registration'),
             reply_markup=agreement_kbd,
             parse_mode='Markdown'
         )
 
-    await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_personal)
+    stats_text = t(lang, 'statistics_dashboard')
+    await message.answer(stats_text, reply_markup=kb.inline_personal(lang), parse_mode='Markdown')
 
 
 @dp.message(Command('club'))
@@ -239,13 +272,17 @@ async def process_cancel_phone(message: types.Message):
     )
 
 
+@dp.message(F.text.regexp(r'🔗 (Войти на сайт|Login)'))
 @dp.message(Command('login'))
 async def process_command_login(message: types.Message, state: FSMContext):
+    await helpers.delete_message(message)
     user_service = container.resolve(UserService)
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
+    lang = language_code(message)
+    
     if not user:
         return await message.answer(
-            t(language_code(message), 'confirm_registration'),
+            t(lang, 'confirm_registration'),
             reply_markup=await kb.inline_agreement(message),
             parse_mode='Markdown'
         )
@@ -254,6 +291,6 @@ async def process_command_login(message: types.Message, state: FSMContext):
     await state.update_data(user_id=user['id'])
 
     await message.answer(
-        t(language_code(message), 'select_domain'),
-        reply_markup=kb.inline_select_domain(language_code(message))
+        t(lang, 'select_domain'),
+        reply_markup=kb.inline_select_domain(lang)
     )

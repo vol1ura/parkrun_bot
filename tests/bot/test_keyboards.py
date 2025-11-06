@@ -32,7 +32,7 @@ def test_confirm_set_club_kb():
 
 
 def test_inline_personal_kb():
-    inline_personal_kb = keyboards.inline_personal
+    inline_personal_kb = keyboards.inline_personal('ru')
     assert isinstance(inline_personal_kb, InlineKeyboardMarkup)
 
 

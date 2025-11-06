@@ -21,14 +21,25 @@ async def main(message) -> ReplyKeyboardMarkup:
     user_service = container.resolve(UserService)
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     lang = message.from_user.language_code
-    btn_title = t(lang, 'btn_qr_code') if user else t(lang, 'btn_registration')
-
-    kbd = ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text=btn_title), KeyboardButton(text=t(lang, 'btn_help'))]
-        ],
-        resize_keyboard=True
-    )
+    
+    if user:
+        # Расширенная клавиатура для зарегистрированных пользователей
+        kbd = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text=t(lang, 'btn_qr_code')), KeyboardButton(text=t(lang, 'btn_statistics'))],
+                [KeyboardButton(text=t(lang, 'btn_settings')), KeyboardButton(text=t(lang, 'btn_login'))],
+                [KeyboardButton(text=t(lang, 'btn_help'))]
+            ],
+            resize_keyboard=True
+        )
+    else:
+        # Простая клавиатура для незарегистрированных
+        kbd = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text=t(lang, 'btn_registration')), KeyboardButton(text=t(lang, 'btn_help'))]
+            ],
+            resize_keyboard=True
+        )
     return kbd
 
 
@@ -45,43 +56,45 @@ async def main(message) -> ReplyKeyboardMarkup:
 
 # CLUB ask to change
 change_club = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Сменить', callback_data='ask_club'),
-     InlineKeyboardButton(text='Удалить', callback_data='remove_club')],
-    [InlineKeyboardButton(text='Отмена', callback_data='cancel_action')]
+    [InlineKeyboardButton(text='✏️ Сменить', callback_data='ask_club'),
+     InlineKeyboardButton(text='🗑️ Удалить', callback_data='remove_club')],
+    [InlineKeyboardButton(text='❌ Отмена', callback_data='cancel_action')]
 ])
 
 # CLUB ask to set
 set_club = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Установить', callback_data='ask_club')],
-    [InlineKeyboardButton(text='Отмена', callback_data='cancel_action')]
+    [InlineKeyboardButton(text='✅ Установить', callback_data='ask_club')],
+    [InlineKeyboardButton(text='❌ Отмена', callback_data='cancel_action')]
 ])
 
 confirm_set_club = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Да', callback_data='set_club'),
-     InlineKeyboardButton(text='Нет', callback_data='cancel_action')]
+    [InlineKeyboardButton(text='✅ Да', callback_data='set_club'),
+     InlineKeyboardButton(text='❌ Нет', callback_data='cancel_action')]
 ])
 
 # HOME EVENT ask to change
 change_home_event = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Сменить', callback_data='ask_home_event'),
-     InlineKeyboardButton(text='Удалить', callback_data='remove_home_event')],
-    [InlineKeyboardButton(text='Отмена', callback_data='cancel_action')]
+    [InlineKeyboardButton(text='✏️ Сменить', callback_data='ask_home_event'),
+     InlineKeyboardButton(text='🗑️ Удалить', callback_data='remove_home_event')],
+    [InlineKeyboardButton(text='❌ Отмена', callback_data='cancel_action')]
 ])
 
 # HOME EVENT ask to set
 set_home_event = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Установить', callback_data='ask_home_event')],
-    [InlineKeyboardButton(text='Отмена', callback_data='cancel_action')]
+    [InlineKeyboardButton(text='✅ Установить', callback_data='ask_home_event')],
+    [InlineKeyboardButton(text='❌ Отмена', callback_data='cancel_action')]
 ])
 
 # PERSONAL RESULTS inline keyboard layout
-inline_personal = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Последний забег', callback_data='last_activity_diagram'),
-     InlineKeyboardButton(text='История', callback_data='personal_history')],
-    [InlineKeyboardButton(text='Личники', callback_data='personal_bests'),
-     InlineKeyboardButton(text='График 10 рез.', callback_data='personal_last')]
-    # [InlineKeyboardButton(text='S95-туризм', callback_data='personal_tourism')]
-])
+def inline_personal(language_code: str = 'ru') -> InlineKeyboardMarkup:
+    """Inline keyboard for personal statistics"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='📈 Последний забег', callback_data='last_activity_diagram'),
+         InlineKeyboardButton(text='📅 История', callback_data='personal_history')],
+        [InlineKeyboardButton(text='🏆 Личники', callback_data='personal_bests'),
+         InlineKeyboardButton(text='📊 График 10 рез.', callback_data='personal_last')]
+        # [InlineKeyboardButton(text='✈️ S95-туризм', callback_data='personal_tourism')]
+    ])
 
 
 # COMPARATION of personal results
@@ -145,8 +158,8 @@ async def select_gender(message) -> ReplyKeyboardMarkup:
 async def inline_agreement(message) -> InlineKeyboardMarkup:
     lang = message.from_user.language_code
     inline_agreement_kbd = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=t(lang, 'btn_agree'), callback_data='start_registration'),
-         InlineKeyboardButton(text=t(lang, 'btn_disagree'), callback_data='cancel_registration')]
+        [InlineKeyboardButton(text='✅ ' + t(lang, 'btn_agree'), callback_data='start_registration'),
+         InlineKeyboardButton(text='❌ ' + t(lang, 'btn_disagree'), callback_data='cancel_registration')]
     ])
     return inline_agreement_kbd
 

@@ -99,9 +99,11 @@ async def process_save_with_parkrun_code(message: types.Message, state: FSMConte
 @dp.message(helpers.UserStates.SAVE_WITH_PARKRUN_CODE, F.text.regexp(PROCEED_CREATION_REGEXP))
 async def process_ask_athlete_last_name(message: types.Message, state: FSMContext):
     await state.set_state(helpers.UserStates.ATHLETE_LAST_NAME)
+    lang = language_code(message)
     await message.answer(
-        t(language_code(message), 'input_lastname'),
-        reply_markup=types.ReplyKeyboardRemove(selective=False)
+        t(lang, 'input_lastname'),
+        reply_markup=types.ReplyKeyboardRemove(selective=False),
+        parse_mode='Markdown'
     )
 
 
@@ -118,7 +120,8 @@ async def process_cancel_parkrun_code(message: types.Message, state: FSMContext)
 async def process_get_athlete_last_name(message: types.Message, state: FSMContext):
     await state.set_state(helpers.UserStates.ATHLETE_FIRST_NAME)
     await state.update_data(last_name=message.text.upper())
-    await message.answer(t(language_code(message), 'input_firstname'), parse_mode='Markdown')
+    lang = language_code(message)
+    await message.answer(t(lang, 'input_firstname'), parse_mode='Markdown')
 
 
 @dp.message(helpers.UserStates.ATHLETE_LAST_NAME)
@@ -136,8 +139,9 @@ async def process_repeat_last_name(message: types.Message):
 async def process_get_athlete_first_name(message: types.Message, state: FSMContext):
     await state.set_state(helpers.UserStates.GENDER)
     await state.update_data(first_name=message.text)
+    lang = language_code(message)
     gender_kbd = await kb.select_gender(message)
-    await message.answer(t(language_code(message), 'input_gender'), reply_markup=gender_kbd)
+    await message.answer(t(lang, 'input_gender'), reply_markup=gender_kbd, parse_mode='Markdown')
 
 
 # Повторно запрашиваем имя, если не сработала регулярка

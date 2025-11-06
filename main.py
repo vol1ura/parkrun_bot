@@ -14,16 +14,17 @@ async def setup_bot_commands():
     Here we setup bot commands to make them visible in Telegram UI
     """
     bot_commands = [
-        types.BotCommand(command='qrcode', description='Ваш QR-код в S95'),
-        types.BotCommand(command='register', description='Зарегистрироваться в S95'),
-        types.BotCommand(command='login', description='Войти на сайт S95'),
-        types.BotCommand(command='statistics', description='Персональная статистика'),
-        types.BotCommand(command='help', description='Краткая справка'),
-        types.BotCommand(command='phone', description='Привязать свой телефон к профилю'),
-        types.BotCommand(command='home', description='Установить домашний забег'),
-        types.BotCommand(command='club', description='Установить клуб'),
-        types.BotCommand(command='start', description='Перезапуск'),
-        types.BotCommand(command='reset', description='Отмена действия')
+        types.BotCommand(command='start', description='🚀 Начать работу с ботом'),
+        types.BotCommand(command='qrcode', description='📱 Получить QR-код для регистрации'),
+        types.BotCommand(command='statistics', description='📊 Персональная статистика'),
+        types.BotCommand(command='register', description='⚙️ Зарегистрироваться в S95'),
+        types.BotCommand(command='login', description='🔗 Войти на сайт S95'),
+        types.BotCommand(command='phone', description='📱 Привязать телефон к профилю'),
+        types.BotCommand(command='home', description='🏠 Установить домашний забег'),
+        types.BotCommand(command='club', description='👥 Установить клуб'),
+        types.BotCommand(command='help', description='❓ Интерактивная справка'),
+        types.BotCommand(command='continue', description='🔄 Продолжить прерванный процесс'),
+        types.BotCommand(command='reset', description='❌ Отменить текущее действие')
     ]
     await bot.set_my_commands(bot_commands)
 

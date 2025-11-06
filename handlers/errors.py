@@ -22,20 +22,28 @@ async def error_handler(event: ErrorEvent):
     # Handle ParsingException
     if isinstance(exception, ParsingException):
         if update.message:
+            from utils.content import t
+            from app import language_code
+            lang = language_code(update.message)
             error_msg = f"Exception of type {type(exception)}. Chat ID: {update.message.chat.id}. " \
                         f"User ID: {update.message.from_user.id}. Error: {exception}"
-            await bot.send_message(update.message.chat.id, 'Не могу получить эти данные.\n'
-                                                           'Скорее всего, их пока просто нет 😿\n'
-                                                           'Попробуйте выбрать другой паркран или клуб.')
+            error_text = t(lang, 'error_occurred').format(
+                error_message='Не могу получить эти данные.\nСкорее всего, их пока просто нет 😿\nПопробуйте выбрать другой паркран или клуб.'
+            )
+            await bot.send_message(update.message.chat.id, error_text, parse_mode='Markdown')
             logger.error(error_msg)
         return True
 
     # Handle CallbackException
     if isinstance(exception, CallbackException):
         if update.callback_query:
+            from utils.content import t
+            from app import language_code
+            lang = language_code(update.callback_query)
             error_msg = f"Exception of type {type(exception)}. UserName: {update.callback_query.from_user.username}. " \
                         f"User ID: {update.callback_query.from_user.id}. Error: {exception}"
-            await bot.send_message(update.callback_query.from_user.id, str(exception))
+            error_text = t(lang, 'error_occurred').format(error_message=str(exception))
+            await bot.send_message(update.callback_query.from_user.id, error_text, parse_mode='Markdown')
             logger.error(error_msg)
             notify_in_rollbar(exception)
         return True

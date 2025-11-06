@@ -28,11 +28,11 @@ async def process_most_records_parkruns(callback_query: types.CallbackQuery):
 async def process_personal_results(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
+    lang = language_code(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        '*Представление ваших результатов.*\n'
-        'Здесь можно сделать визуализацию ваших результатов за всю историю участия в забегах S95.',
-        reply_markup=kb.inline_personal,
+        t(lang, 'statistics_dashboard'),
+        reply_markup=kb.inline_personal(lang),
         parse_mode='Markdown'
     )
 
@@ -95,7 +95,9 @@ async def process_excel_table(callback_query: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'last_activity_diagram')
 async def process_last_activity_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
+    await bot.send_chat_action(chat_id=callback_query.from_user.id, action=types.ChatAction.UPLOAD_PHOTO)
     await delete_message(callback_query)
     try:
         telegram_id = callback_query.from_user.id
@@ -103,15 +105,19 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
     except Exception as e:
         logger.info(f'Failed to generate last activity diagram for {callback_query.from_user.id}: {e}')
+        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
         await bot.send_message(
             callback_query.from_user.id,
-            'Не удалось построить диаграмму. Возможно, нет результатов.'
+            error_msg,
+            parse_mode='Markdown'
         )
 
 
 @dp.callback_query(F.data == 'personal_history')
 async def process_personal_history_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
+    await bot.send_chat_action(chat_id=callback_query.from_user.id, action=types.ChatAction.UPLOAD_PHOTO)
     await delete_message(callback_query)
     try:
         telegram_id = callback_query.from_user.id
@@ -119,15 +125,19 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
     except Exception as e:
         logger.info(f'Failed to generate personal history diagram for {callback_query.from_user.id}: {e}')
+        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
         await bot.send_message(
             callback_query.from_user.id,
-            'Не удалось построить диаграмму. Возможно, нет результатов.'
+            error_msg,
+            parse_mode='Markdown'
         )
 
 
 @dp.callback_query(F.data == 'personal_bests')
 async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
+    await bot.send_chat_action(chat_id=callback_query.from_user.id, action=types.ChatAction.UPLOAD_PHOTO)
     await delete_message(callback_query)
     try:
         telegram_id = callback_query.from_user.id
@@ -135,9 +145,11 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
     except Exception as e:
         logger.info(f'Failed to generate personal bests diagram for {callback_query.from_user.id}: {e}')
+        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
         await bot.send_message(
             callback_query.from_user.id,
-            'Не удалось построить диаграмму. Возможно, нет результатов.'
+            error_msg,
+            parse_mode='Markdown'
         )
 
 
@@ -159,7 +171,9 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'personal_last')
 async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, content.wait_diagram)
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'generating_diagram'))
+    await bot.send_chat_action(chat_id=callback_query.from_user.id, action=types.ChatAction.UPLOAD_PHOTO)
     await delete_message(callback_query)
     try:
         telegram_id = callback_query.from_user.id
@@ -167,9 +181,11 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
             await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
     except Exception as e:
         logger.info(f'Failed to generate personal last parkruns diagram for {callback_query.from_user.id}: {e}')
+        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
         await bot.send_message(
             callback_query.from_user.id,
-            'Не удалось построить диаграмму. Возможно, нет результатов.'
+            error_msg,
+            parse_mode='Markdown'
         )
 
 
@@ -367,6 +383,135 @@ async def process_remove_home_event(callback_query: types.CallbackQuery):
         await bot.send_message(callback_query.from_user.id, 'Вы успешно удалили домашний забег.')
     else:
         await bot.send_message(callback_query.from_user.id, 'Не удалось удалить домашний забег. Попробуйте снова')
+
+
+# Обработчики для интерактивной справки
+@dp.callback_query(F.data == 'help_qr')
+async def process_help_qr(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    lang = language_code(callback_query)
+    await bot.edit_message_text(
+        chat_id=callback_query.from_user.id,
+        message_id=callback_query.message.message_id,
+        text=t(lang, 'help_section_qr'),
+        parse_mode='Markdown',
+        reply_markup=callback_query.message.reply_markup
+    )
+
+
+@dp.callback_query(F.data == 'help_stats')
+async def process_help_stats(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    lang = language_code(callback_query)
+    await bot.edit_message_text(
+        chat_id=callback_query.from_user.id,
+        message_id=callback_query.message.message_id,
+        text=t(lang, 'help_section_stats'),
+        parse_mode='Markdown',
+        reply_markup=callback_query.message.reply_markup
+    )
+
+
+@dp.callback_query(F.data == 'help_settings')
+async def process_help_settings(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    lang = language_code(callback_query)
+    await bot.edit_message_text(
+        chat_id=callback_query.from_user.id,
+        message_id=callback_query.message.message_id,
+        text=t(lang, 'help_section_settings'),
+        parse_mode='Markdown',
+        reply_markup=callback_query.message.reply_markup
+    )
+
+
+@dp.callback_query(F.data == 'help_general')
+async def process_help_general(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    lang = language_code(callback_query)
+    from config import VERSION
+    help_text = t(lang, 'help_message').format(VERSION)
+    await bot.edit_message_text(
+        chat_id=callback_query.from_user.id,
+        message_id=callback_query.message.message_id,
+        text=help_text,
+        parse_mode='Markdown',
+        reply_markup=callback_query.message.reply_markup
+    )
+
+
+@dp.callback_query(F.data == 'help_back')
+async def process_help_back(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await delete_message(callback_query)
+    lang = language_code(callback_query)
+    await bot.send_message(
+        callback_query.from_user.id,
+        t(lang, 'available_commands'),
+        reply_markup=await kb.main(callback_query)
+    )
+
+
+# Обработчики для настроек
+@dp.callback_query(F.data == 'settings_home')
+async def process_settings_home(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await delete_message(callback_query)
+    from handlers.base_commands import process_command_home
+    # Создаём временное сообщение для обработчика
+    message = types.Message(
+        message_id=callback_query.message.message_id,
+        date=callback_query.message.date,
+        chat=callback_query.message.chat,
+        from_user=callback_query.from_user,
+        content_type='text',
+        text='/home'
+    )
+    await process_command_home(message)
+
+
+@dp.callback_query(F.data == 'settings_club')
+async def process_settings_club(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await delete_message(callback_query)
+    from handlers.base_commands import process_command_club
+    message = types.Message(
+        message_id=callback_query.message.message_id,
+        date=callback_query.message.date,
+        chat=callback_query.message.chat,
+        from_user=callback_query.from_user,
+        content_type='text',
+        text='/club'
+    )
+    await process_command_club(message)
+
+
+@dp.callback_query(F.data == 'settings_phone')
+async def process_settings_phone(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await delete_message(callback_query)
+    from handlers.base_commands import process_command_phone
+    message = types.Message(
+        message_id=callback_query.message.message_id,
+        date=callback_query.message.date,
+        chat=callback_query.message.chat,
+        from_user=callback_query.from_user,
+        content_type='text',
+        text='/phone'
+    )
+    await process_command_phone(message)
+
+
+@dp.callback_query(F.data == 'settings_back')
+async def process_settings_back(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await delete_message(callback_query)
+    lang = language_code(callback_query)
+    await bot.send_message(
+        callback_query.from_user.id,
+        t(lang, 'available_commands'),
+        reply_markup=await kb.main(callback_query)
+    )
 
 
 async def delete_message(callback_query: types.CallbackQuery):
