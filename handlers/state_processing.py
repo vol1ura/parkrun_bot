@@ -214,11 +214,12 @@ async def confirm_registration(message: types.Message, state: FSMContext):
                     kbd = await kb.main(message)
                     await message.answer(t(language_code(message), 'home_event_suggestion'), reply_markup=kbd)
                 else:
+                    lang = language_code(message)
                     if 'user' in resp['errors']:
-                        await message.answer('Ошибки в данных пользователя: ' + ', '.join(resp['errors']['user']))
+                        await message.answer(t(lang, 'user_data_errors').format(errors=', '.join(resp['errors']['user'])))
                     if 'athlete' in resp['errors']:
-                        await message.answer('Ошибки в данных участника: ' + ', '.join(resp['errors']['athlete']))
-                    await message.answer(t(language_code(message), 'something_wrong'))
+                        await message.answer(t(lang, 'athlete_data_errors').format(errors=', '.join(resp['errors']['athlete'])))
+                    await message.answer(t(lang, 'something_wrong'))
     except Exception:
         await message.answer(t(language_code(message), 'something_wrong'))
     finally:
@@ -238,24 +239,25 @@ async def process_select_country(message: types.Message, state: FSMContext):
     country_service = container.resolve(CountryService)
     country = await country_service.find_country_by_id(country_id)
 
+    lang = language_code(message)
     if not country:
-        return await message.answer('Введён некорректный номер страны. Попробуйте ещё раз. Либо /reset для отмены')
+        return await message.answer(t(lang, 'invalid_country_number'))
 
     await state.update_data(country_id=country_id)
 
     event_service = container.resolve(EventService)
     events_list = await event_service.find_events_by_country(country_id)
 
-    lang = language_code(message)
     localized_country_name = country_name(lang, country['code'])
 
     if not events_list:
         await state.clear()
-        return await message.answer(f'В стране "{localized_country_name}" нет доступных мероприятий.')
+        return await message.answer(t(lang, 'no_events_in_country').format(country_name=localized_country_name))
 
-    message_text = f'Выберите мероприятие в стране *{localized_country_name}*:\n\n'
+    events_text = ''
     for event in events_list:
-        message_text += f'*{event["id"]}* - {event["name"]}\n'
+        events_text += f'*{event["id"]}* - {event["name"]}\n'
+    message_text = t(lang, 'select_event_in_country').format(country_name=localized_country_name, events_list=events_text)
 
     await message.answer(message_text, parse_mode='Markdown')
     await state.set_state(helpers.HomeEventStates.INPUT_EVENT_ID)
@@ -263,7 +265,7 @@ async def process_select_country(message: types.Message, state: FSMContext):
 
 @dp.message(helpers.HomeEventStates.SELECT_COUNTRY)
 async def process_incorrect_country_id(message: types.Message):
-    await message.answer('Введите число из приведённого выше списка стран. Либо /reset для отмены')
+    await message.answer(t(language_code(message), 'enter_country_number'))
 
 
 @dp.message(helpers.HomeEventStates.INPUT_EVENT_ID, F.text.regexp(r'\A\d+\Z'))
@@ -271,14 +273,15 @@ async def process_input_event_id(message: types.Message, state: FSMContext):
     event_id = int(message.text)
     event_service = container.resolve(EventService)
     event = await event_service.find_event_by_id(event_id)
+    lang = language_code(message)
     if not event:
-        return await message.answer('Введён некорректный номер. Попробуйте ещё раз. Либо /reset для отмены')
+        return await message.answer(t(lang, 'invalid_event_number'))
 
     result = await helpers.update_home_event(message.from_user.id, event_id)
     if not result:
-        return await message.answer('Произошла ошибка при установке домашнего забега. Попробуйте ещё раз.')
+        return await message.answer(t(lang, 'home_event_set_failed'))
 
-    answer = 'Домашний забег установлен.'
+    answer = t(lang, 'home_event_set_success')
     link = await event_service.find_telegram_channel(event_id)
     if link:
         answer += ' ' + home_event_notice.format(link)
@@ -290,13 +293,14 @@ async def process_input_event_id(message: types.Message, state: FSMContext):
 # Повторный запрос кода локации
 @dp.message(helpers.HomeEventStates.INPUT_EVENT_ID)
 async def process_incorrect_input_club_id(message: types.Message):
-    await message.answer('Введите число из приведённого выше списка. Либо /reset для отмены')
+    await message.answer(t(language_code(message), 'enter_event_number'))
 
 
 @dp.message(helpers.ClubStates.INPUT_NAME)
 async def process_club_name(message: types.Message, state: FSMContext):
+    lang = language_code(message)
     if len(message.text) < 2:
-        return await message.answer('Введите название клуба немного точнее')
+        return await message.answer(t(lang, 'club_name_too_short'))
 
     club_service = container.resolve(ClubService)
     club = await club_service.find_club_by_name(message.text)

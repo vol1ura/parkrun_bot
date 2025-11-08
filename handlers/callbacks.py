@@ -110,7 +110,7 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=t(lang, 'last_activity_caption'))
     except Exception as e:
         logger.info(f'Failed to generate last activity diagram for {callback_query.from_user.id}: {e}')
-        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
+        error_msg = t(lang, 'error_occurred').format(error_message=t(lang, 'diagram_generation_failed'))
         await bot.send_message(
             callback_query.from_user.id,
             error_msg,
@@ -130,7 +130,7 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=t(lang, 'personal_history_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal history diagram for {callback_query.from_user.id}: {e}')
-        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
+        error_msg = t(lang, 'error_occurred').format(error_message=t(lang, 'diagram_generation_failed'))
         await bot.send_message(
             callback_query.from_user.id,
             error_msg,
@@ -150,7 +150,7 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=t(lang, 'personal_bests_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal bests diagram for {callback_query.from_user.id}: {e}')
-        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
+        error_msg = t(lang, 'error_occurred').format(error_message=t(lang, 'diagram_generation_failed'))
         await bot.send_message(
             callback_query.from_user.id,
             error_msg,
@@ -169,7 +169,7 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
             await bot.send_photo(telegram_id, pic, caption=t(lang, 'personal_tourism_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal tourism diagram for {callback_query.from_user.id}: {e}')
-        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
+        error_msg = t(lang, 'error_occurred').format(error_message=t(lang, 'diagram_generation_failed'))
         await bot.send_message(
             callback_query.from_user.id,
             error_msg,
@@ -189,7 +189,7 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
             await bot.send_photo(telegram_id, pic, caption=t(lang, 'last_parkruns_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal last parkruns diagram for {callback_query.from_user.id}: {e}')
-        error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
+        error_msg = t(lang, 'error_occurred').format(error_message=t(lang, 'diagram_generation_failed'))
         await bot.send_message(
             callback_query.from_user.id,
             error_msg,
@@ -340,10 +340,9 @@ async def process_ask_club(callback_query: types.CallbackQuery, state: FSMContex
     lang = language_code(callback_query)
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
-    from utils.content import ask_club
     await bot.send_message(
         callback_query.from_user.id,
-        ask_club,
+        t(lang, 'ask_club'),
         parse_mode='Markdown',
         disable_web_page_preview=True
     )
@@ -377,11 +376,11 @@ async def process_ask_home_event(callback_query: types.CallbackQuery, state: FSM
     countries_list = await country_service.find_all_countries()
 
     lang = language_code(callback_query)
-    message = 'Выберите страну вашего домашнего забега:\n\n'
+    countries_text = ''
     for country in countries_list:
         localized_name = country_name(lang, country["code"])
-        message += f'*{country["id"]}* - {localized_name}\n'
-    message += '\n*Введите число* из приведённого выше списка, либо /reset для отмены'
+        countries_text += f'*{country["id"]}* - {localized_name}\n'
+    message = t(lang, 'select_home_event_country').format(countries_list=countries_text)
 
     await bot.send_message(callback_query.from_user.id, message, parse_mode='Markdown')
     await state.set_state(helpers.HomeEventStates.SELECT_COUNTRY)
