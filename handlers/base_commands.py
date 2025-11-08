@@ -226,6 +226,7 @@ async def process_command_phone(message: types.Message):
 
     # Get services from container
     user_service = container.resolve(UserService)
+    lang = language_code(message)
 
     # Find user by Telegram ID
     user = await user_service.find_user_by_telegram_id(message.from_user.id)

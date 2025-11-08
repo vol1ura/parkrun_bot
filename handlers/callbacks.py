@@ -59,7 +59,7 @@ async def process_battle_diagram(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     pic = await asyncio.to_thread(lambda: CollationMaker(*pages).bars('gen_png/battle.png'))
-    await bot.send_photo(user_id, pic, caption='Трактовка: чем меньше по высоте столбцы, тем ближе ваши результаты.')
+    await bot.send_photo(user_id, pic, caption=t(lang, 'battle_diagram_caption'))
     pic.close()
 
 
@@ -70,7 +70,7 @@ async def process_battle_scatter(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     pages = await get_compared_pages(user_id)
     pic = await asyncio.to_thread(lambda: CollationMaker(*pages).scatter('gen_png/scatter.png'))
-    await bot.send_photo(user_id, pic, caption=content.battle_scatter_caption)
+    await bot.send_photo(user_id, pic, caption=t(lang, 'battle_scatter_caption'))
     pic.close()
 
 
@@ -94,7 +94,7 @@ async def process_excel_table(callback_query: types.CallbackQuery):
     file_obj.close()
     await bot.send_document(
         user_id, FSInputFile('compare_parkrun.xlsx'),
-        caption='Сравнительная таблица для анализа в Excel'
+        caption=t(lang, 'excel_table_caption')
     )
 
 
@@ -107,7 +107,7 @@ async def process_last_activity_diagram(callback_query: types.CallbackQuery):
     try:
         telegram_id = callback_query.from_user.id
         async with latest.make_latest_results_diagram(telegram_id, f'gen_png/results_{telegram_id}.png') as pic:
-            await bot.send_photo(telegram_id, pic, caption=content.last_activity_caption)
+            await bot.send_photo(telegram_id, pic, caption=t(lang, 'last_activity_caption'))
     except Exception as e:
         logger.info(f'Failed to generate last activity diagram for {callback_query.from_user.id}: {e}')
         error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
@@ -127,7 +127,7 @@ async def process_personal_history_diagram(callback_query: types.CallbackQuery):
     try:
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).history() as pic:
-            await bot.send_photo(telegram_id, pic, caption=content.personal_history_caption)
+            await bot.send_photo(telegram_id, pic, caption=t(lang, 'personal_history_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal history diagram for {callback_query.from_user.id}: {e}')
         error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
@@ -147,7 +147,7 @@ async def process_personal_bests_diagram(callback_query: types.CallbackQuery):
     try:
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).personal_bests() as pic:
-            await bot.send_photo(telegram_id, pic, caption=content.personal_bests_caption)
+            await bot.send_photo(telegram_id, pic, caption=t(lang, 'personal_bests_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal bests diagram for {callback_query.from_user.id}: {e}')
         error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
@@ -166,7 +166,7 @@ async def process_personal_tourism_diagram(callback_query: types.CallbackQuery):
     try:
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).tourism() as pic:
-            await bot.send_photo(telegram_id, pic, caption=content.personal_tourism_caption)
+            await bot.send_photo(telegram_id, pic, caption=t(lang, 'personal_tourism_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal tourism diagram for {callback_query.from_user.id}: {e}')
         error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
@@ -186,7 +186,7 @@ async def process_personal_last_parkruns_diagram(callback_query: types.CallbackQ
     try:
         telegram_id = callback_query.from_user.id
         async with PersonalResults(telegram_id).last_runs() as pic:
-            await bot.send_photo(telegram_id, pic, caption='Трактовка: оцените прогресс (если он есть).')
+            await bot.send_photo(telegram_id, pic, caption=t(lang, 'last_parkruns_caption'))
     except Exception as e:
         logger.info(f'Failed to generate personal last parkruns diagram for {callback_query.from_user.id}: {e}')
         error_msg = t(lang, 'error_occurred').format(error_message='Не удалось построить диаграмму. Возможно, нет результатов.')
@@ -227,26 +227,28 @@ async def process_help_to_find_id(callback_query: types.CallbackQuery, state: FS
 
 @dp.callback_query(F.data == 'cancel_registration')
 async def process_cancel_registration(callback_query: types.CallbackQuery, state: FSMContext):
-    await bot.answer_callback_query(callback_query.id, 'Регистрация прервана')
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'registration_cancelled'))
     if await state.get_state():
         await state.clear()
     await delete_message(callback_query)
     kbd = await kb.main(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        t(language_code(callback_query), 'available_commands'),
+        t(lang, 'available_commands'),
         reply_markup=kbd
     )
 
 
 @dp.callback_query(F.data == 'start_registration')
 async def process_start_registration(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Начинаем регистрацию')
+    lang = language_code(callback_query)
+    await bot.answer_callback_query(callback_query.id, t(lang, 'registration_starting'))
     await delete_message(callback_query)
     find_athlete_kbd = await kb.inline_find_athlete_by_id(callback_query)
     await bot.send_message(
         callback_query.from_user.id,
-        t(language_code(callback_query), 'you_already_have_id'),
+        t(lang, 'you_already_have_id'),
         reply_markup=find_athlete_kbd,
         parse_mode='Markdown'
     )
@@ -323,22 +325,25 @@ async def process_cancel_action_with_state(callback_query: types.CallbackQuery, 
 
 @dp.callback_query(F.data == 'remove_club')
 async def process_remove_club(callback_query: types.CallbackQuery):
+    lang = language_code(callback_query)
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
     result = await helpers.update_club(callback_query.from_user.id, None)
     if result:
-        await bot.send_message(callback_query.from_user.id, 'Вы успешно вышли из клуба.')
+        await bot.send_message(callback_query.from_user.id, t(lang, 'club_removed_success'))
     else:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось удалить клуб. Попробуйте снова')
+        await bot.send_message(callback_query.from_user.id, t(lang, 'club_remove_failed'))
 
 
 @dp.callback_query(F.data == 'ask_club')
 async def process_ask_club(callback_query: types.CallbackQuery, state: FSMContext):
+    lang = language_code(callback_query)
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
+    from utils.content import ask_club
     await bot.send_message(
         callback_query.from_user.id,
-        content.ask_club,
+        ask_club,
         parse_mode='Markdown',
         disable_web_page_preview=True
     )
@@ -347,6 +352,7 @@ async def process_ask_club(callback_query: types.CallbackQuery, state: FSMContex
 
 @dp.callback_query(helpers.ClubStates.CONFIRM_NAME, F.data == 'set_club')
 async def process_set_club(callback_query: types.CallbackQuery, state: FSMContext):
+    lang = language_code(callback_query)
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
     data = await state.get_data()
@@ -354,12 +360,12 @@ async def process_set_club(callback_query: types.CallbackQuery, state: FSMContex
     if result:
         await bot.send_message(
             callback_query.from_user.id,
-            f'Клуб [{data["club_name"]}](https://s95.ru/clubs/{data["club_id"]}) установлен',
+            t(lang, 'club_set_success').format(club_name=data["club_name"], club_id=data["club_id"]),
             parse_mode='Markdown',
             disable_web_page_preview=False
         )
     else:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось установить клуб. Попробуйте снова')
+        await bot.send_message(callback_query.from_user.id, t(lang, 'club_set_failed'))
     await state.clear()
 
 
@@ -384,13 +390,14 @@ async def process_ask_home_event(callback_query: types.CallbackQuery, state: FSM
 
 @dp.callback_query(F.data == 'remove_home_event')
 async def process_remove_home_event(callback_query: types.CallbackQuery):
+    lang = language_code(callback_query)
     await bot.answer_callback_query(callback_query.id)
     await delete_message(callback_query)
     result = await helpers.update_home_event(callback_query.from_user.id, None)
     if result:
-        await bot.send_message(callback_query.from_user.id, 'Вы успешно удалили домашний забег.')
+        await bot.send_message(callback_query.from_user.id, t(lang, 'home_event_removed_success'))
     else:
-        await bot.send_message(callback_query.from_user.id, 'Не удалось удалить домашний забег. Попробуйте снова')
+        await bot.send_message(callback_query.from_user.id, t(lang, 'home_event_remove_failed'))
 
 
 # Обработчики для интерактивной справки

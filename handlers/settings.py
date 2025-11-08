@@ -60,7 +60,7 @@ async def process_command_continue(message: types.Message, state: FSMContext):
     
     if not current_state:
         await message.answer(
-            'ℹ️ У вас нет активных процессов для продолжения.',
+            t(lang, 'no_active_processes'),
             reply_markup=await kb.main(message)
         )
         return
@@ -92,15 +92,15 @@ async def process_command_continue(message: types.Message, state: FSMContext):
             await message.answer(t(lang, 'input_lastname'), parse_mode='Markdown')
     elif 'ClubStates' in state_str:
         await message.answer(
-            'Введите название клуба или /reset для отмены',
+            t(lang, 'enter_club_name'),
             parse_mode='Markdown'
         )
     elif 'HomeEventStates' in state_str:
         data = await state.get_data()
         if 'country_id' not in data:
-            await message.answer('Введите номер страны из списка выше или /reset для отмены')
+            await message.answer(t(lang, 'enter_country_number'))
         else:
-            await message.answer('Введите номер мероприятия из списка выше или /reset для отмены')
+            await message.answer(t(lang, 'enter_event_number'))
     else:
         await message.answer(
             t(lang, 'continue_registration'),
