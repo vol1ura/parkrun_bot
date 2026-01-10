@@ -57,7 +57,7 @@ async def process_user_enter_parkrun_code(message: types.Message, state: FSMCont
             athlete_id=athlete['id'],
             first_name=names_list[0],
             last_name=names_list[1],
-            male=athlete['male']
+            male=athlete['gender'] == 'male'
         )
 
         accept_athlete_kbd = await kb.accept_athlete(message)
@@ -190,7 +190,7 @@ async def confirm_registration(message: types.Message, state: FSMContext):
     else:
         payload['athlete'] = {
             'name': f'{data["first_name"]} {data["last_name"]}',
-            'male': data['male'],
+            'gender': 'male' if data['male'] else 'female',
             'parkrun_code': data.get('parkrun_code'),
             'fiveverst_code': data.get('fiveverst_code'),
             'runpark_code': data.get('runpark_code')

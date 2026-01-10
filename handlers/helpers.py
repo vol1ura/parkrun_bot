@@ -195,7 +195,10 @@ async def get_auth_link(user_id: int, domain: str) -> Optional[str]:
         async with aiohttp.ClientSession(headers={'Accept': 'application/json'}) as session:
             async with session.post(f'{INTERNAL_API_URL}/user/auth_link', json=payload) as response:
                 if not response.ok:
-                    logger.error(f'Failed to get auth link for user with id={user_id}')
+                    logger.error(
+                        f'Failed to get auth link for user with id={user_id}, '
+                        f'status={response.status}, body={await response.text()}, '
+                    )
                     return None
                 data = await response.json()
                 return data['link']
