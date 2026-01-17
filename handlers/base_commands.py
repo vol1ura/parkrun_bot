@@ -86,6 +86,9 @@ async def process_command_qrcode(message: types.Message):
             parse_mode='Markdown'
         )
 
+    if user.get('telegram_user') != message.from_user.username:
+        await user_service.update_user(user['id'], {'telegram_user': message.from_user.username})
+
     athlete = await athlete_service.find_athlete_by_user_id(user['id'])
     if not athlete:
         return await message.answer(t(language_code(message), 'user_without_athlete'))
