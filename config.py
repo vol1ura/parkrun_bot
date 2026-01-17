@@ -9,7 +9,7 @@ if os.path.exists(dotenv_path):
 
 PRODUCTION_ENV = os.getenv('PRODUCTION', '').lower() in ('true', '1', 'yes')
 
-VERSION = '1.9.10'
+VERSION = '1.9.11'
 
 TOKEN_BOT = os.getenv('API_BOT_TOKEN', '123456:123456test')
 

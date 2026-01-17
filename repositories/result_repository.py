@@ -3,7 +3,6 @@ import asyncpg
 import pandas as pd
 
 from repositories.postgres_repository import PostgresRepository
-from s95.helpers import time_conv
 
 
 class ResultRepository(PostgresRepository):
@@ -34,6 +33,6 @@ class ResultRepository(PostgresRepository):
             """
             data = await conn.fetch(query, telegram_id)
 
-            df = pd.DataFrame(data, columns=['Pos', 'Time', 'Run Date', 'Event'])
-            df['m'] = df['Time'].apply(lambda t: time_conv(t))
+            df = pd.DataFrame(data, columns=pd.Index(['Pos', 'Time', 'Run Date', 'Event']))
+            df['m'] = df['Time'] / 60
             return df

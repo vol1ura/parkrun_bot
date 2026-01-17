@@ -5,7 +5,7 @@ import pandas as pd
 import seaborn as sns
 
 from contextlib import asynccontextmanager
-from matplotlib.ticker import MultipleLocator, NullLocator
+from matplotlib.ticker import FuncFormatter, MultipleLocator, NullLocator
 from aiogram.types import BufferedInputFile
 
 from handlers.helpers import find_user_by, user_results
@@ -67,7 +67,7 @@ class PersonalResults:
         _, ax = plt.subplots(figsize=(9, 6), dpi=150)
 
         # pivot df into long form and aggregate by fastest time
-        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='m', aggfunc='min', fill_value=np.nan)
+        rundata = self.__df.pivot_table(index='Месяц', columns='Год', values='Time', aggfunc='min', fill_value=np.nan)
         # add rows of zeros for any months missed
         for month in MONTHS:
             if month not in rundata.index.values:
@@ -75,7 +75,10 @@ class PersonalResults:
         # sort chronological
         rundata = rundata.reindex(MONTHS)
 
-        sns.heatmap(rundata, linewidths=0.4, cmap='hot', cbar_kws={'label': 'Время (минуты)'}, ax=ax)
+        sns.heatmap(rundata, linewidths=0.4, cmap='hot', cbar_kws={'label': 'Время (мм:сс)'}, ax=ax)
+        cbar = ax.collections[0].colorbar
+        cbar.formatter = FuncFormatter(lambda value, _pos: f"{int(value) // 60}:{int(value) % 60:02d}")
+        cbar.update_ticks()
         ax.set_title(f'{self.__athlete_name}: тепловая карта лучших результатов', fontweight='bold')
         plt.tight_layout()
         pic = f'gen_png/pb_{self.__telegram_id}.png'

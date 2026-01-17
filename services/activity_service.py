@@ -3,7 +3,6 @@ import pandas as pd
 
 from repositories.activity_repository import ActivityRepository
 from repositories.result_repository import ResultRepository
-from s95.helpers import time_conv
 
 
 class ActivityService:
@@ -27,8 +26,8 @@ class ActivityService:
 
         data = await self.result_repository.find_by_activity_id(last_activity['id'])
 
-        df = pd.DataFrame(data, columns=['Pos', 'Время', 'athlete_id', 'Участник', 'Клуб'])
-        df['Время'] = df['Время'].apply(lambda t: time_conv(t))
+        df = pd.DataFrame(data, columns=pd.Index(['Pos', 'Время', 'athlete_id', 'Участник', 'Клуб']))
+        df['Время'] = df['Время'] / 60
 
         return df, last_activity['date'], last_activity['name'], last_activity['athlete_id']
 
