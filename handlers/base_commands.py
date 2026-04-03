@@ -44,11 +44,9 @@ async def commands(message: types.Message):
 async def process_command_settings(message: types.Message):
     await helpers.delete_message(message)
 
-    # Get services from container
     user_service = container.resolve(UserService)
     athlete_service = container.resolve(AthleteService)
 
-    # Find user by Telegram ID
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
         agreement_kbd = await kb.inline_agreement(message)
@@ -58,7 +56,6 @@ async def process_command_settings(message: types.Message):
             parse_mode='Markdown'
         )
 
-    # Find athlete by user ID
     athlete = await athlete_service.find_athlete_by_user_id(user['id'])
     if not athlete:
         return await message.answer(t(language_code(message), 'user_without_athlete'))
@@ -71,12 +68,10 @@ async def process_command_settings(message: types.Message):
 async def process_command_qrcode(message: types.Message):
     await helpers.delete_message(message)
 
-    # Get services from container
     user_service = container.resolve(UserService)
     athlete_service = container.resolve(AthleteService)
 
-    telegram_id = message.from_user.id
-    user = await user_service.find_user_by_telegram_id(telegram_id)
+    user = await user_service.find_user_by_telegram_id(message.from_user.id)
     agreement_kbd = await kb.inline_agreement(message)
 
     if not user:
@@ -109,10 +104,7 @@ async def process_command_qrcode(message: types.Message):
 async def process_command_statistics(message: types.Message):
     await helpers.delete_message(message)
 
-    # Get services from container
     user_service = container.resolve(UserService)
-
-    # Check if user exists
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
         agreement_kbd = await kb.inline_agreement(message)
@@ -129,10 +121,7 @@ async def process_command_statistics(message: types.Message):
 async def process_command_club(message: types.Message):
     await helpers.delete_message(message)
 
-    # Get services from container
     athlete_service = container.resolve(AthleteService)
-
-    # Find athlete with club information
     club = await athlete_service.find_athlete_with_club(message.from_user.id)
     agreement_kbd = await kb.inline_agreement(message)
 
@@ -160,10 +149,7 @@ async def process_command_club(message: types.Message):
 async def process_command_home(message: types.Message):
     await helpers.delete_message(message)
 
-    # Get services from container
     athlete_service = container.resolve(AthleteService)
-
-    # Find athlete with home event information
     event = await athlete_service.find_athlete_with_home_event(message.from_user.id)
     agreement_kbd = await kb.inline_agreement(message)
 
@@ -191,10 +177,7 @@ async def process_command_home(message: types.Message):
 async def process_command_phone(message: types.Message):
     await helpers.delete_message(message)
 
-    # Get services from container
     user_service = container.resolve(UserService)
-
-    # Find user by Telegram ID
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
         agreement_kbd = await kb.inline_agreement(message)

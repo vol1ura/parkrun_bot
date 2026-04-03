@@ -139,7 +139,7 @@ sr:
 
   your_login_link: |
     Link za prijavu na sajt S95: [PRIJAVI SE]({link})
-    Link je validan 2 minuta
+    Link je validan 5 minuta.
     Molimo vas ne delite ga sa drugim korisnicima!
 
   login_link_error: 'Došlo je do greške prilikom dobijanja linka za prijavu. Molimo vas pokušajte ponovo kasnije.'

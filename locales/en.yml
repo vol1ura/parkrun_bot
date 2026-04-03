@@ -140,7 +140,7 @@ en:
 
   your_login_link: |
     Link to S95 website: [LOGIN]({link})
-    Link is valid for 2 minutes
+    Link is valid for 5 minutes.
     Please do not share it with other users!
 
   login_link_error: 'An error occurred while getting the login link. Please try again later.'
