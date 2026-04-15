@@ -3,7 +3,9 @@ import asyncpg
 import logging
 import typing
 
+from aiohttp import ClientTimeout
 from aiogram import Bot, Dispatcher, types
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.fsm.storage.memory import MemoryStorage
 
 import config
@@ -11,7 +13,8 @@ from di.container import Container
 
 container = Container()
 
-bot = Bot(token=config.TOKEN_BOT)
+session = AiohttpSession(timeout=ClientTimeout(total=60, connect=30, sock_read=30))
+bot = Bot(token=config.TOKEN_BOT, session=session)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
