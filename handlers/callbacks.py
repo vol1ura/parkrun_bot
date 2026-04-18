@@ -215,17 +215,17 @@ async def process_cancel_registration(callback_query: types.CallbackQuery, state
     )
 
 
-@dp.callback_query(F.data == 'start_registration')
-async def process_start_registration(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id, 'Начинаем регистрацию')
-    await delete_message(callback_query)
-    find_athlete_kbd = await kb.inline_find_athlete_by_id(callback_query)
-    await bot.send_message(
-        callback_query.from_user.id,
-        t(language_code(callback_query), 'you_already_have_id'),
-        reply_markup=find_athlete_kbd,
-        parse_mode='Markdown'
-    )
+# @dp.callback_query(F.data == 'start_registration')
+# async def process_start_registration(callback_query: types.CallbackQuery):
+#     await bot.answer_callback_query(callback_query.id, 'Начинаем регистрацию')
+#     await delete_message(callback_query)
+#     find_athlete_kbd = await kb.inline_find_athlete_by_id(callback_query)
+#     await bot.send_message(
+#         callback_query.from_user.id,
+#         t(language_code(callback_query), 'you_already_have_id'),
+#         reply_markup=find_athlete_kbd,
+#         parse_mode='Markdown'
+#     )
 
 
 @dp.callback_query(F.data == 'create_new_athlete')

@@ -142,13 +142,13 @@ async def select_gender(message) -> ReplyKeyboardMarkup:
     return select_gender_kbd
 
 
-async def inline_agreement(message) -> InlineKeyboardMarkup:
-    lang = message.from_user.language_code
-    inline_agreement_kbd = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=t(lang, 'btn_agree'), callback_data='start_registration'),
-         InlineKeyboardButton(text=t(lang, 'btn_disagree'), callback_data='cancel_registration')]
-    ])
-    return inline_agreement_kbd
+# async def inline_agreement(message) -> InlineKeyboardMarkup:
+#     lang = message.from_user.language_code
+#     inline_agreement_kbd = InlineKeyboardMarkup(inline_keyboard=[
+#         [InlineKeyboardButton(text=t(lang, 'btn_agree'), callback_data='start_registration'),
+#          InlineKeyboardButton(text=t(lang, 'btn_disagree'), callback_data='cancel_registration')]
+#     ])
+#     return inline_agreement_kbd
 
 
 async def inline_find_athlete_by_id(message) -> InlineKeyboardMarkup:

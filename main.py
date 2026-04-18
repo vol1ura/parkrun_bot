@@ -15,7 +15,7 @@ async def setup_bot_commands():
     """
     bot_commands = [
         types.BotCommand(command='qrcode', description='Ваш QR-код в S95'),
-        types.BotCommand(command='register', description='Зарегистрироваться в S95'),
+        # types.BotCommand(command='register', description='Зарегистрироваться в S95'),
         types.BotCommand(command='login', description='Войти на сайт S95'),
         types.BotCommand(command='statistics', description='Персональная статистика'),
         types.BotCommand(command='help', description='Краткая справка'),
@@ -32,7 +32,7 @@ async def setup_bot_commands():
 async def on_startup():
     await setup_container()
     await bot.delete_webhook(drop_pending_updates=True)
-    if config.PRODUCTION_ENV:
+    if False and config.PRODUCTION_ENV:
         await bot.set_webhook(config.WEBHOOK_URL, drop_pending_updates=True, request_timeout=30)
     await setup_bot_commands()
 
@@ -53,7 +53,7 @@ async def main():
     # Register shutdown hook
     dp.shutdown.register(on_shutdown)
 
-    if config.PRODUCTION_ENV:
+    if False and config.PRODUCTION_ENV:
         from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
         from aiohttp.web import AppRunner, TCPSite
 

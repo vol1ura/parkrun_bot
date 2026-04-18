@@ -49,12 +49,13 @@ async def process_command_settings(message: types.Message):
 
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
-        agreement_kbd = await kb.inline_agreement(message)
-        return await message.answer(
-            t(language_code(message), 'confirm_registration'),
-            reply_markup=agreement_kbd,
-            parse_mode='Markdown'
-        )
+        return await message.answer('Регистрация теперь осуществляется через сайт s95')
+        # agreement_kbd = await kb.inline_agreement(message)
+        # return await message.answer(
+        #     t(language_code(message), 'confirm_registration'),
+        #     reply_markup=agreement_kbd,
+        #     parse_mode='Markdown'
+        # )
 
     athlete = await athlete_service.find_athlete_by_user_id(user['id'])
     if not athlete:
@@ -72,14 +73,15 @@ async def process_command_qrcode(message: types.Message):
     athlete_service = container.resolve(AthleteService)
 
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
-    agreement_kbd = await kb.inline_agreement(message)
 
     if not user:
-        return await message.answer(
-            t(language_code(message), 'confirm_registration'),
-            reply_markup=agreement_kbd,
-            parse_mode='Markdown'
-        )
+        return await message.answer('Вы не зарегистрированы в S95. Регистрация теперь осуществляется через сайт s95')
+        # agreement_kbd = await kb.inline_agreement(message)
+        # return await message.answer(
+        #     t(language_code(message), 'confirm_registration'),
+        #     reply_markup=agreement_kbd,
+        #     parse_mode='Markdown'
+        # )
 
     if user.get('telegram_user') != message.from_user.username:
         await user_service.update_user(user['id'], {'telegram_user': message.from_user.username})
@@ -107,12 +109,13 @@ async def process_command_statistics(message: types.Message):
     user_service = container.resolve(UserService)
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
-        agreement_kbd = await kb.inline_agreement(message)
-        return await message.answer(
-            t(language_code(message), 'confirm_registration'),
-            reply_markup=agreement_kbd,
-            parse_mode='Markdown'
-        )
+        return await message.answer('Вы не зарегистрированы в S95. Регистрация теперь осуществляется через сайт s95')
+        # agreement_kbd = await kb.inline_agreement(message)
+        # return await message.answer(
+        #     t(language_code(message), 'confirm_registration'),
+        #     reply_markup=agreement_kbd,
+        #     parse_mode='Markdown'
+        # )
 
     await message.answer('Выберите интересующий вас показатель', reply_markup=kb.inline_personal)
 
@@ -122,24 +125,25 @@ async def process_command_club(message: types.Message):
     await helpers.delete_message(message)
 
     athlete_service = container.resolve(AthleteService)
-    club = await athlete_service.find_athlete_with_club(message.from_user.id)
-    agreement_kbd = await kb.inline_agreement(message)
+    athlete = await athlete_service.find_athlete_with_club(message.from_user.id)
 
-    if not club:
-        return await message.answer(
-            t(language_code(message), 'confirm_registration'),
-            reply_markup=agreement_kbd,
-            parse_mode='Markdown'
-        )
+    if not athlete:
+        return await message.answer('Вы не зарегистрированы в S95. Регистрация теперь осуществляется через сайт s95')
+        # agreement_kbd = await kb.inline_agreement(message)
+        # return await message.answer(
+        #     t(language_code(message), 'confirm_registration'),
+        #     reply_markup=agreement_kbd,
+        #     parse_mode='Markdown'
+        # )
 
-    if not club['club_id']:
+    if not athlete['club_id']:
         return await message.answer(
             t(language_code(message), 'setup_running_club'),
             reply_markup=kb.set_club
         )
 
     await message.answer(
-        about_club.format(club['club_name']),
+        about_club.format(athlete['club_name']),
         reply_markup=kb.change_club,
         parse_mode='Markdown'
     )
@@ -150,24 +154,25 @@ async def process_command_home(message: types.Message):
     await helpers.delete_message(message)
 
     athlete_service = container.resolve(AthleteService)
-    event = await athlete_service.find_athlete_with_home_event(message.from_user.id)
-    agreement_kbd = await kb.inline_agreement(message)
+    athlete = await athlete_service.find_athlete_with_home_event(message.from_user.id)
 
-    if not event:
-        return await message.answer(
-            t(language_code(message), 'confirm_registration'),
-            reply_markup=agreement_kbd,
-            parse_mode='Markdown'
-        )
+    if not athlete:
+        return await message.answer('Вы не зарегистрированы в S95. Регистрация теперь осуществляется через сайт s95')
+        # agreement_kbd = await kb.inline_agreement(message)
+        # return await message.answer(
+        #     t(language_code(message), 'confirm_registration'),
+        #     reply_markup=agreement_kbd,
+        #     parse_mode='Markdown'
+        # )
 
-    if not event['event_id']:
+    if not athlete['event_id']:
         return await message.answer(
             t(language_code(message), 'setup_home_run'),
             reply_markup=kb.set_home_event
         )
 
     await message.answer(
-        about_home_event.format(event['event_name']),
+        about_home_event.format(athlete['event_name']),
         reply_markup=kb.change_home_event,
         parse_mode='Markdown'
     )
@@ -180,12 +185,13 @@ async def process_command_phone(message: types.Message):
     user_service = container.resolve(UserService)
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
-        agreement_kbd = await kb.inline_agreement(message)
-        return await message.answer(
-            t(language_code(message), 'confirm_registration'),
-            reply_markup=agreement_kbd,
-            parse_mode='Markdown'
-        )
+        return await message.answer('Вы не зарегистрированы в S95. Регистрация теперь осуществляется через сайт s95')
+        # agreement_kbd = await kb.inline_agreement(message)
+        # return await message.answer(
+        #     t(language_code(message), 'confirm_registration'),
+        #     reply_markup=agreement_kbd,
+        #     parse_mode='Markdown'
+        # )
 
     if user.get('phone'):
         return await message.answer(
@@ -230,11 +236,12 @@ async def process_command_login(message: types.Message, state: FSMContext):
     user_service = container.resolve(UserService)
     user = await user_service.find_user_by_telegram_id(message.from_user.id)
     if not user:
-        return await message.answer(
-            t(language_code(message), 'confirm_registration'),
-            reply_markup=await kb.inline_agreement(message),
-            parse_mode='Markdown'
-        )
+        return await message.answer('Вы не зарегистрированы в S95. Регистрация теперь осуществляется через сайт s95')
+        # return await message.answer(
+        #     t(language_code(message), 'confirm_registration'),
+        #     reply_markup=await kb.inline_agreement(message),
+        #     parse_mode='Markdown'
+        # )
 
     await state.set_state(helpers.LoginStates.SELECT_DOMAIN)
     await state.update_data(user_id=user['id'])
