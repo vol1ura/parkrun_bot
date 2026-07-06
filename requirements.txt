@@ -4,7 +4,7 @@ asyncpg~=0.30
 lxml~=6.0
 pycparser~=2.22
 pypng==0.20220715.0
-python-dotenv>=0.17.0
+python-dotenv>=1.2.2
 python-Levenshtein>=0.12.2
 qrcode~=8.2
 rollbar~=1.0
